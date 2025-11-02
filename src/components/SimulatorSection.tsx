@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Cpu, Code, Zap, Check } from "lucide-react";
 import simulatorPreview from "@/assets/simulator-preview.jpg";
+import { useNavigate } from "react-router-dom";
 
 export const SimulatorSection = () => {
+  const navigate = useNavigate();
   const features = [
     "Design Arduino circuits visually",
     "Test sensors and actuators virtually",
@@ -43,7 +45,12 @@ export const SimulatorSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" variant="default" className="group">
+              <Button 
+                size="lg" 
+                variant="default" 
+                className="group"
+                onClick={() => navigate("/simulator")}
+              >
                 Try Beta Version
                 <Code className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
               </Button>
@@ -54,7 +61,10 @@ export const SimulatorSection = () => {
           </div>
 
           <div className="order-1 lg:order-2 animate-slide-in-right">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-border">
+            <div 
+              className="relative rounded-2xl overflow-hidden shadow-2xl border border-border cursor-pointer hover:shadow-3xl transition-shadow"
+              onClick={() => navigate("/simulator")}
+            >
               <img 
                 src={simulatorPreview} 
                 alt="AI Mechatronics Simulator Interface" 

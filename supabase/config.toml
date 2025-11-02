@@ -1,0 +1,4 @@
+project_id = "xqappnjnsacppizkxbia"
+
+[functions.arduino-ai-assistant]
+verify_jwt = false
