@@ -27,14 +27,44 @@ void loop() {
 }`);
   
   const [circuit, setCircuit] = useState<any[]>([]);
+  const [compilationStatus, setCompilationStatus] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
 
   const handleRun = () => {
     setIsRunning(true);
-    setSerialOutput(prev => [...prev, "Simulation started...", "Compiling code..."]);
-    setTimeout(() => {
-      setSerialOutput(prev => [...prev, "Upload complete!", "Running program..."]);
+    setCompilationStatus([]);
+    setSerialOutput([]);
+    
+    // Simulate compilation
+    const compileSteps = [
+      "Arduino: Compiling sketch...",
+      `Sketch uses ${code.length} bytes of program storage space.`,
+      "Connecting to Arduino Uno...",
+      "Upload complete!"
+    ];
+    
+    compileSteps.forEach((step, index) => {
+      setTimeout(() => {
+        setCompilationStatus(prev => [...prev, step]);
+        if (index === compileSteps.length - 1) {
+          setSerialOutput(["Serial Monitor initialized at 9600 baud", "Program running..."]);
+          simulateSerialOutput();
+        }
+      }, index * 500);
+    });
+  };
+
+  const simulateSerialOutput = () => {
+    let count = 0;
+    const interval = setInterval(() => {
+      if (!isRunning) {
+        clearInterval(interval);
+        return;
+      }
+      setSerialOutput(prev => [...prev, `LED ${count % 2 === 0 ? 'ON' : 'OFF'}`, `Timestamp: ${Date.now()}`]);
+      count++;
+      if (count > 10) clearInterval(interval);
     }, 1000);
   };
 
