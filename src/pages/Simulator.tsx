@@ -9,25 +9,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { PROJECT_CODES } from "@/components/simulator/ProjectTemplates";
 
 export default function Simulator() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [code, setCode] = useState(`// Blink LED Example
-void setup() {
-  pinMode(13, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("🚀 Arduino Started!");
-}
-
-void loop() {
-  digitalWrite(13, HIGH);
-  Serial.println("💡 LED ON");
-  delay(1000);
-  digitalWrite(13, LOW);
-  Serial.println("🌑 LED OFF");
-  delay(1000);
-}`);
+  const [activeTemplate, setActiveTemplate] = useState<string>("blank");
+  const [code, setCode] = useState(PROJECT_CODES.blink);
   
   const [circuit, setCircuit] = useState<any[]>([]);
   const [compilationStatus, setCompilationStatus] = useState<string[]>([]);
@@ -306,6 +294,13 @@ void loop() {
                   setCircuit={setCircuit}
                   isRunning={isRunning}
                   componentStates={componentStates}
+                  onTemplateChange={(templateCode) => {
+                    setCode(templateCode);
+                    toast({
+                      title: "✨ Code Updated",
+                      description: "Project code loaded successfully"
+                    });
+                  }}
                 />
               </TabsContent>
               

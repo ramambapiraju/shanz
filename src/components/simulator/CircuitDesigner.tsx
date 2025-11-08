@@ -6,6 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Draggable from "react-draggable";
 import Xarrow, { useXarrow, Xwrapper } from "react-xarrows";
 import { Badge } from "@/components/ui/badge";
+import { buildProjectCircuit, PROJECT_CODES } from "./ProjectTemplates";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 interface CircuitComponent {
   id: string;
@@ -78,12 +81,42 @@ const PROJECT_TEMPLATES = [
   { id: "fan", name: "10. Fan Controller ⚙️", description: "Variable speed control" },
 ];
 
-export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentStates }: CircuitDesignerProps) => {
+interface CircuitDesignerExtendedProps extends CircuitDesignerProps {
+  onTemplateChange?: (code: string) => void;
+}
+
+export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentStates, onTemplateChange }: CircuitDesignerExtendedProps) => {
   const [wiringMode, setWiringMode] = useState(false);
   const [wireFrom, setWireFrom] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("blank");
   const updateXarrow = useXarrow();
+
+  const loadTemplate = (templateId: string) => {
+    if (templateId === "blank") {
+      setCircuit([]);
+      toast.success("Canvas cleared - Build your own circuit!");
+      return;
+    }
+    
+    const prebuiltCircuit = buildProjectCircuit(templateId);
+    setCircuit(prebuiltCircuit);
+    
+    const template = PROJECT_TEMPLATES.find(t => t.id === templateId);
+    toast.success(`${template?.name} loaded!`, {
+      description: template?.description
+    });
+  };
+
+  useEffect(() => {
+    if (selectedTemplate !== "blank") {
+      loadTemplate(selectedTemplate);
+      // Load corresponding code if callback provided
+      if (onTemplateChange && PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES]) {
+        onTemplateChange(PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES]);
+      }
+    }
+  }, [selectedTemplate]);
   
   const categories = ["All", ...Array.from(new Set(COMPONENTS.map(c => c.category)))];
   const filteredComponents = selectedCategory === "All" 
@@ -156,9 +189,14 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 Build one of 10 DIY projects or create your own circuit!
               </CardDescription>
               <select 
-                className="w-full max-w-md p-2 rounded-md border bg-background text-sm"
+                className="w-full max-w-md p-2.5 rounded-lg border-2 bg-card text-sm font-medium hover:border-primary transition-colors shadow-sm"
                 value={selectedTemplate}
-                onChange={(e) => setSelectedTemplate(e.target.value)}
+                onChange={(e) => {
+                  setSelectedTemplate(e.target.value);
+                  if (onTemplateChange && e.target.value !== "blank") {
+                    // Template code will be loaded in parent
+                  }
+                }}
                 disabled={isRunning}
               >
                 {PROJECT_TEMPLATES.map(template => (
@@ -167,6 +205,9 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-muted-foreground mt-1">
+                ✨ Select a project to auto-build the circuit
+              </p>
             </div>
             <Button
               variant={wiringMode ? "default" : "outline"}
@@ -269,13 +310,13 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                         >
                           <div
                             id={component.id}
-                            className={`absolute bg-card border-2 rounded-lg p-3 shadow-lg cursor-move transition-all ${
-                              isRunning && isActive ? 'shadow-2xl scale-105' : ''
-                            } ${isLED && isActive ? 'animate-pulse-glow' : ''}`}
+                            className={`absolute component-3d bg-gradient-to-br from-card to-card/90 border-2 rounded-xl p-3 cursor-move transition-all duration-300 ${
+                              isRunning && isActive ? 'scale-110 shadow-2xl' : 'hover:scale-105 shadow-lg'
+                            } ${isLED && isActive ? 'animate-pulse' : ''}`}
                             style={{ 
-                              borderColor: component.color,
-                              backgroundColor: isLED && isActive ? `${component.color}15` : undefined,
-                              boxShadow: isLED && isActive ? `0 0 20px ${component.color}60` : undefined
+                              borderColor: isActive ? component.color : `${component.color}80`,
+                              backgroundColor: isLED && isActive ? `${component.color}20` : undefined,
+                              boxShadow: isLED && isActive ? `0 0 30px ${component.color}80, 0 0 60px ${component.color}40` : undefined
                             }}
                           >
                             <div className="flex items-center gap-2 mb-2 border-b pb-2">
@@ -306,9 +347,15 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                 <div
                                   key={pin}
                                   id={`${component.id}-${pin}`}
-                                  className={`text-[10px] px-2 py-1 rounded border cursor-pointer hover:bg-primary/10 transition-all font-medium ${
-                                    wiringMode ? 'border-primary ring-1 ring-primary' : 'border-border'
-                                  } ${wireFrom === `${component.id}-${pin}` ? 'bg-primary text-primary-foreground ring-2 ring-primary' : 'bg-background'}`}
+                                  className={`text-[10px] px-2 py-1 rounded-md cursor-pointer transition-all font-bold text-center ${
+                                    wiringMode 
+                                      ? 'pin-metallic border-2 border-primary ring-2 ring-primary/50 hover:scale-105' 
+                                      : 'pin-metallic border border-border/50 hover:border-primary/50'
+                                  } ${
+                                    wireFrom === `${component.id}-${pin}` 
+                                      ? 'bg-primary text-primary-foreground ring-2 ring-primary scale-105' 
+                                      : 'text-foreground/80 hover:text-foreground'
+                                  }`}
                                   onClick={() => handlePinClick(component.id, pin)}
                                 >
                                   {pin}
