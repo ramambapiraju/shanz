@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Cpu, Lightbulb, Thermometer, Gauge, Cable, Trash2, ZapIcon, Power, Activity, Radio } from "lucide-react";
-import { useState, useRef } from "react";
+import { Cpu, Lightbulb, Thermometer, Gauge, Cable, Trash2, ZapIcon, Power, Activity, Radio, Battery, Grid3x3, Antenna } from "lucide-react";
+import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Draggable from "react-draggable";
 import Xarrow, { useXarrow, Xwrapper } from "react-xarrows";
+import { Badge } from "@/components/ui/badge";
 
 interface CircuitComponent {
   id: string;
@@ -15,30 +16,49 @@ interface CircuitComponent {
   color: string;
   pins: string[];
   connections: { from: string; to: string }[];
+  state?: any; // For simulation state (LED on/off, sensor values, etc.)
 }
 
 interface CircuitDesignerProps {
   circuit: CircuitComponent[];
   setCircuit: (circuit: CircuitComponent[]) => void;
   isRunning: boolean;
+  componentStates?: Map<string, any>;
 }
 
 const COMPONENTS = [
-  { type: "arduino", name: "Arduino Uno", icon: Cpu, color: "#00979D", pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"] },
-  { type: "led", name: "LED", icon: Lightbulb, color: "#FFC107", pins: ["ANODE", "CATHODE"] },
-  { type: "resistor", name: "Resistor", icon: ZapIcon, color: "#795548", pins: ["PIN1", "PIN2"] },
-  { type: "button", name: "Push Button", icon: Power, color: "#9E9E9E", pins: ["PIN1", "PIN2"] },
-  { type: "temp", name: "DHT22 Sensor", icon: Thermometer, color: "#FF5722", pins: ["VCC", "DATA", "GND"] },
-  { type: "servo", name: "Servo Motor", icon: Gauge, color: "#9C27B0", pins: ["VCC", "GND", "SIGNAL"] },
-  { type: "ultrasonic", name: "HC-SR04", icon: Cable, color: "#4CAF50", pins: ["VCC", "TRIG", "ECHO", "GND"] },
-  { type: "potentiometer", name: "Potentiometer", icon: Activity, color: "#FF9800", pins: ["VCC", "WIPER", "GND"] },
-  { type: "buzzer", name: "Buzzer", icon: Radio, color: "#E91E63", pins: ["POSITIVE", "NEGATIVE"] },
+  { type: "breadboard", name: "Breadboard", icon: Grid3x3, color: "#FAFAFA", pins: ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "+", "-"], category: "Base" },
+  { type: "arduino", name: "Arduino Uno", icon: Cpu, color: "#00979D", pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V", "3.3V", "A0", "A1", "A2"], category: "Controllers" },
+  { type: "battery", name: "9V Battery", icon: Battery, color: "#424242", pins: ["+", "-"], category: "Power" },
+  { type: "led-red", name: "Red LED", icon: Lightbulb, color: "#F44336", pins: ["+", "-"], category: "Output" },
+  { type: "led-green", name: "Green LED", icon: Lightbulb, color: "#4CAF50", pins: ["+", "-"], category: "Output" },
+  { type: "led-blue", name: "Blue LED", icon: Lightbulb, color: "#2196F3", pins: ["+", "-"], category: "Output" },
+  { type: "led-yellow", name: "Yellow LED", icon: Lightbulb, color: "#FFEB3B", pins: ["+", "-"], category: "Output" },
+  { type: "rgb-led", name: "RGB LED", icon: Lightbulb, color: "#9C27B0", pins: ["R", "G", "B", "CATHODE"], category: "Output" },
+  { type: "resistor-220", name: "220Ω Resistor", icon: ZapIcon, color: "#FF5722", pins: ["1", "2"], category: "Passive" },
+  { type: "resistor-1k", name: "1KΩ Resistor", icon: ZapIcon, color: "#795548", pins: ["1", "2"], category: "Passive" },
+  { type: "resistor-10k", name: "10KΩ Resistor", icon: ZapIcon, color: "#9E9E9E", pins: ["1", "2"], category: "Passive" },
+  { type: "button", name: "Push Button", icon: Power, color: "#607D8B", pins: ["1A", "1B", "2A", "2B"], category: "Input" },
+  { type: "switch", name: "Toggle Switch", icon: Power, color: "#455A64", pins: ["COM", "NO", "NC"], category: "Input" },
+  { type: "temp", name: "DHT22 (Temp & Humidity)", icon: Thermometer, color: "#FF5722", pins: ["VCC", "DATA", "NC", "GND"], category: "Sensors" },
+  { type: "ultrasonic", name: "HC-SR04 (Distance)", icon: Cable, color: "#4CAF50", pins: ["VCC", "TRIG", "ECHO", "GND"], category: "Sensors" },
+  { type: "pir", name: "PIR Motion Sensor", icon: Antenna, color: "#E91E63", pins: ["VCC", "OUT", "GND"], category: "Sensors" },
+  { type: "ldr", name: "Light Sensor (LDR)", icon: Lightbulb, color: "#FFC107", pins: ["1", "2"], category: "Sensors" },
+  { type: "potentiometer", name: "Potentiometer", icon: Activity, color: "#FF9800", pins: ["VCC", "WIPER", "GND"], category: "Input" },
+  { type: "servo", name: "Servo Motor", icon: Gauge, color: "#9C27B0", pins: ["VCC", "GND", "SIGNAL"], category: "Output" },
+  { type: "buzzer", name: "Buzzer", icon: Radio, color: "#E91E63", pins: ["+", "-"], category: "Output" },
 ];
 
-export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesignerProps) => {
+export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentStates }: CircuitDesignerProps) => {
   const [wiringMode, setWiringMode] = useState(false);
   const [wireFrom, setWireFrom] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const updateXarrow = useXarrow();
+  
+  const categories = ["All", ...Array.from(new Set(COMPONENTS.map(c => c.category)))];
+  const filteredComponents = selectedCategory === "All" 
+    ? COMPONENTS 
+    : COMPONENTS.filter(c => c.category === selectedCategory);
 
   const addComponent = (component: typeof COMPONENTS[0]) => {
     const newComponent: CircuitComponent = {
@@ -49,7 +69,8 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesig
       y: Math.random() * 200 + 100,
       color: component.color,
       pins: component.pins,
-      connections: []
+      connections: [],
+      state: { active: false, value: 0 }
     };
     setCircuit([...circuit, newComponent]);
   };
@@ -86,48 +107,73 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesig
     const comp = COMPONENTS.find(c => c.type === type);
     return comp ? comp.icon : Cpu;
   };
+  
+  const getComponentState = (componentId: string) => {
+    return componentStates?.get(componentId) || { active: false, value: 0 };
+  };
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Circuit Designer</CardTitle>
-            <CardDescription>
-              Drag components and connect wires to build your circuit
-            </CardDescription>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                🔧 Circuit Designer 
+                {isRunning && <Badge variant="secondary" className="animate-pulse">Simulating</Badge>}
+              </CardTitle>
+              <CardDescription>
+                Build your electronics project - drag components, connect wires, and watch them come alive!
+              </CardDescription>
+            </div>
+            <Button
+              variant={wiringMode ? "default" : "outline"}
+              onClick={() => {
+                setWiringMode(!wiringMode);
+                setWireFrom(null);
+              }}
+              disabled={isRunning}
+              size="lg"
+            >
+              {wiringMode ? "✓ Wiring Mode" : "🔌 Connect Wires"}
+            </Button>
           </div>
-          <Button
-            variant={wiringMode ? "default" : "outline"}
-            onClick={() => {
-              setWiringMode(!wiringMode);
-              setWireFrom(null);
-            }}
-            disabled={isRunning}
-          >
-            {wiringMode ? "Cancel Wiring" : "Wire Mode"}
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((cat) => (
+              <Button
+                key={cat}
+                variant={selectedCategory === cat ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(cat)}
+                disabled={isRunning}
+              >
+                {cat}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="md:col-span-1">
-            <h3 className="font-semibold mb-3 text-sm">Components</h3>
-            <ScrollArea className="h-[500px]">
-              <div className="space-y-2">
-                {COMPONENTS.map((component) => {
+            <h3 className="font-semibold mb-3 text-sm flex items-center gap-2">
+              📦 Component Library
+            </h3>
+            <ScrollArea className="h-[600px]">
+              <div className="space-y-2 pr-2">
+                {filteredComponents.map((component) => {
                   const Icon = component.icon;
                   return (
                     <Button
                       key={component.type}
                       variant="outline"
-                      className="w-full justify-start gap-2 h-auto py-2"
+                      className="w-full justify-start gap-2 h-auto py-3 hover:scale-105 transition-transform"
                       onClick={() => addComponent(component)}
                       disabled={isRunning}
                       size="sm"
                     >
-                      <Icon className="h-3 w-3 flex-shrink-0" style={{ color: component.color }} />
-                      <span className="text-xs">{component.name}</span>
+                      <Icon className="h-4 w-4 flex-shrink-0" style={{ color: component.color }} />
+                      <span className="text-xs font-medium">{component.name}</span>
                     </Button>
                   );
                 })}
@@ -136,20 +182,35 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesig
           </div>
 
           <div className="md:col-span-4">
-            <div className="border-2 border-dashed rounded-lg min-h-[500px] bg-grid-pattern relative overflow-hidden">
+            <div className="border-2 border-dashed rounded-lg min-h-[600px] bg-grid-pattern relative overflow-hidden shadow-inner">
               {circuit.length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Cpu className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm">Drag components from the library</p>
-                    <p className="text-xs mt-2">Click "Wire Mode" to connect pins</p>
+                  <div className="text-center p-8">
+                    <div className="text-6xl mb-4">🔌</div>
+                    <p className="text-lg font-semibold mb-2">Start Building Your Circuit!</p>
+                    <p className="text-sm mb-4">Click on components from the left to add them to your workspace</p>
+                    <div className="flex gap-4 justify-center text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">1️⃣</span> Add components
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">2️⃣</span> Click "Connect Wires"
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">3️⃣</span> Click pins to connect
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <Xwrapper>
-                  <div className="relative w-full h-[500px]">
+                  <div className="relative w-full h-[600px]">
                     {circuit.map((component) => {
                       const Icon = getIcon(component.type);
+                      const state = getComponentState(component.id);
+                      const isLED = component.type.includes('led');
+                      const isActive = state.active;
+                      
                       return (
                         <Draggable
                           key={component.id}
@@ -166,18 +227,29 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesig
                         >
                           <div
                             id={component.id}
-                            className={`absolute bg-card border-2 rounded-lg p-2 shadow-lg cursor-move ${
-                              isRunning ? 'animate-pulse-glow' : ''
-                            }`}
-                            style={{ borderColor: component.color }}
+                            className={`absolute bg-card border-2 rounded-lg p-3 shadow-lg cursor-move transition-all ${
+                              isRunning && isActive ? 'shadow-2xl scale-105' : ''
+                            } ${isLED && isActive ? 'animate-pulse-glow' : ''}`}
+                            style={{ 
+                              borderColor: component.color,
+                              backgroundColor: isLED && isActive ? `${component.color}15` : undefined,
+                              boxShadow: isLED && isActive ? `0 0 20px ${component.color}60` : undefined
+                            }}
                           >
                             <div className="flex items-center gap-2 mb-2 border-b pb-2">
-                              <Icon className="h-4 w-4" style={{ color: component.color }} />
+                              <Icon 
+                                className="h-5 w-5" 
+                                style={{ 
+                                  color: component.color,
+                                  filter: isLED && isActive ? 'brightness(1.5)' : undefined
+                                }} 
+                              />
                               <span className="text-xs font-semibold">{component.name}</span>
+                              {isActive && <Badge variant="secondary" className="text-[8px] px-1 py-0">ON</Badge>}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-5 w-5 p-0 ml-auto"
+                                className="h-5 w-5 p-0 ml-auto hover:bg-destructive/10"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   removeComponent(component.id);
@@ -192,9 +264,9 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesig
                                 <div
                                   key={pin}
                                   id={`${component.id}-${pin}`}
-                                  className={`text-[10px] px-2 py-1 rounded border cursor-pointer hover:bg-primary/10 transition-colors ${
-                                    wiringMode ? 'border-primary' : 'border-border'
-                                  } ${wireFrom === `${component.id}-${pin}` ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
+                                  className={`text-[10px] px-2 py-1 rounded border cursor-pointer hover:bg-primary/10 transition-all font-medium ${
+                                    wiringMode ? 'border-primary ring-1 ring-primary' : 'border-border'
+                                  } ${wireFrom === `${component.id}-${pin}` ? 'bg-primary text-primary-foreground ring-2 ring-primary' : 'bg-background'}`}
                                   onClick={() => handlePinClick(component.id, pin)}
                                 >
                                   {pin}
@@ -207,17 +279,21 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning }: CircuitDesig
                     })}
                     
                     {circuit.flatMap((component) =>
-                      component.connections.map((conn, idx) => (
-                        <Xarrow
-                          key={`${component.id}-${idx}`}
-                          start={conn.from}
-                          end={conn.to}
-                          color={component.color}
-                          strokeWidth={2}
-                          headSize={4}
-                          showHead={false}
-                        />
-                      ))
+                      component.connections.map((conn, idx) => {
+                        const state = getComponentState(component.id);
+                        return (
+                          <Xarrow
+                            key={`${component.id}-${idx}`}
+                            start={conn.from}
+                            end={conn.to}
+                            color={state.active ? component.color : '#666'}
+                            strokeWidth={state.active ? 3 : 2}
+                            headSize={4}
+                            showHead={false}
+                            dashness={state.active ? false : { animation: 1 }}
+                          />
+                        );
+                      })
                     )}
                   </div>
                 </Xwrapper>

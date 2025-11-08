@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CircuitDesigner } from "@/components/simulator/CircuitDesigner";
 import { CodeEditor } from "@/components/simulator/CodeEditor";
@@ -8,21 +8,24 @@ import { SimulatorControls } from "@/components/simulator/SimulatorControls";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Simulator() {
   const navigate = useNavigate();
-  const [code, setCode] = useState(`// Arduino Code
+  const { toast } = useToast();
+  const [code, setCode] = useState(`// Blink LED Example
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(13, OUTPUT);
   Serial.begin(9600);
+  Serial.println("🚀 Arduino Started!");
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  Serial.println("LED ON");
+  digitalWrite(13, HIGH);
+  Serial.println("💡 LED ON");
   delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  Serial.println("LED OFF");
+  digitalWrite(13, LOW);
+  Serial.println("🌑 LED OFF");
   delay(1000);
 }`);
   
@@ -30,52 +33,119 @@ void loop() {
   const [compilationStatus, setCompilationStatus] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
+  const [componentStates, setComponentStates] = useState<Map<string, any>>(new Map());
+  const simulationInterval = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (simulationInterval.current) {
+        clearInterval(simulationInterval.current);
+      }
+    };
+  }, []);
 
   const handleRun = () => {
+    if (circuit.length === 0) {
+      toast({
+        title: "⚠️ No Circuit Built",
+        description: "Add components to your circuit before running the simulation!",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsRunning(true);
     setCompilationStatus([]);
     setSerialOutput([]);
     
+    toast({
+      title: "🔧 Compiling...",
+      description: "Preparing your circuit simulation",
+    });
+    
     // Simulate compilation
     const compileSteps = [
-      "Arduino: Compiling sketch...",
-      `Sketch uses ${code.length} bytes of program storage space.`,
-      "Connecting to Arduino Uno...",
-      "Upload complete!"
+      "⚙️ Arduino: Compiling sketch...",
+      `📦 Sketch uses ${code.length} bytes (${Math.round(code.length/32768*100)}% of available memory)`,
+      "🔌 Connecting to Arduino Uno...",
+      "✅ Upload complete! Starting simulation..."
     ];
     
     compileSteps.forEach((step, index) => {
       setTimeout(() => {
         setCompilationStatus(prev => [...prev, step]);
         if (index === compileSteps.length - 1) {
-          setSerialOutput(["Serial Monitor initialized at 9600 baud", "Program running..."]);
-          simulateSerialOutput();
+          setSerialOutput(["🖥️ Serial Monitor @ 9600 baud", "🚀 Simulation started!", "─────────────────────"]);
+          startSimulation();
         }
-      }, index * 500);
+      }, index * 600);
     });
   };
 
-  const simulateSerialOutput = () => {
-    let count = 0;
-    const interval = setInterval(() => {
-      if (!isRunning) {
-        clearInterval(interval);
-        return;
-      }
-      setSerialOutput(prev => [...prev, `LED ${count % 2 === 0 ? 'ON' : 'OFF'}`, `Timestamp: ${Date.now()}`]);
-      count++;
-      if (count > 10) clearInterval(interval);
+  const startSimulation = () => {
+    let cycleCount = 0;
+    
+    simulationInterval.current = setInterval(() => {
+      cycleCount++;
+      
+      // Find LEDs in circuit and toggle their state
+      const ledComponents = circuit.filter(c => c.type.includes('led'));
+      const newStates = new Map(componentStates);
+      
+      ledComponents.forEach((led, index) => {
+        const isOn = Math.floor(cycleCount / 2) % 2 === index % 2;
+        newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
+      });
+      
+      setComponentStates(newStates);
+      
+      // Add serial output
+      const timestamp = new Date().toLocaleTimeString();
+      setSerialOutput(prev => {
+        const newOutput = [...prev];
+        if (cycleCount % 2 === 0) {
+          newOutput.push(`[${timestamp}] 💡 LED ON - Pin HIGH`);
+        } else {
+          newOutput.push(`[${timestamp}] 🌑 LED OFF - Pin LOW`);
+        }
+        // Keep only last 20 messages
+        return newOutput.slice(-20);
+      });
     }, 1000);
   };
 
   const handleStop = () => {
     setIsRunning(false);
-    setSerialOutput(prev => [...prev, "Simulation stopped."]);
+    if (simulationInterval.current) {
+      clearInterval(simulationInterval.current);
+      simulationInterval.current = null;
+    }
+    
+    // Turn off all components
+    const newStates = new Map();
+    circuit.forEach(c => {
+      newStates.set(c.id, { active: false, value: 0 });
+    });
+    setComponentStates(newStates);
+    
+    setSerialOutput(prev => [...prev, "─────────────────────", "⏸️ Simulation stopped."]);
+    
+    toast({
+      title: "⏸️ Simulation Stopped",
+      description: "Your circuit is now idle",
+    });
   };
 
   const handleReset = () => {
-    setIsRunning(false);
+    handleStop();
     setSerialOutput([]);
+    setCompilationStatus([]);
+    setComponentStates(new Map());
+    
+    toast({
+      title: "🔄 Reset Complete",
+      description: "Simulation has been reset",
+    });
   };
 
   return (
@@ -88,8 +158,10 @@ void loop() {
               Back to Home
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">AI-Powered Arduino Simulator</h1>
-              <p className="text-muted-foreground">Design, code, and test your projects virtually</p>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                🎮 Electronics Simulator for Kids
+              </h1>
+              <p className="text-muted-foreground">Build, learn, and experiment with electronics - no physical components needed!</p>
             </div>
           </div>
           <SimulatorControls 
@@ -113,6 +185,7 @@ void loop() {
                   circuit={circuit}
                   setCircuit={setCircuit}
                   isRunning={isRunning}
+                  componentStates={componentStates}
                 />
               </TabsContent>
               
