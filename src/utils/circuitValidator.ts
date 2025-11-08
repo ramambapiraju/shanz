@@ -26,62 +26,66 @@ export function validateCircuit(circuit: CircuitComponent[]): ValidationError[] 
     });
   }
 
-  // Check 2: Power source validation
-  const hasPower = circuit.some(c => c.type === 'power' || c.type === 'arduino');
-  if (!hasPower && circuit.length > 0) {
-    errors.push({
-      id: 'no-power',
-      severity: 'critical',
-      title: '⚡ No Power Source',
-      message: 'Your circuit has no power source. An Arduino or power supply is required.',
-    });
-  }
+// Check 2: Power source validation
+const hasPower = circuit.some(c =>
+  ['power', 'battery', 'battery-aa', 'arduino'].includes(c.type)
+);
+if (!hasPower && circuit.length > 0) {
+  errors.push({
+    id: 'no-power',
+    severity: 'critical',
+    title: '⚡ No Power Source',
+    message: 'Your circuit has no power source. Add an Arduino or battery/power supply.',
+  });
+}
 
-  // Check 3: Ground connection
-  const hasGround = circuit.some(c => c.type === 'ground');
-  const hasComplexComponents = circuit.some(c => 
-    ['led', 'buzzer', 'motor', 'sensor'].some(type => c.type.includes(type))
+// Check 3: Ground connection (implicit via components that provide GND)
+const hasImplicitGround = circuit.some(c =>
+  ['arduino', 'battery', 'battery-aa', 'breadboard', 'ground'].includes(c.type)
+);
+const hasComplexComponents = circuit.some(c => 
+  ['led', 'buzzer', 'motor', 'sensor'].some(type => c.type.includes(type))
+);
+if (hasComplexComponents && !hasImplicitGround && circuit.length > 2) {
+  errors.push({
+    id: 'no-ground',
+    severity: 'error',
+    title: '🔌 Missing Ground Connection',
+    message: 'Active components need a ground (GND) reference. Add a controller or battery to provide GND.',
+  });
+}
+
+// Check 4: LEDs without resistors
+const leds = circuit.filter(c => c.type.includes('led'));
+const resistors = circuit.filter(c => c.type.includes('resistor'));
+if (leds.length > 0 && resistors.length < leds.length) {
+  const affectedLEDs = leds.map(led => led.id);
+  errors.push({
+    id: 'led-no-resistor',
+    severity: 'error',
+    title: '💥 LEDs Need Resistors!',
+    message: `You have ${leds.length} LED(s) but only ${resistors.length} resistor(s). Each LED needs a 220Ω–330Ω resistor to prevent burnout.`,
+    affectedComponents: affectedLEDs,
+  });
+}
+
+// Check 5: Short circuit detection (power directly to ground)
+const hasPowerSource = circuit.some(c => ['power', 'battery', 'battery-aa', 'arduino'].includes(c.type));
+const hasGroundRef = circuit.some(c => ['ground', 'arduino', 'battery', 'battery-aa', 'breadboard'].includes(c.type));
+if (hasPowerSource && hasGroundRef) {
+  // Check if there are components between power and ground
+  const activeComponents = circuit.filter(c => 
+    !['power', 'ground', 'battery', 'battery-aa', 'wire', 'arduino', 'breadboard'].includes(c.type)
   );
-  if (hasComplexComponents && !hasGround && circuit.length > 2) {
+  if (activeComponents.length === 0 && circuit.length > 2) {
     errors.push({
-      id: 'no-ground',
-      severity: 'error',
-      title: '🔌 Missing Ground Connection',
-      message: 'Active components need a ground (GND) connection to complete the circuit. Add a ground component.',
+      id: 'short-circuit',
+      severity: 'critical',
+      title: '⚠️ SHORT CIRCUIT DETECTED!',
+      message: 'Power is directly connected to ground with no components in between. This will damage your circuit!',
     });
   }
-
-  // Check 4: LEDs without resistors
-  const leds = circuit.filter(c => c.type.includes('led'));
-  const resistors = circuit.filter(c => c.type === 'resistor');
-  if (leds.length > 0 && resistors.length < leds.length) {
-    const affectedLEDs = leds.map(led => led.id);
-    errors.push({
-      id: 'led-no-resistor',
-      severity: 'error',
-      title: '💥 LEDs Need Resistors!',
-      message: `You have ${leds.length} LED(s) but only ${resistors.length} resistor(s). Each LED needs a 220Ω-330Ω resistor to prevent burnout.`,
-      affectedComponents: affectedLEDs,
-    });
-  }
-
-  // Check 5: Short circuit detection (power directly to ground)
-  const powerComponents = circuit.filter(c => c.type === 'power' || c.type === 'battery');
-  const groundComponents = circuit.filter(c => c.type === 'ground');
-  if (powerComponents.length > 0 && groundComponents.length > 0) {
-    // Check if there are components between power and ground
-    const activeComponents = circuit.filter(c => 
-      !['power', 'ground', 'battery', 'wire', 'arduino'].includes(c.type)
-    );
-    if (activeComponents.length === 0 && circuit.length > 2) {
-      errors.push({
-        id: 'short-circuit',
-        severity: 'critical',
-        title: '⚠️ SHORT CIRCUIT DETECTED!',
-        message: 'Power is directly connected to ground with no components in between. This will damage your circuit!',
-      });
-    }
-  }
+}
 
   // Check 6: Voltage level warnings
   const highVoltageComponents = circuit.filter(c => 
@@ -100,18 +104,18 @@ export function validateCircuit(circuit: CircuitComponent[]): ValidationError[] 
     });
   }
 
-  // Check 7: Motor without proper power
-  const motors = circuit.filter(c => c.type.includes('motor'));
-  const hasPowerSupply = circuit.some(c => c.type === 'power' || c.type === 'battery');
-  if (motors.length > 0 && !hasPowerSupply) {
-    errors.push({
-      id: 'motor-power',
-      severity: 'warning',
-      title: '🔋 Motors Need External Power',
-      message: 'DC motors require external power supply. Arduino pins may not provide enough current.',
-      affectedComponents: motors.map(m => m.id),
-    });
-  }
+// Check 7: Motor without proper power
+const motors = circuit.filter(c => c.type.includes('motor'));
+const hasPowerSupply = circuit.some(c => ['power', 'battery', 'battery-aa', 'arduino'].includes(c.type));
+if (motors.length > 0 && !hasPowerSupply) {
+  errors.push({
+    id: 'motor-power',
+    severity: 'warning',
+    title: '🔋 Motors Need External Power',
+    message: 'DC motors typically require external power. Ensure adequate current is available.',
+    affectedComponents: motors.map(m => m.id),
+  });
+}
 
   // Check 8: Multiple buzzers without resistors
   const buzzers = circuit.filter(c => c.type === 'buzzer');
@@ -141,17 +145,17 @@ export function validateCircuit(circuit: CircuitComponent[]): ValidationError[] 
     });
   }
 
-  // Check 10: RGB LED special requirements
-  const rgbLeds = circuit.filter(c => c.type === 'led-rgb');
-  if (rgbLeds.length > 0 && resistors.length < rgbLeds.length * 3) {
-    errors.push({
-      id: 'rgb-resistors',
-      severity: 'warning',
-      title: '🌈 RGB LED Requirements',
-      message: `RGB LEDs need 3 resistors each (one per color channel). You have ${rgbLeds.length} RGB LED(s) requiring ${rgbLeds.length * 3} resistors.`,
-      affectedComponents: rgbLeds.map(r => r.id),
-    });
-  }
+// Check 10: RGB LED special requirements
+const rgbLeds = circuit.filter(c => c.type === 'led-rgb');
+if (rgbLeds.length > 0 && resistors.length < rgbLeds.length * 3) {
+  errors.push({
+    id: 'rgb-resistors',
+    severity: 'warning',
+    title: '🌈 RGB LED Requirements',
+    message: `RGB LEDs need 3 resistors each (one per color channel). You have ${rgbLeds.length} RGB LED(s) requiring ${rgbLeds.length * 3} resistors.`,
+    affectedComponents: rgbLeds.map(r => r.id),
+  });
+}
 
   return errors;
 }

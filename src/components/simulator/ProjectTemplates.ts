@@ -617,16 +617,18 @@ export const buildProjectCircuit = (projectId: string) => {
           { from: 'arduino-1-D12', to: 'led-yellow-+' },
           { from: 'arduino-1-D13', to: 'led-green-+' },
           { from: 'led-red--', to: 'resistor-1-1' },
-          { from: 'led-yellow--', to: 'resistor-1-1' },
-          { from: 'led-green--', to: 'resistor-2-1' },
+          { from: 'led-yellow--', to: 'resistor-2-1' },
+          { from: 'led-green--', to: 'resistor-3-1' },
           { from: 'resistor-1-2', to: 'arduino-1-GND' },
-          { from: 'resistor-2-2', to: 'arduino-1-GND' }
+          { from: 'resistor-2-2', to: 'arduino-1-GND' },
+          { from: 'resistor-3-2', to: 'arduino-1-GND' }
         ] },
         { id: 'led-red', type: 'led-red', name: 'Red LED', x: baseX + 300, y: baseY, color: '#F44336', pins: ['+', '-'], connections: [] },
         { id: 'led-yellow', type: 'led-yellow', name: 'Yellow LED', x: baseX + 300, y: baseY + 100, color: '#FFEB3B', pins: ['+', '-'], connections: [] },
         { id: 'led-green', type: 'led-green', name: 'Green LED', x: baseX + 300, y: baseY + 200, color: '#4CAF50', pins: ['+', '-'], connections: [] },
         { id: 'resistor-1', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 50, color: '#FF5722', pins: ['1', '2'], connections: [] },
-        { id: 'resistor-2', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 150, color: '#FF5722', pins: ['1', '2'], connections: [] }
+        { id: 'resistor-2', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 150, color: '#FF5722', pins: ['1', '2'], connections: [] },
+        { id: 'resistor-3', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 250, color: '#FF5722', pins: ['1', '2'], connections: [] }
       ];
       
     case 'nightlight':
