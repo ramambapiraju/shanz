@@ -5,6 +5,7 @@ import { CodeEditor } from "@/components/simulator/CodeEditor";
 import { AIAssistant } from "@/components/simulator/AIAssistant";
 import { SerialMonitor } from "@/components/simulator/SerialMonitor";
 import { SimulatorControls } from "@/components/simulator/SimulatorControls";
+import { InteractiveControls } from "@/components/simulator/InteractiveControls";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ export default function Simulator() {
   const [isRunning, setIsRunning] = useState(false);
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
   const [componentStates, setComponentStates] = useState<Map<string, any>>(new Map());
+  const [interactiveValues, setInteractiveValues] = useState<Map<string, number>>(new Map());
   const simulationInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -144,7 +146,10 @@ export default function Simulator() {
           break;
 
         case 'nightlight':
-          const lightLevel = 30 + Math.sin(cycleCount / 3) * 70;
+          const ldr = circuit.find(c => c.type === 'ldr');
+          const lightLevel = ldr && interactiveValues.has(ldr.id) 
+            ? interactiveValues.get(ldr.id)! 
+            : 30 + Math.sin(cycleCount / 3) * 70;
           const shouldLight = lightLevel < 50;
           circuit.filter(c => c.type.includes('led')).forEach(led => {
             newStates.set(led.id, { active: shouldLight, value: shouldLight ? 200 : 0 });
@@ -179,17 +184,28 @@ export default function Simulator() {
           break;
 
         case 'temperature':
-          const temp = 22 + Math.sin(cycleCount / 4) * 5;
+          const tempSensor = circuit.find(c => c.type === 'dht11');
+          const temp = tempSensor && interactiveValues.has(tempSensor.id)
+            ? interactiveValues.get(tempSensor.id)!
+            : 22 + Math.sin(cycleCount / 4) * 5;
           const humidity = 50 + Math.cos(cycleCount / 5) * 10;
           newOutput.push(`[${timestamp}] 🌡️ Temperature: ${temp.toFixed(1)}°C | Humidity: ${humidity.toFixed(0)}%`);
           break;
 
         case 'distance':
-          const distance = 50 + Math.sin(cycleCount / 2) * 40;
+          const ultrasonic = circuit.find(c => c.type === 'ultrasonic');
+          const distance = ultrasonic && interactiveValues.has(ultrasonic.id)
+            ? interactiveValues.get(ultrasonic.id)!
+            : 50 + Math.sin(cycleCount / 2) * 40;
           const alert = distance < 30;
           circuit.filter(c => c.type.includes('led') || c.type === 'buzzer').forEach(comp => {
             newStates.set(comp.id, { active: alert, value: alert ? 255 : 0 });
           });
+          if (alert) {
+            playBuzzerSound(2000);
+          } else {
+            stopBuzzerSound();
+          }
           newOutput.push(`[${timestamp}] 📡 Distance: ${distance.toFixed(0)}cm ${alert ? '⚠️ TOO CLOSE!' : '✓'}`);
           break;
 
@@ -218,7 +234,10 @@ export default function Simulator() {
           break;
 
         case 'fan':
-          const speed = 50 + Math.sin(cycleCount / 4) * 50;
+          const pot = circuit.find(c => c.type === 'potentiometer');
+          const speed = pot && interactiveValues.has(pot.id)
+            ? interactiveValues.get(pot.id)!
+            : 50 + Math.sin(cycleCount / 4) * 50;
           circuit.filter(c => c.type === 'dc-motor' || c.type === 'servo').forEach(motor => {
             newStates.set(motor.id, { active: speed > 30, value: speed });
           });
@@ -362,7 +381,18 @@ export default function Simulator() {
             <SerialMonitor output={serialOutput} />
           </div>
 
-          <div>
+          <div className="space-y-4">
+            <InteractiveControls 
+              circuit={circuit}
+              onControlChange={(componentId, value) => {
+                setInteractiveValues(prev => {
+                  const next = new Map(prev);
+                  next.set(componentId, value);
+                  return next;
+                });
+              }}
+            />
+            
             <AIAssistant 
               code={code}
               circuit={circuit}

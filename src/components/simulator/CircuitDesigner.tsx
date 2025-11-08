@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Cpu, Lightbulb, Thermometer, Gauge, Cable, Trash2, ZapIcon, Power, Activity, Radio, Battery, Grid3x3, Antenna } from "lucide-react";
+import { Cpu, Lightbulb, Thermometer, Gauge, Cable, Trash2, ZapIcon, Power, Activity, Radio, Battery, Grid3x3, Antenna, Eraser } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Draggable from "react-draggable";
@@ -126,6 +126,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     : COMPONENTS.filter(c => c.category === selectedCategory);
 
   const addComponent = (component: typeof COMPONENTS[0]) => {
+    // Allow adding components even during simulation for live editing
     const newComponent: CircuitComponent = {
       id: `${component.type}-${Date.now()}`,
       type: component.type,
@@ -138,10 +139,22 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
       state: { active: false, value: 0 }
     };
     setCircuit([...circuit, newComponent]);
+    toast.success(`${component.name} added!`, {
+      description: isRunning ? "🎮 Live editing active" : "Drag to position"
+    });
   };
 
   const removeComponent = (id: string) => {
+    // Allow deleting components even during simulation
     setCircuit(circuit.filter((c) => c.id !== id));
+  };
+
+  const clearCircuit = () => {
+    setCircuit([]);
+    setSelectedTemplate("blank");
+    toast.success("🧹 Circuit Cleared", {
+      description: "Canvas reset. Start fresh!"
+    });
   };
 
   const handlePinClick = (componentId: string, pin: string) => {
@@ -183,12 +196,19 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <CardTitle className="flex items-center gap-2 mb-2">
-                🔧 Circuit Designer 
-                {isRunning && <Badge variant="secondary" className="animate-pulse">Simulating</Badge>}
-              </CardTitle>
+              <div className="flex items-center justify-between mb-2">
+                <CardTitle className="flex items-center gap-2">
+                  🔧 Circuit Designer 
+                </CardTitle>
+                {isRunning && (
+                  <Badge variant="default" className="animate-pulse bg-green-500">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-1" />
+                    🎮 Live Edit Mode
+                  </Badge>
+                )}
+              </div>
               <CardDescription className="mb-3">
-                Build one of 10 DIY projects or create your own circuit!
+                Build one of 10 DIY projects or create your own! Edit anytime, even during simulation.
               </CardDescription>
               <select 
                 className="w-full max-w-md p-2.5 rounded-lg border-2 bg-card text-sm font-medium hover:border-primary transition-colors shadow-sm"
@@ -206,9 +226,20 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-muted-foreground mt-1">
-                ✨ Select a project to auto-build the circuit
-              </p>
+              <div className="flex gap-2 mt-2">
+                <p className="text-xs text-muted-foreground flex-1">
+                  ✨ Select a project to auto-build the circuit
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearCircuit}
+                  className="gap-1 text-destructive hover:bg-destructive/10"
+                >
+                  <Eraser className="h-3 w-3" />
+                  Clear All
+                </Button>
+              </div>
             </div>
             <Button
               variant={wiringMode ? "default" : "outline"}
@@ -216,7 +247,6 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 setWiringMode(!wiringMode);
                 setWireFrom(null);
               }}
-              disabled={isRunning}
               size="lg"
             >
               {wiringMode ? "✓ Wiring Mode" : "🔌 Connect Wires"}
@@ -229,7 +259,6 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 variant={selectedCategory === cat ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(cat)}
-                disabled={isRunning}
               >
                 {cat}
               </Button>
@@ -253,7 +282,6 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                       variant="outline"
                       className="w-full justify-start gap-2 h-auto py-3 hover:scale-105 transition-transform"
                       onClick={() => addComponent(component)}
-                      disabled={isRunning}
                       size="sm"
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" style={{ color: component.color }} />
@@ -307,7 +335,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                             setCircuit(updatedCircuit);
                             updateXarrow();
                           }}
-                          disabled={isRunning || wiringMode}
+                          disabled={wiringMode}
                         >
                            <div
                             id={component.id}
@@ -395,7 +423,6 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                   e.stopPropagation();
                                   removeComponent(component.id);
                                 }}
-                                disabled={isRunning}
                               >
                                 <Trash2 className="h-3 w-3" style={{
                                   color: component.type === 'arduino' || component.type.includes('battery') || 
