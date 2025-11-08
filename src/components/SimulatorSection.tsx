@@ -54,11 +54,19 @@ export const SimulatorSection = () => {
                   setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
                 }}
               >
-                Try Beta Version
+                Electronics Simulator
                 <Code className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
               </Button>
-              <Button size="lg" variant="outline">
-                Watch Demo
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => {
+                  navigate("/mechatronics-simulator");
+                  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+                }}
+              >
+                Mechatronics Simulator
+                <Cpu className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
