@@ -27,32 +27,62 @@ interface CircuitDesignerProps {
 }
 
 const COMPONENTS = [
-  { type: "breadboard", name: "Breadboard", icon: Grid3x3, color: "#FAFAFA", pins: ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "+", "-"], category: "Base" },
+  // Controllers & Base
   { type: "arduino", name: "Arduino Uno", icon: Cpu, color: "#00979D", pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V", "3.3V", "A0", "A1", "A2"], category: "Controllers" },
+  { type: "breadboard", name: "Breadboard", icon: Grid3x3, color: "#FAFAFA", pins: ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "+", "-"], category: "Base" },
+  
+  // Power
   { type: "battery", name: "9V Battery", icon: Battery, color: "#424242", pins: ["+", "-"], category: "Power" },
+  { type: "battery-aa", name: "AA Battery Pack", icon: Battery, color: "#616161", pins: ["+", "-"], category: "Power" },
+  
+  // LEDs (Output)
   { type: "led-red", name: "Red LED", icon: Lightbulb, color: "#F44336", pins: ["+", "-"], category: "Output" },
   { type: "led-green", name: "Green LED", icon: Lightbulb, color: "#4CAF50", pins: ["+", "-"], category: "Output" },
   { type: "led-blue", name: "Blue LED", icon: Lightbulb, color: "#2196F3", pins: ["+", "-"], category: "Output" },
   { type: "led-yellow", name: "Yellow LED", icon: Lightbulb, color: "#FFEB3B", pins: ["+", "-"], category: "Output" },
-  { type: "rgb-led", name: "RGB LED", icon: Lightbulb, color: "#9C27B0", pins: ["R", "G", "B", "CATHODE"], category: "Output" },
+  { type: "led-rgb", name: "RGB LED", icon: Lightbulb, color: "#9C27B0", pins: ["R", "G", "B", "GND"], category: "Output" },
+  
+  // Resistors (Passive)
   { type: "resistor-220", name: "220Ω Resistor", icon: ZapIcon, color: "#FF5722", pins: ["1", "2"], category: "Passive" },
   { type: "resistor-1k", name: "1KΩ Resistor", icon: ZapIcon, color: "#795548", pins: ["1", "2"], category: "Passive" },
   { type: "resistor-10k", name: "10KΩ Resistor", icon: ZapIcon, color: "#9E9E9E", pins: ["1", "2"], category: "Passive" },
-  { type: "button", name: "Push Button", icon: Power, color: "#607D8B", pins: ["1A", "1B", "2A", "2B"], category: "Input" },
-  { type: "switch", name: "Toggle Switch", icon: Power, color: "#455A64", pins: ["COM", "NO", "NC"], category: "Input" },
-  { type: "temp", name: "DHT22 (Temp & Humidity)", icon: Thermometer, color: "#FF5722", pins: ["VCC", "DATA", "NC", "GND"], category: "Sensors" },
-  { type: "ultrasonic", name: "HC-SR04 (Distance)", icon: Cable, color: "#4CAF50", pins: ["VCC", "TRIG", "ECHO", "GND"], category: "Sensors" },
-  { type: "pir", name: "PIR Motion Sensor", icon: Antenna, color: "#E91E63", pins: ["VCC", "OUT", "GND"], category: "Sensors" },
+  
+  // Sensors
   { type: "ldr", name: "Light Sensor (LDR)", icon: Lightbulb, color: "#FFC107", pins: ["1", "2"], category: "Sensors" },
+  { type: "pir-sensor", name: "PIR Motion Sensor", icon: Antenna, color: "#E91E63", pins: ["VCC", "OUT", "GND"], category: "Sensors" },
+  { type: "dht11", name: "DHT11 Temp Sensor", icon: Thermometer, color: "#FF5722", pins: ["VCC", "DATA", "GND"], category: "Sensors" },
+  { type: "ultrasonic", name: "HC-SR04 Ultrasonic", icon: Cable, color: "#4CAF50", pins: ["VCC", "TRIG", "ECHO", "GND"], category: "Sensors" },
+  
+  // Input
+  { type: "button", name: "Push Button", icon: Power, color: "#607D8B", pins: ["1", "2"], category: "Input" },
+  { type: "switch", name: "Toggle Switch", icon: Power, color: "#455A64", pins: ["1", "2"], category: "Input" },
   { type: "potentiometer", name: "Potentiometer", icon: Activity, color: "#FF9800", pins: ["VCC", "WIPER", "GND"], category: "Input" },
-  { type: "servo", name: "Servo Motor", icon: Gauge, color: "#9C27B0", pins: ["VCC", "GND", "SIGNAL"], category: "Output" },
-  { type: "buzzer", name: "Buzzer", icon: Radio, color: "#E91E63", pins: ["+", "-"], category: "Output" },
+  
+  // Output Devices
+  { type: "buzzer", name: "Piezo Buzzer", icon: Radio, color: "#E91E63", pins: ["+", "-"], category: "Output" },
+  { type: "servo", name: "Servo Motor", icon: Gauge, color: "#9C27B0", pins: ["VCC", "GND", "SIG"], category: "Output" },
+  { type: "dc-motor", name: "DC Motor", icon: Gauge, color: "#673AB7", pins: ["+", "-"], category: "Output" },
+];
+
+const PROJECT_TEMPLATES = [
+  { id: "blank", name: "Blank Canvas", description: "Start from scratch" },
+  { id: "blink", name: "1. Blinking LED 💡", description: "Learn basic LED control" },
+  { id: "traffic", name: "2. Traffic Light 🚦", description: "3 LEDs in sequence" },
+  { id: "nightlight", name: "3. Night Light 🌙", description: "Auto light with LDR" },
+  { id: "alarm", name: "4. Buzzer Alarm 🔊", description: "Sound alert system" },
+  { id: "temp", name: "5. Temperature Monitor 🌡️", description: "Read DHT11 sensor" },
+  { id: "motion", name: "6. Motion Detector 👋", description: "PIR sensor light" },
+  { id: "rgb", name: "7. RGB Color Mixer 🌈", description: "Mix light colors" },
+  { id: "counter", name: "8. Button Counter 🔘", description: "Count presses" },
+  { id: "distance", name: "9. Distance Alert 📡", description: "Ultrasonic warning" },
+  { id: "fan", name: "10. Fan Controller ⚙️", description: "Variable speed control" },
 ];
 
 export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentStates }: CircuitDesignerProps) => {
   const [wiringMode, setWiringMode] = useState(false);
   const [wireFrom, setWireFrom] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("blank");
   const updateXarrow = useXarrow();
   
   const categories = ["All", ...Array.from(new Set(COMPONENTS.map(c => c.category)))];
@@ -117,14 +147,26 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
       <CardHeader>
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
+            <div className="flex-1">
+              <CardTitle className="flex items-center gap-2 mb-2">
                 🔧 Circuit Designer 
                 {isRunning && <Badge variant="secondary" className="animate-pulse">Simulating</Badge>}
               </CardTitle>
-              <CardDescription>
-                Build your electronics project - drag components, connect wires, and watch them come alive!
+              <CardDescription className="mb-3">
+                Build one of 10 DIY projects or create your own circuit!
               </CardDescription>
+              <select 
+                className="w-full max-w-md p-2 rounded-md border bg-background text-sm"
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value)}
+                disabled={isRunning}
+              >
+                {PROJECT_TEMPLATES.map(template => (
+                  <option key={template.id} value={template.id}>
+                    {template.name} - {template.description}
+                  </option>
+                ))}
+              </select>
             </div>
             <Button
               variant={wiringMode ? "default" : "outline"}

@@ -49,27 +49,27 @@ export const AIAssistant = ({ code, circuit }: AIAssistantProps) => {
   const quickActions = [
     {
       type: "suggest" as const,
-      label: "Project Ideas",
+      label: "📋 10 DIY Projects",
       icon: Lightbulb,
-      prompt: "Suggest Arduino projects suitable for beginners interested in robotics and sensors",
+      prompt: "Show me all 10 DIY electronics projects with detailed circuit diagrams and component lists",
+    },
+    {
+      type: "explain" as const,
+      label: "Circuit Diagram",
+      icon: BookOpen,
+      prompt: "Explain the circuit diagram for my current project with wiring details",
     },
     {
       type: "debug" as const,
       label: "Debug Code",
       icon: Bug,
-      prompt: "Help me debug this Arduino code",
-    },
-    {
-      type: "explain" as const,
-      label: "Explain",
-      icon: BookOpen,
-      prompt: "Explain how this Arduino code works",
+      prompt: "Help me debug this Arduino code and fix any issues",
     },
     {
       type: "optimize" as const,
-      label: "Optimize",
+      label: "Improve Project",
       icon: Zap,
-      prompt: "Suggest optimizations for this code",
+      prompt: "Suggest improvements and optimizations for this project",
     },
   ];
 

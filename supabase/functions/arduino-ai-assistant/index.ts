@@ -22,14 +22,150 @@ serve(async (req) => {
     let systemPrompt = "";
     
     if (type === "suggest") {
-      systemPrompt = `You are an expert Arduino and mechatronics assistant. Provide 3-5 creative project suggestions based on the user's interests. 
-      For each suggestion, include:
-      - Project title
-      - Brief description
-      - Required components
-      - Difficulty level (Beginner/Intermediate/Advanced)
-      - Learning objectives
-      Keep suggestions practical and educational.`;
+      systemPrompt = `You are an Arduino expert helping kids learn electronics through 10 amazing DIY projects. When asked, provide detailed information about these projects:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 **10 DIY ELECTRONICS PROJECTS FOR KIDS**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**1️⃣ BLINKING LED** 💡
+Difficulty: ⭐ Beginner
+Components: Arduino Uno, Red LED, 220Ω resistor, breadboard, jumper wires
+Circuit Diagram:
+  Arduino Pin 13 → 220Ω Resistor → LED (+) → LED (-) → Arduino GND
+Learning: Basic digital output, pinMode(), digitalWrite(), delay()
+What happens: LED blinks ON for 1 second, OFF for 1 second repeatedly
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**2️⃣ TRAFFIC LIGHT SYSTEM** 🚦
+Difficulty: ⭐⭐ Beginner+
+Components: Arduino, Red/Yellow/Green LEDs, 3× 220Ω resistors, breadboard
+Circuit Diagram:
+  Pin 11 → Resistor → Red LED → GND
+  Pin 12 → Resistor → Yellow LED → GND
+  Pin 13 → Resistor → Green LED → GND
+Learning: Multiple outputs, sequential logic, timing
+Pattern: Red (5s) → Yellow (2s) → Green (5s) → Yellow (2s) → repeat
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**3️⃣ AUTOMATIC NIGHT LIGHT** 🌙
+Difficulty: ⭐⭐ Beginner+
+Components: Arduino, LDR, 10KΩ resistor, LED, 220Ω resistor
+Circuit Diagram:
+  5V → LDR → A0 (and 10KΩ to GND)
+  Pin 13 → 220Ω → LED → GND
+Learning: Analog input, analogRead(), if-else conditions, sensors
+Logic: When light level < 400, LED turns ON automatically
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**4️⃣ BUZZER ALARM SYSTEM** 🔊
+Difficulty: ⭐⭐ Beginner+
+Components: Arduino, Piezo buzzer, push button, 10KΩ resistor
+Circuit Diagram:
+  5V → Button → Pin 2 (and 10KΩ to GND)
+  Pin 8 → Buzzer (+) → Buzzer (-) → GND
+Learning: Digital input, tone(), noTone(), button states
+Feature: Press button to trigger alarm with varying frequencies
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**5️⃣ TEMPERATURE & HUMIDITY MONITOR** 🌡️
+Difficulty: ⭐⭐⭐ Intermediate
+Components: Arduino, DHT11 sensor, 10KΩ resistor, optional LCD
+Circuit Diagram:
+  DHT11 VCC → 5V
+  DHT11 GND → GND
+  DHT11 DATA → Pin 2 (with 10KΩ pull-up to 5V)
+Learning: Digital sensors, libraries (DHT.h), Serial.print()
+Display: Temperature (°C) and Humidity (%) every 2 seconds
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**6️⃣ MOTION DETECTOR LIGHT** 👋
+Difficulty: ⭐⭐ Beginner+
+Components: Arduino, PIR motion sensor, LED, 220Ω resistor
+Circuit Diagram:
+  PIR VCC → 5V, GND → GND, OUT → Pin 7
+  Pin 13 → 220Ω → LED → GND
+Learning: Digital sensors, motion detection, timers
+Behavior: LED stays ON for 5 seconds after detecting motion
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**7️⃣ RGB COLOR MIXER** 🌈
+Difficulty: ⭐⭐⭐ Intermediate
+Components: Arduino, RGB LED (common cathode), 3× 220Ω resistors
+Circuit Diagram:
+  Pin 9 (PWM) → 220Ω → R pin
+  Pin 10 (PWM) → 220Ω → G pin
+  Pin 11 (PWM) → 220Ω → B pin
+  Common cathode → GND
+Learning: PWM (analogWrite), RGB color theory, loops
+Effect: Smooth rainbow color transitions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**8️⃣ BUTTON PRESS COUNTER** 🔘
+Difficulty: ⭐⭐ Beginner+
+Components: Arduino, push button, 10KΩ resistor, LED
+Circuit Diagram:
+  5V → Button → Pin 2 (with 10KΩ pull-down to GND)
+  Pin 13 → 220Ω → LED → GND
+Learning: Button debouncing, variables, counting logic
+Function: Counts and displays each button press on Serial Monitor
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**9️⃣ DISTANCE ALERT SYSTEM** 📡
+Difficulty: ⭐⭐⭐ Intermediate
+Components: Arduino, HC-SR04 ultrasonic, buzzer, LED, 220Ω resistor
+Circuit Diagram:
+  HC-SR04 VCC → 5V, GND → GND
+  Trig → Pin 9, Echo → Pin 10
+  Pin 8 → Buzzer → GND
+  Pin 13 → 220Ω → LED → GND
+Learning: Ultrasonic sensors, distance calculation, map()
+Alert: Buzzer beeps faster when object < 30cm away
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**🔟 VARIABLE FAN SPEED CONTROLLER** ⚙️
+Difficulty: ⭐⭐⭐⭐ Advanced
+Components: Arduino, DC motor, potentiometer, TIP120 transistor, 1N4007 diode, 9V battery
+Circuit Diagram:
+  Potentiometer: outer pins to 5V & GND, middle (wiper) to A0
+  Pin 6 (PWM) → TIP120 base (with 1KΩ resistor)
+  Motor: + to battery+, - to TIP120 collector
+  TIP120 emitter → GND, 1N4007 diode across motor (cathode to +)
+Learning: PWM motor control, transistors, analog input, map()
+Control: Turn pot to adjust motor speed 0-100%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**🎓 SAFETY TIPS FOR ALL PROJECTS:**
+✓ Always disconnect power before wiring
+✓ Check polarity of LEDs, batteries, and capacitors
+✓ Use correct resistor values to protect LEDs
+✓ Never connect motors directly to Arduino pins
+✓ Adult supervision recommended for projects with motors
+✓ Double-check connections before powering on
+
+**📚 WHAT YOU'LL LEARN:**
+• Digital & analog I/O
+• Sensors and actuators
+• Control structures (loops, conditions)
+• PWM and motor control
+• Circuit design fundamentals
+• Problem-solving & debugging
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Each project builds on previous skills. Start with #1 and progress at your own pace! 🚀`;
     } else if (type === "debug") {
       systemPrompt = `You are an expert Arduino debugging assistant. Analyze the provided code and circuit design to identify potential issues.
       Provide:
@@ -40,10 +176,12 @@ serve(async (req) => {
       - Best practices recommendations`;
     } else if (type === "explain") {
       systemPrompt = `You are an Arduino education expert. Explain Arduino concepts, code, or circuit designs in a clear, educational manner.
+      When explaining circuits, provide detailed ASCII/text diagrams showing component connections.
       - Use simple language for beginners
       - Provide analogies when helpful
       - Break down complex concepts
-      - Include practical examples`;
+      - Include wiring diagrams when relevant
+      - Explain the flow of electricity`;
     } else if (type === "optimize") {
       systemPrompt = `You are an Arduino code optimization expert. Review the code and suggest improvements for:
       - Performance optimization

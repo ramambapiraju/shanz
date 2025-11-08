@@ -82,35 +82,155 @@ void loop() {
     });
   };
 
+  const detectProjectType = () => {
+    const hasLED = circuit.some(c => c.type.includes('led'));
+    const hasLDR = circuit.some(c => c.type === 'ldr');
+    const hasPIR = circuit.some(c => c.type === 'pir-sensor');
+    const hasBuzzer = circuit.some(c => c.type === 'buzzer');
+    const hasTemp = circuit.some(c => c.type === 'dht11');
+    const hasUltrasonic = circuit.some(c => c.type === 'ultrasonic');
+    const hasRGB = circuit.some(c => c.type === 'led-rgb');
+    const hasButton = circuit.some(c => c.type === 'button');
+    const hasMotor = circuit.some(c => c.type === 'dc-motor' || c.type === 'servo');
+    const ledCount = circuit.filter(c => c.type.includes('led')).length;
+
+    if (hasLDR && hasLED) return 'nightlight';
+    if (hasPIR && hasLED) return 'motion';
+    if (hasBuzzer && hasButton) return 'alarm';
+    if (hasTemp) return 'temperature';
+    if (hasUltrasonic && (hasLED || hasBuzzer)) return 'distance';
+    if (hasRGB) return 'rgb';
+    if (hasButton && hasLED) return 'counter';
+    if (hasMotor) return 'fan';
+    if (ledCount >= 3) return 'traffic';
+    if (hasLED) return 'blink';
+    return 'custom';
+  };
+
   const startSimulation = () => {
     let cycleCount = 0;
+    const projectType = detectProjectType();
     
     simulationInterval.current = setInterval(() => {
       cycleCount++;
-      
-      // Find LEDs in circuit and toggle their state
-      const ledComponents = circuit.filter(c => c.type.includes('led'));
-      const newStates = new Map(componentStates);
-      
-      ledComponents.forEach((led, index) => {
-        const isOn = Math.floor(cycleCount / 2) % 2 === index % 2;
-        newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
-      });
-      
-      setComponentStates(newStates);
-      
-      // Add serial output
       const timestamp = new Date().toLocaleTimeString();
-      setSerialOutput(prev => {
-        const newOutput = [...prev];
-        if (cycleCount % 2 === 0) {
-          newOutput.push(`[${timestamp}] 💡 LED ON - Pin HIGH`);
-        } else {
-          newOutput.push(`[${timestamp}] 🌑 LED OFF - Pin LOW`);
-        }
-        // Keep only last 20 messages
-        return newOutput.slice(-20);
-      });
+      const newStates = new Map(componentStates);
+      const newOutput: string[] = [];
+
+      switch (projectType) {
+        case 'blink':
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            const isOn = cycleCount % 2 === 0;
+            newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
+            if (cycleCount % 2 === 0) {
+              newOutput.push(`[${timestamp}] 💡 LED ON - Brightness: 100%`);
+            } else {
+              newOutput.push(`[${timestamp}] 🌑 LED OFF`);
+            }
+          });
+          break;
+
+        case 'traffic':
+          const leds = circuit.filter(c => c.type.includes('led'));
+          const activeIndex = cycleCount % (leds.length * 2);
+          leds.forEach((led, idx) => {
+            const isOn = Math.floor(activeIndex / 2) === idx;
+            newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
+          });
+          if (cycleCount % 2 === 0) {
+            const colors = ['🔴 RED', '🟡 YELLOW', '🟢 GREEN'];
+            newOutput.push(`[${timestamp}] ${colors[Math.floor(activeIndex / 2) % colors.length]} Light Active`);
+          }
+          break;
+
+        case 'nightlight':
+          const lightLevel = 30 + Math.sin(cycleCount / 3) * 70;
+          const shouldLight = lightLevel < 50;
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            newStates.set(led.id, { active: shouldLight, value: shouldLight ? 200 : 0 });
+          });
+          newOutput.push(`[${timestamp}] ☀️ Light Level: ${lightLevel.toFixed(0)}% - LED ${shouldLight ? 'ON' : 'OFF'}`);
+          break;
+
+        case 'motion':
+          const motionDetected = cycleCount % 5 === 0;
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            newStates.set(led.id, { active: motionDetected, value: motionDetected ? 255 : 0 });
+          });
+          if (motionDetected) {
+            newOutput.push(`[${timestamp}] 👋 MOTION DETECTED! Light ON`);
+          } else {
+            newOutput.push(`[${timestamp}] ✓ No motion - Monitoring...`);
+          }
+          break;
+
+        case 'alarm':
+          const buzzing = cycleCount % 3 === 0;
+          circuit.filter(c => c.type === 'buzzer').forEach(buzzer => {
+            newStates.set(buzzer.id, { active: buzzing, value: buzzing ? 1 : 0 });
+          });
+          if (buzzing) {
+            newOutput.push(`[${timestamp}] 🔊 BEEP! Alarm Active - ${1000 + (cycleCount % 3) * 500}Hz`);
+          }
+          break;
+
+        case 'temperature':
+          const temp = 22 + Math.sin(cycleCount / 4) * 5;
+          const humidity = 50 + Math.cos(cycleCount / 5) * 10;
+          newOutput.push(`[${timestamp}] 🌡️ Temperature: ${temp.toFixed(1)}°C | Humidity: ${humidity.toFixed(0)}%`);
+          break;
+
+        case 'distance':
+          const distance = 50 + Math.sin(cycleCount / 2) * 40;
+          const alert = distance < 30;
+          circuit.filter(c => c.type.includes('led') || c.type === 'buzzer').forEach(comp => {
+            newStates.set(comp.id, { active: alert, value: alert ? 255 : 0 });
+          });
+          newOutput.push(`[${timestamp}] 📡 Distance: ${distance.toFixed(0)}cm ${alert ? '⚠️ TOO CLOSE!' : '✓'}`);
+          break;
+
+        case 'rgb':
+          const r = Math.sin(cycleCount / 3) * 127 + 128;
+          const g = Math.sin(cycleCount / 3 + 2) * 127 + 128;
+          const b = Math.sin(cycleCount / 3 + 4) * 127 + 128;
+          circuit.filter(c => c.type === 'led-rgb').forEach(led => {
+            newStates.set(led.id, { active: true, value: 200, r, g, b });
+          });
+          newOutput.push(`[${timestamp}] 🌈 RGB: R=${r.toFixed(0)} G=${g.toFixed(0)} B=${b.toFixed(0)}`);
+          break;
+
+        case 'counter':
+          if (cycleCount % 3 === 0) {
+            const count = Math.floor(cycleCount / 3);
+            newOutput.push(`[${timestamp}] 🔘 Button Press #${count} detected!`);
+            circuit.filter(c => c.type.includes('led')).forEach(led => {
+              newStates.set(led.id, { active: true, value: 255 });
+            });
+          } else {
+            circuit.filter(c => c.type.includes('led')).forEach(led => {
+              newStates.set(led.id, { active: false, value: 0 });
+            });
+          }
+          break;
+
+        case 'fan':
+          const speed = 50 + Math.sin(cycleCount / 4) * 50;
+          circuit.filter(c => c.type === 'dc-motor' || c.type === 'servo').forEach(motor => {
+            newStates.set(motor.id, { active: speed > 30, value: speed });
+          });
+          newOutput.push(`[${timestamp}] ⚙️ Motor Speed: ${speed.toFixed(0)}% RPM`);
+          break;
+
+        default:
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            const isOn = cycleCount % 2 === 0;
+            newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
+          });
+          newOutput.push(`[${timestamp}] ⚡ Custom circuit running...`);
+      }
+
+      setComponentStates(newStates);
+      setSerialOutput(prev => [...prev, ...newOutput].slice(-25));
     }, 1000);
   };
 
