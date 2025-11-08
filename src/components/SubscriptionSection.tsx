@@ -28,7 +28,7 @@ export const SubscriptionSection = () => {
           <div className="animate-slide-in-left">
             <div className="inline-flex items-center gap-2 bg-secondary/10 px-4 py-2 rounded-full mb-6">
               <Sparkles className="h-4 w-4 text-secondary" />
-              <span className="text-sm font-medium text-secondary">Subscribe & Save</span>
+              <span className="text-sm font-medium text-secondary">Coming Soon</span>
             </div>
 
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
@@ -74,8 +74,8 @@ export const SubscriptionSection = () => {
               ))}
             </div>
 
-            <Button size="lg" variant="default" className="text-lg px-8">
-              Start Subscription
+            <Button size="lg" variant="default" className="text-lg px-8" disabled>
+              Coming Soon
             </Button>
           </div>
 
