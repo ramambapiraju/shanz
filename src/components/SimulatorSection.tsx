@@ -47,8 +47,8 @@ export const SimulatorSection = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                variant="default" 
-                className="group"
+                variant="secondary" 
+                className="group bg-secondary hover:bg-secondary/90"
                 onClick={() => {
                   navigate("/simulator");
                   setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -57,17 +57,21 @@ export const SimulatorSection = () => {
                 Electronics Simulator
                 <Code className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="secondary"
-                onClick={() => {
-                  navigate("/mechatronics-simulator");
-                  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-                }}
-              >
-                Mechatronics Simulator
-                <Cpu className="ml-2 h-5 w-5" />
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button 
+                  size="lg" 
+                  variant="default"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => {
+                    navigate("/mechatronics-simulator");
+                    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+                  }}
+                >
+                  Mechatronics Simulator
+                  <Cpu className="ml-2 h-5 w-5" />
+                </Button>
+                <span className="text-sm text-muted-foreground text-center">Coming Soon</span>
+              </div>
             </div>
           </div>
 
