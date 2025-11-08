@@ -79,6 +79,12 @@ const PROJECT_TEMPLATES = [
   { id: "counter", name: "8. Button Counter 🔘", description: "Count presses" },
   { id: "distance", name: "9. Distance Alert 📡", description: "Ultrasonic warning" },
   { id: "fan", name: "10. Fan Controller ⚙️", description: "Variable speed control" },
+  // MID-LEVEL PROJECTS
+  { id: "smartLighting", name: "11. Smart Lighting 💡⭐", description: "LDR + PIR combo system" },
+  { id: "parkingSensor", name: "12. Parking Sensor 🚗", description: "3-zone distance alert" },
+  { id: "thermostat", name: "13. Smart Thermostat 🌡️⭐", description: "Auto temperature control" },
+  { id: "securitySystem", name: "14. Security System 🔒", description: "Motion alarm with arming" },
+  { id: "musicPlayer", name: "15. Music Player 🎵", description: "Multi-song buzzer player" },
 ];
 
 interface CircuitDesignerExtendedProps extends CircuitDesignerProps {
@@ -208,7 +214,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 )}
               </div>
               <CardDescription className="mb-3">
-                Build one of 10 DIY projects or create your own! Edit anytime, even during simulation.
+                Build one of 15 DIY projects (including 5 advanced) or create your own! Edit anytime, even during simulation.
               </CardDescription>
               <select 
                 className="w-full max-w-md p-2.5 rounded-lg border-2 bg-card text-sm font-medium hover:border-primary transition-colors shadow-sm"

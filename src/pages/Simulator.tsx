@@ -96,6 +96,14 @@ export default function Simulator() {
     const hasMotor = circuit.some(c => c.type === 'dc-motor' || c.type === 'servo');
     const ledCount = circuit.filter(c => c.type.includes('led')).length;
 
+    // Advanced combinations (Mid-level projects)
+    if (hasLDR && hasPIR && hasLED) return 'smartLighting';
+    if (hasUltrasonic && hasBuzzer && ledCount >= 3) return 'parkingSensor';
+    if (hasTemp && hasMotor) return 'thermostat';
+    if (hasPIR && hasBuzzer && hasButton && hasLED) return 'securitySystem';
+    if (hasBuzzer && hasButton && hasLED && ledCount >= 1) return 'musicPlayer';
+    
+    // Basic projects
     if (hasLDR && hasLED) return 'nightlight';
     if (hasPIR && hasLED) return 'motion';
     if (hasBuzzer && hasButton) return 'alarm';
@@ -120,6 +128,118 @@ export default function Simulator() {
       const newOutput: string[] = [];
 
       switch (projectType) {
+        // MID-LEVEL PROJECTS
+        case 'smartLighting':
+          const ldrSmart = circuit.find(c => c.type === 'ldr');
+          const pirSmart = circuit.find(c => c.type === 'pir-sensor');
+          const lightLevelSmart = ldrSmart && interactiveValues.has(ldrSmart.id) 
+            ? interactiveValues.get(ldrSmart.id)! 
+            : 30 + Math.sin(cycleCount / 3) * 70;
+          const motionSmart = cycleCount % 6 === 0 || cycleCount % 6 === 1;
+          const shouldLightSmart = lightLevelSmart < 50 && motionSmart;
+          
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            newStates.set(led.id, { active: shouldLightSmart, value: shouldLightSmart ? 255 : 0 });
+          });
+          newOutput.push(`[${timestamp}] 💡 Smart System: Light=${lightLevelSmart.toFixed(0)}% Motion=${motionSmart ? 'YES' : 'NO'} → LED ${shouldLightSmart ? 'ON' : 'OFF'}`);
+          break;
+
+        case 'parkingSensor':
+          const ultrasonicPark = circuit.find(c => c.type === 'ultrasonic');
+          const distancePark = ultrasonicPark && interactiveValues.has(ultrasonicPark.id)
+            ? interactiveValues.get(ultrasonicPark.id)!
+            : 50 + Math.sin(cycleCount / 2) * 45;
+          
+          const ledsPark = circuit.filter(c => c.type.includes('led'));
+          ledsPark.forEach(led => newStates.set(led.id, { active: false, value: 0 }));
+          
+          if (distancePark > 50) {
+            const greenLed = ledsPark.find(l => l.type === 'led-green');
+            if (greenLed) newStates.set(greenLed.id, { active: true, value: 255 });
+            stopBuzzerSound();
+            newOutput.push(`[${timestamp}] 🚗 ${distancePark.toFixed(0)}cm ✅ SAFE ZONE`);
+          } else if (distancePark > 20) {
+            const yellowLed = ledsPark.find(l => l.type === 'led-yellow');
+            if (yellowLed) newStates.set(yellowLed.id, { active: true, value: 255 });
+            if (cycleCount % 2 === 0) playBuzzerSound(1000);
+            else stopBuzzerSound();
+            newOutput.push(`[${timestamp}] 🚗 ${distancePark.toFixed(0)}cm ⚠️ WARNING ZONE`);
+          } else {
+            const redLed = ledsPark.find(l => l.type === 'led-red');
+            if (redLed) newStates.set(redLed.id, { active: true, value: 255 });
+            playBuzzerSound(2500);
+            newOutput.push(`[${timestamp}] 🚗 ${distancePark.toFixed(0)}cm 🚨 DANGER! TOO CLOSE!`);
+          }
+          break;
+
+        case 'thermostat':
+          const tempSensorThermostat = circuit.find(c => c.type === 'dht11');
+          const targetTemp = 24.0;
+          const currentTemp = tempSensorThermostat && interactiveValues.has(tempSensorThermostat.id)
+            ? interactiveValues.get(tempSensorThermostat.id)!
+            : 22 + Math.sin(cycleCount / 5) * 6;
+          
+          const motorThermostat = circuit.find(c => c.type === 'dc-motor');
+          const ledThermostat = circuit.find(c => c.type.includes('led'));
+          
+          if (currentTemp > targetTemp + 1) {
+            if (motorThermostat) newStates.set(motorThermostat.id, { active: true, value: 255 });
+            if (ledThermostat) newStates.set(ledThermostat.id, { active: true, value: 255 });
+            newOutput.push(`[${timestamp}] 🌡️ ${currentTemp.toFixed(1)}°C → ❄️ COOLING (Fan ON)`);
+          } else if (currentTemp < targetTemp - 1) {
+            if (motorThermostat) newStates.set(motorThermostat.id, { active: false, value: 0 });
+            if (ledThermostat) newStates.set(ledThermostat.id, { active: true, value: 128 });
+            newOutput.push(`[${timestamp}] 🌡️ ${currentTemp.toFixed(1)}°C → 🔥 HEATING`);
+          } else {
+            if (motorThermostat) newStates.set(motorThermostat.id, { active: false, value: 0 });
+            if (ledThermostat) newStates.set(ledThermostat.id, { active: false, value: 0 });
+            newOutput.push(`[${timestamp}] 🌡️ ${currentTemp.toFixed(1)}°C → ✅ Temperature OK`);
+          }
+          break;
+
+        case 'securitySystem':
+          const motionSec = cycleCount % 7 === 0;
+          const doorOpen = cycleCount % 9 === 0;
+          const alarmActive = motionSec || doorOpen;
+          
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            newStates.set(led.id, { active: alarmActive, value: alarmActive ? 255 : 0 });
+          });
+          
+          circuit.filter(c => c.type === 'buzzer').forEach(buzzer => {
+            newStates.set(buzzer.id, { active: alarmActive, value: alarmActive ? 1 : 0 });
+          });
+          
+          if (alarmActive) {
+            playBuzzerSound(2000 + (cycleCount % 5) * 200);
+            let reason = motionSec ? 'Motion detected!' : '';
+            if (doorOpen) reason += (reason ? ' + ' : '') + 'Door opened!';
+            newOutput.push(`[${timestamp}] 🚨 ALARM! ${reason}`);
+          } else {
+            stopBuzzerSound();
+            newOutput.push(`[${timestamp}] 🔒 System armed - Monitoring...`);
+          }
+          break;
+
+        case 'musicPlayer':
+          const isPlaying = cycleCount % 16 < 8;
+          const notes = [262, 294, 330, 349, 392, 440, 494, 523];
+          const noteIndex = cycleCount % 8;
+          
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
+            newStates.set(led.id, { active: isPlaying, value: isPlaying ? 255 : 0 });
+          });
+          
+          if (isPlaying) {
+            playBuzzerSound(notes[noteIndex]);
+            newOutput.push(`[${timestamp}] 🎵 ♪ Playing Note ${noteIndex + 1} - ${notes[noteIndex]} Hz`);
+          } else {
+            stopBuzzerSound();
+            newOutput.push(`[${timestamp}] ⏸️ Music paused`);
+          }
+          break;
+
+        // BASIC PROJECTS
         case 'blink':
           circuit.filter(c => c.type.includes('led')).forEach(led => {
             const isOn = cycleCount % 2 === 0;
@@ -133,9 +253,9 @@ export default function Simulator() {
           break;
 
         case 'traffic':
-          const leds = circuit.filter(c => c.type.includes('led'));
-          const activeIndex = cycleCount % (leds.length * 2);
-          leds.forEach((led, idx) => {
+          const ledsTraffic = circuit.filter(c => c.type.includes('led'));
+          const activeIndex = cycleCount % (ledsTraffic.length * 2);
+          ledsTraffic.forEach((led, idx) => {
             const isOn = Math.floor(activeIndex / 2) === idx;
             newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
           });
@@ -378,7 +498,10 @@ export default function Simulator() {
               </TabsContent>
             </Tabs>
 
-            <SerialMonitor output={serialOutput} />
+            <SerialMonitor 
+              output={serialOutput} 
+              onClear={() => setSerialOutput([])}
+            />
           </div>
 
           <div className="space-y-4">
