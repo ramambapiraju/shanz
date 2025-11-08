@@ -293,10 +293,13 @@ export default function Simulator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <Tabs defaultValue="circuit" className="w-full">
+            <Tabs defaultValue="circuit" className="w-full" key={activeTemplate}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="circuit">Circuit Design</TabsTrigger>
-                <TabsTrigger value="code">Code Editor</TabsTrigger>
+                <TabsTrigger value="code">
+                  Arduino Code 
+                  {activeTemplate !== "blank" && <span className="ml-1 text-xs">✨</span>}
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="circuit" className="mt-4">

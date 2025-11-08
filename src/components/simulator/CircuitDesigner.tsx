@@ -199,7 +199,6 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                     // Template code will be loaded in parent
                   }
                 }}
-                disabled={isRunning}
               >
                 {PROJECT_TEMPLATES.map(template => (
                   <option key={template.id} value={template.id}>
@@ -312,19 +311,19 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                         >
                           <div
                             id={component.id}
-                            className={`absolute cursor-move transition-all duration-300 ${
-                              isRunning && isActive ? 'scale-110' : 'hover:scale-105'
-                            } ${isLED && isActive ? 'animate-pulse' : ''} ${
-                              component.type === 'arduino' ? 'arduino-board' :
-                              component.type === 'breadboard' ? 'breadboard-surface' :
-                              component.type.includes('led') ? '' :
-                              component.type.includes('resistor') ? 'resistor-body' :
-                              component.type === 'button' || component.type === 'switch' ? 'button-3d' :
-                              component.type.includes('battery') ? 'battery-casing' :
-                              component.type === 'dc-motor' || component.type === 'servo' ? 'motor-housing' :
-                              component.type === 'dht11' || component.type === 'ultrasonic' || component.type === 'pir-sensor' || component.type === 'ldr' ? 'sensor-housing' :
-                              'component-3d'
-                            } rounded-xl p-3`}
+                            className={`absolute cursor-move transition-all duration-300 rounded-xl p-3
+                              ${isRunning && isActive ? 'scale-110' : 'hover:scale-105'}
+                              ${component.type === 'arduino' ? 'arduino-board' :
+                                component.type === 'breadboard' ? 'breadboard-surface' :
+                                component.type.includes('resistor') ? 'resistor-body' :
+                                component.type === 'button' || component.type === 'switch' ? 'button-3d' + (isActive ? ' button-active' : '') :
+                                component.type.includes('battery') ? 'battery-casing' :
+                                component.type === 'dc-motor' || component.type === 'servo' ? 'motor-housing' + (isActive ? ' motor-active' : '') :
+                                component.type === 'buzzer' ? (isActive ? 'buzzer-active' : '') + ' component-3d' :
+                                component.type === 'dht11' || component.type === 'ultrasonic' || component.type === 'pir-sensor' || component.type === 'ldr' ? 'sensor-housing' + (isActive ? ' sensor-active' : '') :
+                                component.type.includes('led') ? (isActive ? 'led-glow-active' : '') :
+                                'component-3d'
+                              }`}
                             style={{ 
                               backgroundColor: isLED && isActive ? `${component.color}` : undefined,
                               boxShadow: isLED && isActive ? `0 0 30px ${component.color}, 0 0 60px ${component.color}80, 0 8px 20px rgba(0,0,0,0.3)` : undefined,

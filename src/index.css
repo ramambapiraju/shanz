@@ -136,6 +136,73 @@
     border: 1px solid #2a1c4f;
   }
 
+  /* Realistic Component Animations */
+  @keyframes motor-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes buzzer-vibrate {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    10% { transform: translateX(-2px) translateY(1px); }
+    20% { transform: translateX(2px) translateY(-1px); }
+    30% { transform: translateX(-2px) translateY(-1px); }
+    40% { transform: translateX(2px) translateY(1px); }
+    50% { transform: translateX(-1px) translateY(2px); }
+    60% { transform: translateX(1px) translateY(-2px); }
+    70% { transform: translateX(-2px) translateY(0); }
+    80% { transform: translateX(2px) translateY(0); }
+    90% { transform: translateX(0) translateY(-2px); }
+  }
+
+  @keyframes led-glow-pulse {
+    0%, 100% { 
+      filter: brightness(1.5) drop-shadow(0 0 8px currentColor);
+      transform: scale(1);
+    }
+    50% { 
+      filter: brightness(2) drop-shadow(0 0 15px currentColor);
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes sensor-scan {
+    0%, 100% { 
+      box-shadow: 0 0 10px rgba(100, 200, 255, 0.3),
+                  inset 0 0 10px rgba(100, 200, 255, 0.1);
+    }
+    50% { 
+      box-shadow: 0 0 20px rgba(100, 200, 255, 0.6),
+                  inset 0 0 15px rgba(100, 200, 255, 0.3);
+    }
+  }
+
+  @keyframes button-press {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    100% { transform: translateY(0); }
+  }
+
+  .motor-active {
+    animation: motor-spin 1s linear infinite;
+  }
+
+  .buzzer-active {
+    animation: buzzer-vibrate 0.1s linear infinite;
+  }
+
+  .led-glow-active {
+    animation: led-glow-pulse 1s ease-in-out infinite;
+  }
+
+  .sensor-active {
+    animation: sensor-scan 2s ease-in-out infinite;
+  }
+
+  .button-active {
+    animation: button-press 0.3s ease-out;
+  }
+
   /* LED glow effects */
   .led-glow-red {
     box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff4444;
