@@ -133,12 +133,18 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
 
   const addComponent = (component: typeof COMPONENTS[0]) => {
     // Allow adding components even during simulation for live editing
+    // Center components in the canvas (canvas is ~800px wide, ~600px tall)
+    const centerX = 350; // Center horizontally with some offset
+    const centerY = 250; // Center vertically with some offset
+    const randomOffsetX = (Math.random() - 0.5) * 200; // ±100px variation
+    const randomOffsetY = (Math.random() - 0.5) * 150; // ±75px variation
+    
     const newComponent: CircuitComponent = {
       id: `${component.type}-${Date.now()}`,
       type: component.type,
       name: component.name,
-      x: Math.random() * 300 + 100,
-      y: Math.random() * 200 + 100,
+      x: centerX + randomOffsetX,
+      y: centerY + randomOffsetY,
       color: component.color,
       pins: component.pins,
       connections: [],

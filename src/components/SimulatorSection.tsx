@@ -49,7 +49,10 @@ export const SimulatorSection = () => {
                 size="lg" 
                 variant="default" 
                 className="group"
-                onClick={() => navigate("/simulator")}
+                onClick={() => {
+                  navigate("/simulator");
+                  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+                }}
               >
                 Try Beta Version
                 <Code className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
