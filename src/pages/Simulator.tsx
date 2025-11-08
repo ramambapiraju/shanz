@@ -32,6 +32,17 @@ export default function Simulator() {
     };
   }, []);
 
+  // Auto-run simulation when template changes
+  useEffect(() => {
+    if (activeTemplate !== "blank" && circuit.length > 0 && !isRunning) {
+      // Small delay to ensure circuit is rendered
+      const timer = setTimeout(() => {
+        handleRun();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTemplate, circuit.length]);
+
   const handleRun = () => {
     if (circuit.length === 0) {
       toast({
@@ -294,8 +305,9 @@ export default function Simulator() {
                   setCircuit={setCircuit}
                   isRunning={isRunning}
                   componentStates={componentStates}
-                  onTemplateChange={(templateCode) => {
+                  onTemplateChange={(templateCode, templateId) => {
                     setCode(templateCode);
+                    setActiveTemplate(templateId);
                     toast({
                       title: "✨ Code Updated",
                       description: "Project code loaded successfully"

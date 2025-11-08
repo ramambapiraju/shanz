@@ -82,7 +82,7 @@ const PROJECT_TEMPLATES = [
 ];
 
 interface CircuitDesignerExtendedProps extends CircuitDesignerProps {
-  onTemplateChange?: (code: string) => void;
+  onTemplateChange?: (code: string, templateId: string) => void;
 }
 
 export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentStates, onTemplateChange }: CircuitDesignerExtendedProps) => {
@@ -95,16 +95,18 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
   const loadTemplate = (templateId: string) => {
     if (templateId === "blank") {
       setCircuit([]);
+      setSelectedTemplate("blank");
       toast.success("Canvas cleared - Build your own circuit!");
       return;
     }
     
     const prebuiltCircuit = buildProjectCircuit(templateId);
     setCircuit(prebuiltCircuit);
+    setSelectedTemplate(templateId);
     
     const template = PROJECT_TEMPLATES.find(t => t.id === templateId);
     toast.success(`${template?.name} loaded!`, {
-      description: template?.description
+      description: "✨ Circuit built! Click Run to start simulation"
     });
   };
 
@@ -113,7 +115,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
       loadTemplate(selectedTemplate);
       // Load corresponding code if callback provided
       if (onTemplateChange && PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES]) {
-        onTemplateChange(PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES]);
+        onTemplateChange(PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES], selectedTemplate);
       }
     }
   }, [selectedTemplate]);

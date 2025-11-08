@@ -290,14 +290,27 @@ export const buildProjectCircuit = (projectId: string) => {
   switch (projectId) {
     case 'blink':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY, color: '#00979D', pins: ['D13', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY, color: '#00979D', pins: ['D13', 'GND'], connections: [
+          { from: 'arduino-1-D13', to: 'led-1-+' },
+          { from: 'led-1--', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' }
+        ] },
         { id: 'led-1', type: 'led-red', name: 'Red LED', x: baseX + 250, y: baseY + 50, color: '#F44336', pins: ['+', '-'], connections: [] },
         { id: 'resistor-1', type: 'resistor-220', name: '220Ω Resistor', x: baseX + 250, y: baseY + 150, color: '#FF5722', pins: ['1', '2'], connections: [] }
       ];
       
     case 'traffic':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D11', 'D12', 'D13', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D11', 'D12', 'D13', 'GND'], connections: [
+          { from: 'arduino-1-D11', to: 'led-red-+' },
+          { from: 'arduino-1-D12', to: 'led-yellow-+' },
+          { from: 'arduino-1-D13', to: 'led-green-+' },
+          { from: 'led-red--', to: 'resistor-1-1' },
+          { from: 'led-yellow--', to: 'resistor-1-1' },
+          { from: 'led-green--', to: 'resistor-2-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' },
+          { from: 'resistor-2-2', to: 'arduino-1-GND' }
+        ] },
         { id: 'led-red', type: 'led-red', name: 'Red LED', x: baseX + 300, y: baseY, color: '#F44336', pins: ['+', '-'], connections: [] },
         { id: 'led-yellow', type: 'led-yellow', name: 'Yellow LED', x: baseX + 300, y: baseY + 100, color: '#FFEB3B', pins: ['+', '-'], connections: [] },
         { id: 'led-green', type: 'led-green', name: 'Green LED', x: baseX + 300, y: baseY + 200, color: '#4CAF50', pins: ['+', '-'], connections: [] },
@@ -307,7 +320,15 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'nightlight':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['A0', 'D13', '5V', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['A0', 'D13', '5V', 'GND'], connections: [
+          { from: 'arduino-1-5V', to: 'ldr-1-1' },
+          { from: 'ldr-1-2', to: 'arduino-1-A0' },
+          { from: 'arduino-1-A0', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D13', to: 'led-1-+' },
+          { from: 'led-1--', to: 'resistor-2-1' },
+          { from: 'resistor-2-2', to: 'arduino-1-GND' }
+        ] },
         { id: 'ldr-1', type: 'ldr', name: 'Light Sensor', x: baseX + 250, y: baseY, color: '#FFC107', pins: ['1', '2'], connections: [] },
         { id: 'led-1', type: 'led-blue', name: 'Blue LED', x: baseX + 250, y: baseY + 150, color: '#2196F3', pins: ['+', '-'], connections: [] },
         { id: 'resistor-1', type: 'resistor-10k', name: '10KΩ', x: baseX + 400, y: baseY + 50, color: '#9E9E9E', pins: ['1', '2'], connections: [] },
@@ -316,7 +337,13 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'alarm':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', 'D8', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', 'D8', 'GND'], connections: [
+          { from: 'arduino-1-D2', to: 'button-1-1' },
+          { from: 'button-1-2', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D8', to: 'buzzer-1-+' },
+          { from: 'buzzer-1--', to: 'arduino-1-GND' }
+        ] },
         { id: 'button-1', type: 'button', name: 'Push Button', x: baseX + 250, y: baseY, color: '#607D8B', pins: ['1', '2'], connections: [] },
         { id: 'buzzer-1', type: 'buzzer', name: 'Buzzer', x: baseX + 250, y: baseY + 150, color: '#E91E63', pins: ['+', '-'], connections: [] },
         { id: 'resistor-1', type: 'resistor-10k', name: '10KΩ', x: baseX + 400, y: baseY + 50, color: '#9E9E9E', pins: ['1', '2'], connections: [] }
@@ -324,14 +351,27 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'temp':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', '5V', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', '5V', 'GND'], connections: [
+          { from: 'arduino-1-5V', to: 'dht11-1-VCC' },
+          { from: 'arduino-1-D2', to: 'dht11-1-DATA' },
+          { from: 'dht11-1-GND', to: 'arduino-1-GND' },
+          { from: 'dht11-1-VCC', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'dht11-1-DATA' }
+        ] },
         { id: 'dht11-1', type: 'dht11', name: 'DHT11 Sensor', x: baseX + 300, y: baseY + 50, color: '#FF5722', pins: ['VCC', 'DATA', 'GND'], connections: [] },
         { id: 'resistor-1', type: 'resistor-10k', name: '10KΩ Pull-up', x: baseX + 450, y: baseY + 100, color: '#9E9E9E', pins: ['1', '2'], connections: [] }
       ];
       
     case 'motion':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D7', 'D13', '5V', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D7', 'D13', '5V', 'GND'], connections: [
+          { from: 'arduino-1-5V', to: 'pir-1-VCC' },
+          { from: 'pir-1-OUT', to: 'arduino-1-D7' },
+          { from: 'pir-1-GND', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D13', to: 'led-1-+' },
+          { from: 'led-1--', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' }
+        ] },
         { id: 'pir-1', type: 'pir-sensor', name: 'PIR Sensor', x: baseX + 250, y: baseY, color: '#E91E63', pins: ['VCC', 'OUT', 'GND'], connections: [] },
         { id: 'led-1', type: 'led-yellow', name: 'Yellow LED', x: baseX + 250, y: baseY + 150, color: '#FFEB3B', pins: ['+', '-'], connections: [] },
         { id: 'resistor-1', type: 'resistor-220', name: '220Ω', x: baseX + 400, y: baseY + 200, color: '#FF5722', pins: ['1', '2'], connections: [] }
@@ -339,7 +379,15 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'rgb':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D9', 'D10', 'D11', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D9', 'D10', 'D11', 'GND'], connections: [
+          { from: 'arduino-1-D9', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'rgb-led-R' },
+          { from: 'arduino-1-D10', to: 'resistor-2-1' },
+          { from: 'resistor-2-2', to: 'rgb-led-G' },
+          { from: 'arduino-1-D11', to: 'resistor-3-1' },
+          { from: 'resistor-3-2', to: 'rgb-led-B' },
+          { from: 'rgb-led-GND', to: 'arduino-1-GND' }
+        ] },
         { id: 'rgb-led', type: 'led-rgb', name: 'RGB LED', x: baseX + 300, y: baseY + 50, color: '#9C27B0', pins: ['R', 'G', 'B', 'GND'], connections: [] },
         { id: 'resistor-1', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY, color: '#FF5722', pins: ['1', '2'], connections: [] },
         { id: 'resistor-2', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 100, color: '#FF5722', pins: ['1', '2'], connections: [] },
@@ -348,7 +396,14 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'counter':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', 'D13', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', 'D13', 'GND'], connections: [
+          { from: 'arduino-1-D2', to: 'button-1-1' },
+          { from: 'button-1-2', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D13', to: 'led-1-+' },
+          { from: 'led-1--', to: 'resistor-2-1' },
+          { from: 'resistor-2-2', to: 'arduino-1-GND' }
+        ] },
         { id: 'button-1', type: 'button', name: 'Push Button', x: baseX + 250, y: baseY, color: '#607D8B', pins: ['1', '2'], connections: [] },
         { id: 'led-1', type: 'led-green', name: 'Green LED', x: baseX + 250, y: baseY + 150, color: '#4CAF50', pins: ['+', '-'], connections: [] },
         { id: 'resistor-1', type: 'resistor-10k', name: '10KΩ', x: baseX + 400, y: baseY + 50, color: '#9E9E9E', pins: ['1', '2'], connections: [] },
@@ -357,7 +412,17 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'distance':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D9', 'D10', 'D8', 'D13', '5V', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D9', 'D10', 'D8', 'D13', '5V', 'GND'], connections: [
+          { from: 'arduino-1-5V', to: 'ultrasonic-1-VCC' },
+          { from: 'arduino-1-D9', to: 'ultrasonic-1-TRIG' },
+          { from: 'arduino-1-D10', to: 'ultrasonic-1-ECHO' },
+          { from: 'ultrasonic-1-GND', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D8', to: 'buzzer-1-+' },
+          { from: 'buzzer-1--', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D13', to: 'led-1-+' },
+          { from: 'led-1--', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' }
+        ] },
         { id: 'ultrasonic-1', type: 'ultrasonic', name: 'HC-SR04', x: baseX + 300, y: baseY, color: '#4CAF50', pins: ['VCC', 'TRIG', 'ECHO', 'GND'], connections: [] },
         { id: 'buzzer-1', type: 'buzzer', name: 'Buzzer', x: baseX + 300, y: baseY + 150, color: '#E91E63', pins: ['+', '-'], connections: [] },
         { id: 'led-1', type: 'led-red', name: 'Red LED', x: baseX + 300, y: baseY + 250, color: '#F44336', pins: ['+', '-'], connections: [] },
@@ -366,7 +431,14 @@ export const buildProjectCircuit = (projectId: string) => {
       
     case 'fan':
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['A0', 'D6', '5V', 'GND'], connections: [] },
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['A0', 'D6', '5V', 'GND'], connections: [
+          { from: 'arduino-1-5V', to: 'pot-1-VCC' },
+          { from: 'pot-1-WIPER', to: 'arduino-1-A0' },
+          { from: 'pot-1-GND', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D6', to: 'motor-1-+' },
+          { from: 'motor-1--', to: 'battery-1--' },
+          { from: 'battery-1-+', to: 'arduino-1-GND' }
+        ] },
         { id: 'pot-1', type: 'potentiometer', name: 'Potentiometer', x: baseX + 250, y: baseY, color: '#FF9800', pins: ['VCC', 'WIPER', 'GND'], connections: [] },
         { id: 'motor-1', type: 'dc-motor', name: 'DC Motor', x: baseX + 250, y: baseY + 150, color: '#673AB7', pins: ['+', '-'], connections: [] },
         { id: 'battery-1', type: 'battery', name: '9V Battery', x: baseX + 400, y: baseY + 100, color: '#424242', pins: ['+', '-'], connections: [] }
