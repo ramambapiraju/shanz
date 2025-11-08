@@ -10,6 +10,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { PROJECT_CODES } from "@/components/simulator/ProjectTemplates";
+import { playBuzzerSound, stopBuzzerSound } from "@/utils/audioUtils";
 
 export default function Simulator() {
   const navigate = useNavigate();
@@ -165,11 +166,15 @@ export default function Simulator() {
 
         case 'alarm':
           const buzzing = cycleCount % 3 === 0;
+          const buzzerFreq = 1000 + (cycleCount % 3) * 500;
           circuit.filter(c => c.type === 'buzzer').forEach(buzzer => {
             newStates.set(buzzer.id, { active: buzzing, value: buzzing ? 1 : 0 });
           });
           if (buzzing) {
-            newOutput.push(`[${timestamp}] 🔊 BEEP! Alarm Active - ${1000 + (cycleCount % 3) * 500}Hz`);
+            playBuzzerSound(buzzerFreq);
+            newOutput.push(`[${timestamp}] 🔊 BEEP! Alarm Active - ${buzzerFreq}Hz`);
+          } else {
+            stopBuzzerSound();
           }
           break;
 
@@ -235,6 +240,7 @@ export default function Simulator() {
 
   const handleStop = () => {
     setIsRunning(false);
+    stopBuzzerSound();
     if (simulationInterval.current) {
       clearInterval(simulationInterval.current);
       simulationInterval.current = null;
@@ -267,6 +273,30 @@ export default function Simulator() {
     });
   };
 
+  const handleExport = () => {
+    const projectData = {
+      template: activeTemplate,
+      code: code,
+      circuit: circuit,
+      timestamp: new Date().toISOString(),
+    };
+    
+    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `arduino-project-${activeTemplate}-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "📦 Project Exported",
+      description: "Your project has been downloaded successfully!",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background pt-20">
       <div className="container mx-auto px-4 py-8">
@@ -288,6 +318,7 @@ export default function Simulator() {
             onRun={handleRun}
             onStop={handleStop}
             onReset={handleReset}
+            onExport={handleExport}
           />
         </div>
 

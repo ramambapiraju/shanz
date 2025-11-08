@@ -6,9 +6,10 @@ interface SimulatorControlsProps {
   onRun: () => void;
   onStop: () => void;
   onReset: () => void;
+  onExport: () => void;
 }
 
-export const SimulatorControls = ({ isRunning, onRun, onStop, onReset }: SimulatorControlsProps) => {
+export const SimulatorControls = ({ isRunning, onRun, onStop, onReset, onExport }: SimulatorControlsProps) => {
   return (
     <div className="flex items-center gap-2">
       {!isRunning ? (
@@ -26,7 +27,7 @@ export const SimulatorControls = ({ isRunning, onRun, onStop, onReset }: Simulat
         <RotateCcw className="h-4 w-4" />
         Reset
       </Button>
-      <Button variant="outline" className="gap-2">
+      <Button onClick={onExport} variant="outline" className="gap-2">
         <Download className="h-4 w-4" />
         Export
       </Button>

@@ -309,7 +309,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                           }}
                           disabled={isRunning || wiringMode}
                         >
-                          <div
+                           <div
                             id={component.id}
                             className={`absolute cursor-move transition-all duration-300 rounded-xl p-3
                               ${isRunning && isActive ? 'scale-110' : 'hover:scale-105'}
@@ -321,7 +321,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                 component.type === 'dc-motor' || component.type === 'servo' ? 'motor-housing' + (isActive ? ' motor-active' : '') :
                                 component.type === 'buzzer' ? (isActive ? 'buzzer-active' : '') + ' component-3d' :
                                 component.type === 'dht11' || component.type === 'ultrasonic' || component.type === 'pir-sensor' || component.type === 'ldr' ? 'sensor-housing' + (isActive ? ' sensor-active' : '') :
-                                component.type.includes('led') ? (isActive ? 'led-glow-active' : '') :
+                                component.type.includes('led') ? 'led-dome' + (isActive ? ' led-glow-active' : '') :
                                 'component-3d'
                               }`}
                             style={{ 
@@ -433,16 +433,18 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                     {circuit.flatMap((component) =>
                       component.connections.map((conn, idx) => {
                         const state = getComponentState(component.id);
+                        const isActive = state.active;
                         return (
                           <Xarrow
                             key={`${component.id}-${idx}`}
                             start={conn.from}
                             end={conn.to}
-                            color={state.active ? component.color : '#666'}
-                            strokeWidth={state.active ? 3 : 2}
-                            headSize={4}
+                            color={isActive ? component.color : '#666'}
+                            strokeWidth={isActive ? 4 : 2}
+                            headSize={6}
                             showHead={false}
-                            dashness={state.active ? false : { animation: 1 }}
+                            dashness={isActive ? { strokeLen: 10, nonStrokeLen: 10, animation: 1 } : false}
+                            animateDrawing={isActive ? 0.5 : false}
                           />
                         );
                       })

@@ -143,64 +143,107 @@
   }
 
   @keyframes buzzer-vibrate {
-    0%, 100% { transform: translateX(0) translateY(0); }
-    10% { transform: translateX(-2px) translateY(1px); }
-    20% { transform: translateX(2px) translateY(-1px); }
-    30% { transform: translateX(-2px) translateY(-1px); }
-    40% { transform: translateX(2px) translateY(1px); }
-    50% { transform: translateX(-1px) translateY(2px); }
-    60% { transform: translateX(1px) translateY(-2px); }
-    70% { transform: translateX(-2px) translateY(0); }
-    80% { transform: translateX(2px) translateY(0); }
-    90% { transform: translateX(0) translateY(-2px); }
+    0%, 100% { 
+      transform: translateX(0) translateY(0) scale(1);
+    }
+    10% { 
+      transform: translateX(-3px) translateY(1px) scale(1.05);
+    }
+    20% { 
+      transform: translateX(3px) translateY(-1px) scale(1.08);
+    }
+    30% { 
+      transform: translateX(-3px) translateY(-1px) scale(1.05);
+    }
+    40% { 
+      transform: translateX(3px) translateY(1px) scale(1.1);
+    }
+    50% { 
+      transform: translateX(-2px) translateY(3px) scale(1.08);
+    }
+    60% { 
+      transform: translateX(2px) translateY(-3px) scale(1.05);
+    }
+    70% { 
+      transform: translateX(-3px) translateY(0) scale(1.06);
+    }
+    80% { 
+      transform: translateX(3px) translateY(0) scale(1.04);
+    }
+    90% { 
+      transform: translateX(0) translateY(-3px) scale(1.02);
+    }
   }
 
   @keyframes led-glow-pulse {
     0%, 100% { 
-      filter: brightness(1.5) drop-shadow(0 0 8px currentColor);
+      filter: brightness(1.5) drop-shadow(0 0 10px currentColor);
       transform: scale(1);
     }
     50% { 
-      filter: brightness(2) drop-shadow(0 0 15px currentColor);
-      transform: scale(1.05);
+      filter: brightness(2.5) drop-shadow(0 0 25px currentColor) drop-shadow(0 0 35px currentColor);
+      transform: scale(1.08);
     }
   }
 
   @keyframes sensor-scan {
     0%, 100% { 
-      box-shadow: 0 0 10px rgba(100, 200, 255, 0.3),
-                  inset 0 0 10px rgba(100, 200, 255, 0.1);
+      box-shadow: 0 0 15px rgba(100, 200, 255, 0.4),
+                  inset 0 0 12px rgba(100, 200, 255, 0.2),
+                  0 0 30px rgba(100, 200, 255, 0.2);
+      border-color: rgba(100, 200, 255, 0.5);
     }
     50% { 
-      box-shadow: 0 0 20px rgba(100, 200, 255, 0.6),
-                  inset 0 0 15px rgba(100, 200, 255, 0.3);
+      box-shadow: 0 0 30px rgba(100, 200, 255, 0.8),
+                  inset 0 0 20px rgba(100, 200, 255, 0.5),
+                  0 0 50px rgba(100, 200, 255, 0.4);
+      border-color: rgba(100, 200, 255, 1);
     }
   }
 
   @keyframes button-press {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    100% { transform: translateY(0); }
+    0%, 100% { 
+      transform: translateY(0) scale(1);
+      box-shadow: 0 4px 0 #922b21, 0 4px 8px rgba(0,0,0,0.3);
+    }
+    50% { 
+      transform: translateY(3px) scale(0.98);
+      box-shadow: 0 1px 0 #922b21, 0 1px 4px rgba(0,0,0,0.3), inset 0 2px 4px rgba(0,0,0,0.4);
+    }
+  }
+
+  @keyframes wire-flow {
+    0% {
+      stroke-dashoffset: 20;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
   }
 
   .motor-active {
-    animation: motor-spin 1s linear infinite;
+    animation: motor-spin 0.4s linear infinite;
   }
 
   .buzzer-active {
-    animation: buzzer-vibrate 0.1s linear infinite;
+    animation: buzzer-vibrate 0.08s linear infinite;
   }
 
   .led-glow-active {
-    animation: led-glow-pulse 1s ease-in-out infinite;
+    animation: led-glow-pulse 0.8s ease-in-out infinite;
   }
 
   .sensor-active {
-    animation: sensor-scan 2s ease-in-out infinite;
+    animation: sensor-scan 1.5s ease-in-out infinite;
   }
 
   .button-active {
-    animation: button-press 0.3s ease-out;
+    animation: button-press 0.4s ease-in-out infinite;
+  }
+
+  .wire-animated {
+    stroke-dasharray: 5, 5;
+    animation: wire-flow 0.5s linear infinite;
   }
 
   /* LED glow effects */
