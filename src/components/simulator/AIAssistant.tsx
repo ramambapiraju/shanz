@@ -49,6 +49,12 @@ export const AIAssistant = ({ code, circuit }: AIAssistantProps) => {
   const quickActions = [
     {
       type: "suggest" as const,
+      label: "💡 Get Project Ideas",
+      icon: Lightbulb,
+      prompt: "Give me 5 creative Arduino project ideas based on my skill level and available components. Include difficulty level and learning benefits for each.",
+    },
+    {
+      type: "suggest" as const,
       label: "📋 15 DIY Projects",
       icon: Lightbulb,
       prompt: "Show me all 15 DIY electronics projects (10 basic + 5 advanced) with detailed circuit diagrams and component lists",

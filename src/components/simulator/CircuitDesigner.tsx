@@ -332,7 +332,8 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                       return (
                         <Draggable
                           key={component.id}
-                          position={{ x: component.x, y: component.y }}
+                          defaultPosition={{ x: component.x, y: component.y }}
+                          position={undefined}
                           onDrag={updateXarrow}
                           onStop={(e, data) => {
                             const updatedCircuit = circuit.map(c =>

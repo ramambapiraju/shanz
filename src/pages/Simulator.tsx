@@ -6,6 +6,7 @@ import { AIAssistant } from "@/components/simulator/AIAssistant";
 import { SerialMonitor } from "@/components/simulator/SerialMonitor";
 import { SimulatorControls } from "@/components/simulator/SimulatorControls";
 import { InteractiveControls } from "@/components/simulator/InteractiveControls";
+import { LiveSuggestions } from "@/components/simulator/LiveSuggestions";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +27,11 @@ export default function Simulator() {
   const [componentStates, setComponentStates] = useState<Map<string, any>>(new Map());
   const [interactiveValues, setInteractiveValues] = useState<Map<string, number>>(new Map());
   const simulationInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -505,6 +511,11 @@ export default function Simulator() {
           </div>
 
           <div className="space-y-4">
+            <LiveSuggestions 
+              circuit={circuit}
+              isRunning={isRunning}
+            />
+            
             <InteractiveControls 
               circuit={circuit}
               onControlChange={(componentId, value) => {
