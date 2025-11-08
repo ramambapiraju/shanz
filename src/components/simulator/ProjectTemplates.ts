@@ -1,4 +1,4 @@
-// Pre-built circuit templates for all 10 DIY projects
+// Pre-built circuit templates for all 15 DIY projects (10 Basic + 5 Mid-Level)
 
 export const PROJECT_CODES = {
   blink: `// 1. Blinking LED
@@ -88,44 +88,54 @@ void loop() {
 #define BUZZER_PIN 8
 
 void setup() {
-  pinMode(BUTTON_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   pinMode(BUZZER_PIN, OUTPUT);
   Serial.begin(9600);
   Serial.println("🔊 Alarm System Ready");
+  Serial.println("Press button to trigger alarm");
 }
 
 void loop() {
-  if (digitalRead(BUTTON_PIN) == HIGH) {
+  int buttonState = digitalRead(BUTTON_PIN);
+  
+  if (buttonState == LOW) {  // Active LOW with pullup
     Serial.println("🚨 ALARM ACTIVATED!");
-    tone(BUZZER_PIN, 1000);
-    delay(500);
-    tone(BUZZER_PIN, 1500);
-    delay(500);
+    for(int i = 0; i < 3; i++) {
+      tone(BUZZER_PIN, 1000);
+      delay(300);
+      tone(BUZZER_PIN, 1500);
+      delay(300);
+    }
     noTone(BUZZER_PIN);
-  } else {
-    Serial.println("System armed...");
-    delay(1000);
   }
+  delay(100);
 }`,
 
-  temp: `// 5. Temperature Monitor
+  temperature: `// 5. Temperature Monitor
 #define DHT_PIN 2
 
 void setup() {
+  pinMode(DHT_PIN, INPUT);
   Serial.begin(9600);
   Serial.println("🌡️ Temperature Monitor");
+  Serial.println("DHT11 Sensor Active");
   Serial.println("===================");
 }
 
 void loop() {
+  // Simulate DHT11 readings (in real project, use DHT library)
   float temperature = 22.5 + random(-50, 50) / 10.0;
   float humidity = 55.0 + random(-100, 100) / 10.0;
   
-  Serial.print("Temperature: ");
-  Serial.print(temperature);
-  Serial.print("°C | Humidity: ");
-  Serial.print(humidity);
+  Serial.print("🌡️ Temp: ");
+  Serial.print(temperature, 1);
+  Serial.print("°C | 💧 Humidity: ");
+  Serial.print(humidity, 0);
   Serial.println("%");
+  
+  if(temperature > 25) {
+    Serial.println("⚠️ High temperature!");
+  }
   
   delay(2000);
 }`,
@@ -191,29 +201,32 @@ void loop() {
 #define LED_PIN 13
 
 int counter = 0;
-bool lastState = LOW;
+int lastState = HIGH;  // Start HIGH for pullup
 
 void setup() {
-  pinMode(BUTTON_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(9600);
   Serial.println("🔘 Button Counter Ready");
+  Serial.println("Press button to count");
+  Serial.println("Count: 0");
 }
 
 void loop() {
-  bool currentState = digitalRead(BUTTON_PIN);
+  int currentState = digitalRead(BUTTON_PIN);
   
-  if (currentState == HIGH && lastState == LOW) {
+  if (currentState == LOW && lastState == HIGH) {  // Button pressed (active LOW)
+    delay(50);  // Debounce
     counter++;
     digitalWrite(LED_PIN, HIGH);
-    Serial.print("Button Press #");
+    Serial.print("🔘 Button Press #");
     Serial.println(counter);
-    delay(100);
+    delay(200);
     digitalWrite(LED_PIN, LOW);
   }
   
   lastState = currentState;
-  delay(50);
+  delay(10);
 }`,
 
   distance: `// 9. Distance Alert System
@@ -441,63 +454,64 @@ void loop() {
 
   securitySystem: `// 14. Security Alarm System (Mid-Level)
 #define PIR_PIN 7
-#define DOOR_SENSOR_PIN 3
+#define BUTTON_ARM 2
 #define BUZZER_PIN 8
 #define LED_ALARM 13
-#define BUTTON_ARM 2
 
 bool systemArmed = true;
 bool alarmTriggered = false;
-unsigned long alarmTime = 0;
+int lastButtonState = HIGH;
 
 void setup() {
   pinMode(PIR_PIN, INPUT);
-  pinMode(DOOR_SENSOR_PIN, INPUT);
-  pinMode(BUTTON_ARM, INPUT);
+  pinMode(BUTTON_ARM, INPUT_PULLUP);
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(LED_ALARM, OUTPUT);
   Serial.begin(9600);
   Serial.println("🔒 Security System v2.0");
-  Serial.println("System: ARMED");
   Serial.println("========================");
+  Serial.println("System: ARMED ✓");
+  Serial.println("Press button to toggle arm/disarm");
 }
 
 void loop() {
   bool motion = digitalRead(PIR_PIN);
-  bool doorOpen = digitalRead(DOOR_SENSOR_PIN);
-  bool armButton = digitalRead(BUTTON_ARM);
+  int buttonState = digitalRead(BUTTON_ARM);
   
-  if (armButton) {
+  // Button press detection (active LOW with pullup)
+  if (buttonState == LOW && lastButtonState == HIGH) {
+    delay(50);  // Debounce
     systemArmed = !systemArmed;
     alarmTriggered = false;
+    noTone(BUZZER_PIN);
+    digitalWrite(LED_ALARM, LOW);
+    
+    Serial.println("========================");
     Serial.print("System: ");
     Serial.println(systemArmed ? "🔒 ARMED" : "🔓 DISARMED");
-    delay(500);
+    Serial.println("========================");
+    delay(300);
   }
+  lastButtonState = buttonState;
   
-  if (systemArmed && (motion || doorOpen)) {
+  // Alarm logic
+  if (systemArmed && motion) {
     alarmTriggered = true;
-    alarmTime = millis();
   }
   
-  if (alarmTriggered) {
+  if (alarmTriggered && systemArmed) {
     digitalWrite(LED_ALARM, HIGH);
-    tone(BUZZER_PIN, 2000 + (millis() % 1000));
-    Serial.print("🚨 ALARM! ");
-    if (motion) Serial.print("Motion detected! ");
-    if (doorOpen) Serial.print("Door opened! ");
-    Serial.println();
+    tone(BUZZER_PIN, 2000 + (millis() % 500));
+    Serial.println("🚨 ALARM! Motion detected!");
   } else {
     digitalWrite(LED_ALARM, LOW);
     noTone(BUZZER_PIN);
     if (systemArmed) {
-      Serial.println("✓ System armed - Monitoring...");
-    } else {
-      Serial.println("System disarmed");
+      Serial.println("🔒 System armed - Monitoring...");
     }
   }
   
-  delay(1000);
+  delay(800);
 }`,
 
   musicPlayer: `// 15. Music Player with Buzzer (Mid-Level)
@@ -507,59 +521,76 @@ void loop() {
 #define LED_PIN 13
 
 int currentSong = 0;
-bool isPlaying = false;
+bool isPlaying = true;  // Auto-start
+int noteIndex = 0;
+unsigned long lastNoteTime = 0;
+int lastPlayState = HIGH;
+int lastNextState = HIGH;
 
-int melody1[] = {262, 294, 330, 349, 392, 440, 494, 523};
-int melody2[] = {523, 494, 440, 392, 349, 330, 294, 262};
-int tempo[] = {200, 200, 200, 200, 200, 200, 200, 400};
+// Two simple melodies
+int melody1[] = {262, 294, 330, 349, 392, 440, 494, 523};  // C Major scale
+int melody2[] = {523, 494, 440, 392, 349, 330, 294, 262};  // Descending
+int tempo = 500;  // Note duration
 
 void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(BUTTON_PLAY, INPUT);
-  pinMode(BUTTON_NEXT, INPUT);
+  pinMode(BUTTON_PLAY, INPUT_PULLUP);
+  pinMode(BUTTON_NEXT, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(9600);
   Serial.println("🎵 Music Player System");
-  Serial.println("Play/Pause = Button 1");
-  Serial.println("Next Song = Button 2");
   Serial.println("=======================");
+  Serial.println("Button 1: Play/Pause");
+  Serial.println("Button 2: Next Song");
+  Serial.println("▶️ Auto-playing Song 1...");
 }
 
 void loop() {
-  if (digitalRead(BUTTON_PLAY)) {
+  int playState = digitalRead(BUTTON_PLAY);
+  int nextState = digitalRead(BUTTON_NEXT);
+  
+  // Play/Pause toggle
+  if (playState == LOW && lastPlayState == HIGH) {
+    delay(50);
     isPlaying = !isPlaying;
-    Serial.println(isPlaying ? "▶️ Playing" : "⏸️ Paused");
-    delay(300);
+    Serial.println(isPlaying ? "▶️ Resumed" : "⏸️ Paused");
+    if (!isPlaying) {
+      noTone(BUZZER_PIN);
+      digitalWrite(LED_PIN, LOW);
+    }
+    delay(200);
   }
+  lastPlayState = playState;
   
-  if (digitalRead(BUTTON_NEXT)) {
+  // Next song
+  if (nextState == LOW && lastNextState == HIGH) {
+    delay(50);
     currentSong = (currentSong + 1) % 2;
-    Serial.print("Next song: ");
+    noteIndex = 0;
+    Serial.print("⏭️ Switched to Song ");
     Serial.println(currentSong + 1);
-    delay(300);
+    delay(200);
   }
+  lastNextState = nextState;
   
-  if (isPlaying) {
-    digitalWrite(LED_PIN, HIGH);
+  // Play music
+  if (isPlaying && (millis() - lastNoteTime >= tempo)) {
     int* currentMelody = (currentSong == 0) ? melody1 : melody2;
     
-    for (int i = 0; i < 8; i++) {
-      Serial.print("♪ Note ");
-      Serial.print(i + 1);
-      Serial.print(" - ");
-      Serial.print(currentMelody[i]);
-      Serial.println(" Hz");
-      
-      tone(BUZZER_PIN, currentMelody[i], tempo[i]);
-      delay(tempo[i] * 1.3);
-      
-      if (!isPlaying) break;
-    }
-  } else {
-    digitalWrite(LED_PIN, LOW);
-    noTone(BUZZER_PIN);
-    delay(100);
+    digitalWrite(LED_PIN, HIGH);
+    tone(BUZZER_PIN, currentMelody[noteIndex]);
+    
+    Serial.print("♪ Note ");
+    Serial.print(noteIndex + 1);
+    Serial.print("/8 - ");
+    Serial.print(currentMelody[noteIndex]);
+    Serial.println(" Hz");
+    
+    noteIndex = (noteIndex + 1) % 8;
+    lastNoteTime = millis();
   }
+  
+  delay(10);
 }`,
 };
 
@@ -629,7 +660,7 @@ export const buildProjectCircuit = (projectId: string) => {
         { id: 'resistor-1', type: 'resistor-10k', name: '10KΩ', x: baseX + 400, y: baseY + 50, color: '#9E9E9E', pins: ['1', '2'], connections: [] }
       ];
       
-    case 'temp':
+    case 'temperature':
       return [
         { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', '5V', 'GND'], connections: [
           { from: 'arduino-1-5V', to: 'dht11-1-VCC' },

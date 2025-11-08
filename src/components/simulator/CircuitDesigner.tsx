@@ -73,7 +73,7 @@ const PROJECT_TEMPLATES = [
   { id: "traffic", name: "2. Traffic Light 🚦", description: "3 LEDs in sequence" },
   { id: "nightlight", name: "3. Night Light 🌙", description: "Auto light with LDR" },
   { id: "alarm", name: "4. Buzzer Alarm 🔊", description: "Sound alert system" },
-  { id: "temp", name: "5. Temperature Monitor 🌡️", description: "Read DHT11 sensor" },
+  { id: "temperature", name: "5. Temperature Monitor 🌡️", description: "Read DHT11 sensor" },
   { id: "motion", name: "6. Motion Detector 👋", description: "PIR sensor light" },
   { id: "rgb", name: "7. RGB Color Mixer 🌈", description: "Mix light colors" },
   { id: "counter", name: "8. Button Counter 🔘", description: "Count presses" },
