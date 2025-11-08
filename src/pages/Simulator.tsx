@@ -7,12 +7,14 @@ import { SerialMonitor } from "@/components/simulator/SerialMonitor";
 import { SimulatorControls } from "@/components/simulator/SimulatorControls";
 import { InteractiveControls } from "@/components/simulator/InteractiveControls";
 import { LiveSuggestions } from "@/components/simulator/LiveSuggestions";
+import { CircuitValidation } from "@/components/simulator/CircuitValidation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { PROJECT_CODES } from "@/components/simulator/ProjectTemplates";
 import { playBuzzerSound, stopBuzzerSound } from "@/utils/audioUtils";
+import { validateCircuit, ValidationError } from "@/utils/circuitValidator";
 
 export default function Simulator() {
   const navigate = useNavigate();
@@ -26,12 +28,19 @@ export default function Simulator() {
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
   const [componentStates, setComponentStates] = useState<Map<string, any>>(new Map());
   const [interactiveValues, setInteractiveValues] = useState<Map<string, number>>(new Map());
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const simulationInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // Validate circuit whenever it changes
+  useEffect(() => {
+    const errors = validateCircuit(circuit);
+    setValidationErrors(errors);
+  }, [circuit]);
 
   useEffect(() => {
     return () => {
@@ -60,6 +69,28 @@ export default function Simulator() {
         variant: "destructive"
       });
       return;
+    }
+
+    // Check for critical validation errors
+    const errors = validateCircuit(circuit);
+    const criticalErrors = errors.filter(e => e.severity === 'critical');
+    
+    if (criticalErrors.length > 0) {
+      toast({
+        title: "❌ Cannot Run Simulation",
+        description: `Fix ${criticalErrors.length} critical error(s) first. Check the Circuit Validation panel.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Show warning for non-critical errors
+    const otherErrors = errors.filter(e => e.severity !== 'critical');
+    if (otherErrors.length > 0) {
+      toast({
+        title: "⚠️ Running with Warnings",
+        description: `${otherErrors.length} warning(s) detected. Check Circuit Validation for details.`,
+      });
     }
 
     setIsRunning(true);
@@ -511,6 +542,11 @@ export default function Simulator() {
           </div>
 
           <div className="space-y-4">
+            <CircuitValidation 
+              errors={validationErrors}
+              isRunning={isRunning}
+            />
+            
             <LiveSuggestions 
               circuit={circuit}
               isRunning={isRunning}
