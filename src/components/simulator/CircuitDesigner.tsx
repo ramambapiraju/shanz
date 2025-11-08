@@ -310,13 +310,13 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                         >
                           <div
                             id={component.id}
-                            className={`absolute component-3d bg-gradient-to-br from-card to-card/90 border-2 rounded-xl p-3 cursor-move transition-all duration-300 ${
+                            className={`absolute component-3d bg-background border-2 rounded-xl p-3 cursor-move transition-all duration-300 ${
                               isRunning && isActive ? 'scale-110 shadow-2xl' : 'hover:scale-105 shadow-lg'
                             } ${isLED && isActive ? 'animate-pulse' : ''}`}
                             style={{ 
-                              borderColor: isActive ? component.color : `${component.color}80`,
-                              backgroundColor: isLED && isActive ? `${component.color}20` : undefined,
-                              boxShadow: isLED && isActive ? `0 0 30px ${component.color}80, 0 0 60px ${component.color}40` : undefined
+                              borderColor: isActive ? component.color : component.color,
+                              backgroundColor: isLED && isActive ? `${component.color}20` : '#ffffff',
+                              boxShadow: isLED && isActive ? `0 0 30px ${component.color}80, 0 0 60px ${component.color}40` : '0 4px 12px rgba(0,0,0,0.15)'
                             }}
                           >
                             <div className="flex items-center gap-2 mb-2 border-b pb-2">
