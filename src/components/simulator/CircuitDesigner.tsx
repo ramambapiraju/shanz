@@ -312,25 +312,82 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                         >
                           <div
                             id={component.id}
-                            className={`absolute component-3d bg-background border-2 rounded-xl p-3 cursor-move transition-all duration-300 ${
-                              isRunning && isActive ? 'scale-110 shadow-2xl' : 'hover:scale-105 shadow-lg'
-                            } ${isLED && isActive ? 'animate-pulse' : ''}`}
+                            className={`absolute cursor-move transition-all duration-300 ${
+                              isRunning && isActive ? 'scale-110' : 'hover:scale-105'
+                            } ${isLED && isActive ? 'animate-pulse' : ''} ${
+                              component.type === 'arduino' ? 'arduino-board' :
+                              component.type === 'breadboard' ? 'breadboard-surface' :
+                              component.type.includes('led') ? '' :
+                              component.type.includes('resistor') ? 'resistor-body' :
+                              component.type === 'button' || component.type === 'switch' ? 'button-3d' :
+                              component.type.includes('battery') ? 'battery-casing' :
+                              component.type === 'dc-motor' || component.type === 'servo' ? 'motor-housing' :
+                              component.type === 'dht11' || component.type === 'ultrasonic' || component.type === 'pir-sensor' || component.type === 'ldr' ? 'sensor-housing' :
+                              'component-3d'
+                            } rounded-xl p-3`}
                             style={{ 
-                              borderColor: isActive ? component.color : component.color,
-                              backgroundColor: isLED && isActive ? `${component.color}20` : '#ffffff',
-                              boxShadow: isLED && isActive ? `0 0 30px ${component.color}80, 0 0 60px ${component.color}40` : '0 4px 12px rgba(0,0,0,0.15)'
+                              backgroundColor: isLED && isActive ? `${component.color}` : undefined,
+                              boxShadow: isLED && isActive ? `0 0 30px ${component.color}, 0 0 60px ${component.color}80, 0 8px 20px rgba(0,0,0,0.3)` : undefined,
+                              border: component.type === 'breadboard' ? '1px solid #ccc' : undefined
                             }}
                           >
-                            <div className="flex items-center gap-2 mb-2 border-b pb-2">
-                              <Icon 
-                                className="h-5 w-5" 
-                                style={{ 
-                                  color: component.color,
-                                  filter: isLED && isActive ? 'brightness(1.5)' : undefined
-                                }} 
-                              />
-                              <span className="text-xs font-semibold">{component.name}</span>
-                              {isActive && <Badge variant="secondary" className="text-[8px] px-1 py-0">ON</Badge>}
+                            <div className="flex items-center gap-2 mb-2 pb-2 border-b" style={{
+                              borderColor: component.type === 'arduino' ? 'rgba(255,255,255,0.2)' :
+                                          component.type.includes('battery') || component.type.includes('motor') || 
+                                          (component.type.includes('sensor') || component.type === 'ldr' || component.type === 'dht11') ? 
+                                          'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'
+                            }}>
+                              {isLED && isActive ? (
+                                <div className="relative h-5 w-5">
+                                  <div 
+                                    className="absolute inset-0 rounded-full led-dome"
+                                    style={{ 
+                                      backgroundColor: component.color,
+                                      filter: 'brightness(1.5)',
+                                      boxShadow: `0 0 10px ${component.color}, inset 0 -2px 4px rgba(0,0,0,0.3)`
+                                    }}
+                                  />
+                                  <Icon 
+                                    className="absolute inset-0 h-5 w-5" 
+                                    style={{ 
+                                      color: '#fff',
+                                      filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.8))'
+                                    }} 
+                                  />
+                                </div>
+                              ) : (
+                                <Icon 
+                                  className="h-5 w-5" 
+                                  style={{ 
+                                    color: component.type === 'arduino' || component.type.includes('battery') || 
+                                           component.type.includes('motor') || component.type.includes('sensor') || 
+                                           component.type === 'ldr' || component.type === 'dht11' || component.type === 'pir-sensor' ?
+                                           'rgba(255,255,255,0.9)' : component.color,
+                                    filter: component.type.includes('button') || component.type === 'switch' ? 'brightness(1.2)' : undefined
+                                  }} 
+                                />
+                              )}
+                              <span 
+                                className="text-xs font-semibold"
+                                style={{
+                                  color: component.type === 'arduino' || component.type.includes('battery') || 
+                                         component.type.includes('motor') || component.type.includes('sensor') || 
+                                         component.type === 'ldr' || component.type === 'dht11' || component.type === 'pir-sensor' ?
+                                         'rgba(255,255,255,0.95)' : 'inherit'
+                                }}
+                              >
+                                {component.name}
+                              </span>
+                              {isActive && (
+                                <Badge 
+                                  variant={component.type === 'arduino' || component.type.includes('battery') || 
+                                          component.type.includes('motor') || component.type.includes('sensor') || 
+                                          component.type === 'ldr' || component.type === 'dht11' ? "secondary" : "default"} 
+                                  className="text-[8px] px-1 py-0 font-bold"
+                                >
+                                  ON
+                                </Badge>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -341,7 +398,12 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                 }}
                                 disabled={isRunning}
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-3 w-3" style={{
+                                  color: component.type === 'arduino' || component.type.includes('battery') || 
+                                         component.type.includes('motor') || component.type.includes('sensor') || 
+                                         component.type === 'ldr' || component.type === 'dht11' ?
+                                         'rgba(255,255,255,0.8)' : undefined
+                                }} />
                               </Button>
                             </div>
                             <div className="grid grid-cols-2 gap-1">
