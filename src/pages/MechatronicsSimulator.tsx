@@ -11,9 +11,11 @@ import ProjectSelector from "@/components/mechatronics/ProjectSelector";
 import ValidationPanel from "@/components/mechatronics/ValidationPanel";
 import TelemetryPanel from "@/components/mechatronics/TelemetryPanel";
 import ConnectionManager from "@/components/mechatronics/ConnectionManager";
+import { CodePanel } from "@/components/mechatronics/CodePanel";
 import { MechanicalComponent, createComponent, ComponentType } from "@/components/mechatronics/MechanicalComponent";
 import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3D";
 import { validateProject } from "@/utils/projectValidator";
+import { getProjectCode } from "@/data/projectCode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MechatronicsSimulator = () => {
@@ -22,6 +24,8 @@ const MechatronicsSimulator = () => {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [simulationTime, setSimulationTime] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState<string>("rc_car_basic");
+  const [projectCode, setProjectCode] = useState<string>(getProjectCode("rc_car_basic"));
 
   // Memoize validation to prevent unnecessary recalculations
   const validationErrors = useMemo(() => validateProject(components), [components]);
@@ -55,7 +59,9 @@ const MechatronicsSimulator = () => {
     const projectComponents = loadProjectTemplate(templateId);
     setComponents(projectComponents);
     setSelectedComponent(null);
-    toast.success("Project loaded successfully - validated with 0 errors!");
+    setCurrentProjectId(templateId);
+    setProjectCode(getProjectCode(templateId));
+    toast.success("Project loaded successfully!");
   };
 
   const selectedComp = components.find(c => c.id === selectedComponent) || null;
@@ -68,7 +74,7 @@ const MechatronicsSimulator = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
-          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 2)</h1>
+          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 2 - Complete)</h1>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <Save className="h-4 w-4 mr-2" />
@@ -86,11 +92,12 @@ const MechatronicsSimulator = () => {
         {/* Left Panel */}
         <div className="col-span-3 space-y-4 overflow-auto max-h-[calc(100vh-8rem)]">
           <Tabs defaultValue="library">
-            <TabsList className="w-full grid grid-cols-4">
+            <TabsList className="w-full grid grid-cols-5">
               <TabsTrigger value="library">Library</TabsTrigger>
               <TabsTrigger value="projects">Projects</TabsTrigger>
               <TabsTrigger value="validate">Validate</TabsTrigger>
               <TabsTrigger value="connect">Connect</TabsTrigger>
+              <TabsTrigger value="code">Code</TabsTrigger>
             </TabsList>
             <TabsContent value="library">
               <ComponentLibrary3D onAddComponent={handleAddComponent} />
@@ -106,6 +113,14 @@ const MechatronicsSimulator = () => {
                 components={components}
                 selectedComponent={selectedComponent}
                 onUpdateComponent={handleUpdateComponent}
+              />
+            </TabsContent>
+            <TabsContent value="code">
+              <CodePanel
+                projectId={currentProjectId}
+                code={projectCode}
+                onCodeChange={setProjectCode}
+                readOnly={false}
               />
             </TabsContent>
           </Tabs>

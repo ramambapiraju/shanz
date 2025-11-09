@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, RotateCcw, Settings } from "lucide-react";
+import { Play, Pause, RotateCcw, Settings, Keyboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MechanicalComponent } from "./MechanicalComponent";
 import { 
@@ -19,6 +19,8 @@ import {
 } from "@/utils/physicsEngine";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { useKeyboardControls } from "@/hooks/useKeyboardControls";
+import { Badge } from "@/components/ui/badge";
 
 interface SimulationEngineProps {
   components: MechanicalComponent[];
@@ -34,6 +36,8 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
   const [isRunning, setIsRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [throttle, setThrottle] = useState(0);
+  const [steering, setSteering] = useState(0);
+  const keyboardControls = useKeyboardControls(isRunning);
   const [rigidBody, setRigidBody] = useState<RigidBody>({
     mass: 2, // kg
     position: { x: 0, y: 0, z: 0 },
@@ -52,6 +56,37 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     internalResistance: 0.01,
     dischargeCurrent: 0,
   });
+
+  // Handle keyboard controls
+  useEffect(() => {
+    if (!isRunning) return;
+    
+    // Update throttle based on keyboard
+    if (keyboardControls.throttleUp) {
+      setThrottle((prev) => Math.min(1, prev + 0.02));
+    }
+    if (keyboardControls.throttleDown) {
+      setThrottle((prev) => Math.max(0, prev - 0.02));
+    }
+    
+    // Update steering based on keyboard
+    if (keyboardControls.left) {
+      setSteering((prev) => Math.max(-1, prev - 0.05));
+    } else if (keyboardControls.right) {
+      setSteering((prev) => Math.min(1, prev + 0.05));
+    } else {
+      // Return to center
+      setSteering((prev) => prev * 0.9);
+    }
+    
+    // Forward/backward for direct throttle control
+    if (keyboardControls.forward) {
+      setThrottle((prev) => Math.min(1, prev + 0.01));
+    }
+    if (keyboardControls.backward) {
+      setThrottle((prev) => Math.max(0, prev - 0.01));
+    }
+  }, [isRunning, keyboardControls]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -212,11 +247,57 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
           </Button>
         </div>
 
+        {isRunning && (
+          <div className="bg-muted p-3 rounded-lg space-y-1">
+            <div className="flex items-center gap-2 mb-2">
+              <Keyboard className="h-4 w-4" />
+              <span className="text-sm font-medium">Keyboard Controls</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+              <div>
+                <Badge variant="outline" className="mr-1">↑/W</Badge>
+                Forward
+              </div>
+              <div>
+                <Badge variant="outline" className="mr-1">↓/S</Badge>
+                Backward
+              </div>
+              <div>
+                <Badge variant="outline" className="mr-1">←/A</Badge>
+                Left
+              </div>
+              <div>
+                <Badge variant="outline" className="mr-1">→/D</Badge>
+                Right
+              </div>
+              <div>
+                <Badge variant="outline" className="mr-1">+</Badge>
+                Throttle Up
+              </div>
+              <div>
+                <Badge variant="outline" className="mr-1">-</Badge>
+                Throttle Down
+              </div>
+            </div>
+          </div>
+        )}
+
         <div>
           <Label>Throttle: {(throttle * 100).toFixed(0)}%</Label>
           <Slider
             value={[throttle * 100]}
             onValueChange={(v) => setThrottle(v[0] / 100)}
+            max={100}
+            step={1}
+            disabled={!isRunning}
+          />
+        </div>
+
+        <div>
+          <Label>Steering: {(steering * 100).toFixed(0)}%</Label>
+          <Slider
+            value={[(steering + 1) * 50]}
+            onValueChange={(v) => setSteering((v[0] / 50) - 1)}
             max={100}
             step={1}
             disabled={!isRunning}

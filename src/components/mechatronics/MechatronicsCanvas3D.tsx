@@ -13,11 +13,13 @@ interface ComponentMeshProps {
 const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, onClick }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(() => {
-    if (meshRef.current && component.type === "propeller" && groupRef.current) {
-      // Animate propellers
-      groupRef.current.rotation.y += 0.1;
+  
+  useFrame((state) => {
+    if (component.type === "propeller" && groupRef.current) {
+      groupRef.current.rotation.y += 0.15;
+    }
+    if (component.type === "wheel" && groupRef.current) {
+      groupRef.current.rotation.x += 0.05;
     }
   });
 
@@ -131,161 +133,364 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
     }
   };
 
-  const getGeometry = () => {
+  const getRealisticGeometry = () => {
     switch (component.type) {
       case "dc_motor":
-      case "servo_motor":
       case "stepper_motor":
         return (
-          <group>
+          <group ref={groupRef}>
             <mesh castShadow receiveShadow>
-              <cylinderGeometry args={[0.5, 0.5, 1, 32]} />
+              <cylinderGeometry args={[0.18, 0.18, 0.4, 32]} />
               {getMaterial()}
             </mesh>
-            {/* Motor shaft */}
-            <mesh position={[0, 0.6, 0]} castShadow receiveShadow>
-              <cylinderGeometry args={[0.15, 0.15, 0.4, 16]} />
-              <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.1} />
+            <mesh position={[0, 0.25, 0]} castShadow>
+              <cylinderGeometry args={[0.04, 0.04, 0.15, 16]} />
+              <meshStandardMaterial color="#c0c0c0" metalness={0.95} roughness={0.1} />
             </mesh>
-          </group>
-        );
-      case "wheel":
-        return (
-          <group>
-            <mesh rotation={getRotation("wheel")} castShadow receiveShadow>
-              <cylinderGeometry args={[component.scale.x, component.scale.x, component.scale.z, 32]} />
-              {getMaterial()}
-            </mesh>
-            {/* Tire tread */}
-            <mesh rotation={getRotation("wheel")} position={[0, 0, 0]}>
-              <torusGeometry args={[component.scale.x * 0.9, 0.1, 16, 32]} />
-              <meshStandardMaterial color="#1f2937" roughness={0.95} />
-            </mesh>
-          </group>
-        );
-      case "propeller":
-        return (
-          <group>
-            {/* Main blade */}
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[2, 0.08, 0.3]} />
-              {getMaterial()}
-            </mesh>
-            {/* Cross blade */}
-            <mesh rotation={[0, Math.PI / 2, 0]} castShadow receiveShadow>
-              <boxGeometry args={[2, 0.08, 0.3]} />
-              {getMaterial()}
-            </mesh>
-            {/* Hub */}
-            <mesh castShadow receiveShadow>
-              <cylinderGeometry args={[0.2, 0.2, 0.15, 16]} />
-              <meshStandardMaterial color="#64748b" metalness={0.8} roughness={0.2} />
-            </mesh>
-          </group>
-        );
-      case "chassis":
-      case "frame":
-        return (
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[component.scale.x, component.scale.y, component.scale.z]} />
-            {getMaterial()}
-          </mesh>
-        );
-      case "battery":
-        return (
-          <group>
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[component.scale.x, component.scale.y, component.scale.z]} />
-              {getMaterial()}
-            </mesh>
-            {/* Battery terminals */}
-            <mesh position={[component.scale.x * 0.4, component.scale.y * 0.6, 0]} castShadow>
-              <cylinderGeometry args={[0.1, 0.1, 0.15, 16]} />
-              <meshStandardMaterial color="#ef4444" metalness={0.8} roughness={0.2} />
-            </mesh>
-            <mesh position={[component.scale.x * 0.2, component.scale.y * 0.6, 0]} castShadow>
-              <cylinderGeometry args={[0.1, 0.1, 0.15, 16]} />
-              <meshStandardMaterial color="#1f2937" metalness={0.8} roughness={0.2} />
-            </mesh>
-          </group>
-        );
-      case "esc":
-        return (
-          <group>
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[component.scale.x, component.scale.y, component.scale.z]} />
-              {getMaterial()}
-            </mesh>
-            {/* Heat sink fins */}
-            {[0, 1, 2].map((i) => (
+            {[0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2].map((angle, i) => (
               <mesh 
-                key={i} 
-                position={[0, component.scale.y * 0.6, (i - 1) * 0.2]} 
-                castShadow
+                key={i}
+                position={[Math.cos(angle) * 0.15, -0.15, Math.sin(angle) * 0.15]}
               >
-                <boxGeometry args={[component.scale.x * 0.8, 0.05, 0.15]} />
-                <meshStandardMaterial color="#475569" metalness={0.7} roughness={0.3} />
+                <cylinderGeometry args={[0.02, 0.02, 0.05, 8]} />
+                <meshStandardMaterial color="#1a1a1a" />
+              </mesh>
+            ))}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <mesh 
+                key={`fin-${i}`}
+                position={[0, 0.05 - i * 0.05, 0]}
+                rotation={[0, 0, 0]}
+              >
+                <torusGeometry args={[0.19, 0.01, 8, 32]} />
+                <meshStandardMaterial color={component.color} metalness={0.8} roughness={0.3} />
               </mesh>
             ))}
           </group>
         );
-      case "gear":
+      
+      case "servo_motor":
         return (
-          <group>
-            <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-              <cylinderGeometry args={[component.scale.x, component.scale.x, component.scale.y, 24]} />
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.35, 0.2, 0.3]} />
               {getMaterial()}
             </mesh>
-            {/* Gear teeth */}
-            {Array.from({ length: 20 }).map((_, i) => {
-              const angle = (i / 20) * Math.PI * 2;
+            <mesh position={[0, 0.15, 0]} castShadow>
+              <cylinderGeometry args={[0.08, 0.08, 0.05, 16]} />
+              <meshStandardMaterial color="#ffffff" metalness={0.3} roughness={0.7} />
+            </mesh>
+            <mesh position={[0, 0.18, 0]} castShadow>
+              <boxGeometry args={[0.15, 0.02, 0.03]} />
+              <meshStandardMaterial color="#ffffff" metalness={0.3} roughness={0.7} />
+            </mesh>
+            {[-1, 1].map((side, i) => (
+              <mesh key={i} position={[side * 0.2, 0, 0]}>
+                <boxGeometry args={[0.05, 0.15, 0.3]} />
+                <meshStandardMaterial color={component.color} metalness={0.6} roughness={0.4} />
+              </mesh>
+            ))}
+          </group>
+        );
+      
+      case "wheel":
+        return (
+          <group ref={groupRef} rotation={[0, 0, Math.PI / 2]}>
+            <mesh castShadow receiveShadow>
+              <cylinderGeometry args={[0.22, 0.22, 0.18, 32]} />
+              <meshStandardMaterial color="#1a1a1a" roughness={0.95} />
+            </mesh>
+            <mesh position={[0, 0, 0]}>
+              <cylinderGeometry args={[0.15, 0.15, 0.19, 32]} />
+              <meshStandardMaterial color="#808080" metalness={0.9} roughness={0.2} />
+            </mesh>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <mesh 
+                key={i}
+                position={[
+                  Math.cos((i / 6) * Math.PI * 2) * 0.08,
+                  0,
+                  Math.sin((i / 6) * Math.PI * 2) * 0.08
+                ]}
+                rotation={[0, (i / 6) * Math.PI * 2, Math.PI / 2]}
+              >
+                <boxGeometry args={[0.02, 0.16, 0.19]} />
+                <meshStandardMaterial color="#606060" metalness={0.8} roughness={0.3} />
+              </mesh>
+            ))}
+            <mesh position={[0, 0, 0]}>
+              <cylinderGeometry args={[0.04, 0.04, 0.22, 16]} />
+              <meshStandardMaterial color="#303030" metalness={0.7} roughness={0.4} />
+            </mesh>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <mesh 
+                key={`tread-${i}`}
+                position={[
+                  Math.cos((i / 24) * Math.PI * 2) * 0.23,
+                  0,
+                  Math.sin((i / 24) * Math.PI * 2) * 0.23
+                ]}
+                rotation={[0, (i / 24) * Math.PI * 2, 0]}
+              >
+                <boxGeometry args={[0.03, 0.17, 0.01]} />
+                <meshStandardMaterial color="#0a0a0a" roughness={1} />
+              </mesh>
+            ))}
+          </group>
+        );
+      
+      case "propeller":
+        const bladeCount = component.properties.blades || 2;
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <cylinderGeometry args={[0.06, 0.08, 0.06, 16]} />
+              <meshStandardMaterial 
+                color="#1a1a1a"
+                metalness={0.8}
+                roughness={0.2}
+              />
+            </mesh>
+            <mesh position={[0, 0.04, 0]}>
+              <cylinderGeometry args={[0.03, 0.03, 0.02, 12]} />
+              <meshStandardMaterial color="#c0c0c0" metalness={0.95} roughness={0.1} />
+            </mesh>
+            {Array.from({ length: bladeCount }).map((_, i) => {
+              const angle = (i / bladeCount) * Math.PI * 2;
               return (
-                <mesh
-                  key={i}
-                  position={[
-                    Math.cos(angle) * component.scale.x * 1.1,
-                    0,
-                    Math.sin(angle) * component.scale.x * 1.1,
-                  ]}
-                  rotation={[0, angle, 0]}
-                  castShadow
-                >
-                  <boxGeometry args={[0.15, component.scale.y, 0.2]} />
-                  <meshStandardMaterial color="#475569" metalness={0.9} roughness={0.2} />
-                </mesh>
+                <group key={i} rotation={[0, angle, 0]}>
+                  <mesh 
+                    position={[0.4, 0, 0]}
+                    rotation={[0, 0, Math.PI / 12]}
+                    castShadow
+                  >
+                    <boxGeometry args={[0.75, 0.02, 0.12]} />
+                    <meshStandardMaterial 
+                      color={component.color}
+                      metalness={0.5}
+                      roughness={0.15}
+                      side={THREE.DoubleSide}
+                    />
+                  </mesh>
+                  <mesh 
+                    position={[0.4, 0.015, 0]}
+                    rotation={[0, 0, Math.PI / 12]}
+                  >
+                    <boxGeometry args={[0.7, 0.005, 0.03]} />
+                    <meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.3} />
+                  </mesh>
+                </group>
               );
             })}
           </group>
         );
-      case "axle":
+      
+      case "battery":
         return (
-          <mesh rotation={getRotation("axle")} castShadow receiveShadow>
-            <cylinderGeometry args={[component.scale.x, component.scale.x, component.scale.y, 24]} />
-            {getMaterial()}
-          </mesh>
-        );
-      case "sensor":
-        return (
-          <group>
+          <group ref={groupRef}>
             <mesh castShadow receiveShadow>
-              <boxGeometry args={[component.scale.x, component.scale.y, component.scale.z]} />
+              <boxGeometry args={[0.45, 0.18, 0.28]} />
               {getMaterial()}
             </mesh>
-            {/* LED indicator */}
-            <mesh position={[component.scale.x * 0.3, component.scale.y * 0.6, component.scale.z * 0.6]} castShadow>
-              <sphereGeometry args={[0.08, 16, 16]} />
+            <mesh position={[0.15, 0.12, 0.1]} castShadow>
+              <cylinderGeometry args={[0.025, 0.025, 0.05, 12]} />
+              <meshStandardMaterial color="#ffd700" metalness={0.95} roughness={0.05} />
+            </mesh>
+            <mesh position={[0.15, 0.12, -0.1]} castShadow>
+              <cylinderGeometry args={[0.025, 0.025, 0.05, 12]} />
+              <meshStandardMaterial color="#c0c0c0" metalness={0.95} roughness={0.05} />
+            </mesh>
+            <mesh position={[0, 0.091, 0]}>
+              <boxGeometry args={[0.3, 0.001, 0.2]} />
+              <meshStandardMaterial color="#ffffff" />
+            </mesh>
+            {[-0.1, 0, 0.1].map((x, i) => (
+              <mesh key={i} position={[-0.18, 0.091, x]}>
+                <cylinderGeometry args={[0.015, 0.015, 0.005, 8]} />
+                <meshStandardMaterial 
+                  color={i < 2 ? "#00ff00" : "#ff0000"}
+                  emissive={i < 2 ? "#00ff00" : "#ff0000"}
+                  emissiveIntensity={0.5}
+                />
+              </mesh>
+            ))}
+          </group>
+        );
+      
+      case "esc":
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.28, 0.1, 0.2]} />
+              {getMaterial()}
+            </mesh>
+            {Array.from({ length: 7 }).map((_, i) => (
+              <mesh 
+                key={i}
+                position={[0, 0.055, -0.08 + i * 0.027]}
+                castShadow
+              >
+                <boxGeometry args={[0.26, 0.02, 0.015]} />
+                <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.2} />
+              </mesh>
+            ))}
+            {[-0.09, -0.03, 0.03, 0.09].map((z, i) => (
+              <mesh key={i} position={[0.15, 0, z]}>
+                <cylinderGeometry args={[0.01, 0.01, 0.06, 8]} />
+                <meshStandardMaterial 
+                  color={i < 3 ? "#ffd700" : "#ff0000"}
+                  metalness={0.9}
+                  roughness={0.1}
+                />
+              </mesh>
+            ))}
+            <mesh position={[-0.1, 0.051, 0.05]}>
+              <sphereGeometry args={[0.015, 8, 8]} />
               <meshStandardMaterial 
-                color="#22c55e" 
-                emissive="#22c55e" 
-                emissiveIntensity={0.8}
+                color="#0000ff"
+                emissive="#0000ff"
+                emissiveIntensity={0.6}
               />
             </mesh>
           </group>
         );
+      
+      case "gear":
+        const teeth = component.properties.teeth || 20;
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <cylinderGeometry args={[0.22, 0.22, 0.1, teeth * 2]} />
+              {getMaterial()}
+            </mesh>
+            {Array.from({ length: teeth }).map((_, i) => {
+              const angle = (i / teeth) * Math.PI * 2;
+              return (
+                <mesh 
+                  key={i} 
+                  position={[
+                    Math.cos(angle) * 0.25,
+                    0,
+                    Math.sin(angle) * 0.25
+                  ]}
+                  rotation={[0, angle, 0]}
+                  castShadow
+                >
+                  <boxGeometry args={[0.06, 0.1, 0.05]} />
+                  <meshStandardMaterial 
+                    color={component.color}
+                    metalness={0.9}
+                    roughness={0.15}
+                  />
+                </mesh>
+              );
+            })}
+            <mesh position={[0, 0, 0]}>
+              <cylinderGeometry args={[0.05, 0.05, 0.12, 16]} />
+              <meshStandardMaterial color="#1a1a1a" />
+            </mesh>
+          </group>
+        );
+      
+      case "sensor":
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.18, 0.02, 0.18]} />
+              <meshStandardMaterial color="#006400" roughness={0.8} />
+            </mesh>
+            <mesh position={[0, 0.02, 0]} castShadow>
+              <boxGeometry args={[0.08, 0.025, 0.08]} />
+              <meshStandardMaterial color="#1a1a1a" metalness={0.5} roughness={0.5} />
+            </mesh>
+            <mesh position={[0.05, 0.02, 0.05]}>
+              <sphereGeometry args={[0.015, 12, 12]} />
+              <meshStandardMaterial 
+                color="#ff0000" 
+                emissive="#ff0000"
+                emissiveIntensity={0.7}
+              />
+            </mesh>
+            {[-0.06, -0.02, 0.02, 0.06].map((x, i) => (
+              <mesh key={i} position={[x, -0.025, 0.07]}>
+                <boxGeometry args={[0.015, 0.04, 0.015]} />
+                <meshStandardMaterial color="#ffd700" metalness={0.95} roughness={0.1} />
+              </mesh>
+            ))}
+          </group>
+        );
+      
+      case "chassis":
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[1, 0.12, 0.65]} />
+              {getMaterial()}
+            </mesh>
+            {[-0.35, 0, 0.35].map((x, i) => (
+              <mesh key={i} position={[x, -0.05, 0]}>
+                <boxGeometry args={[0.03, 0.02, 0.6]} />
+                <meshStandardMaterial color={component.color} metalness={0.7} roughness={0.3} />
+              </mesh>
+            ))}
+            {[-0.4, -0.2, 0.2, 0.4].map((x) =>
+              [-0.25, 0.25].map((z, j) => (
+                <mesh key={`${x}-${j}`} position={[x, 0.061, z]}>
+                  <cylinderGeometry args={[0.02, 0.02, 0.005, 12]} />
+                  <meshStandardMaterial color="#1a1a1a" />
+                </mesh>
+              ))
+            )}
+          </group>
+        );
+      
+      case "frame":
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.9, 0.06, 0.9]} />
+              {getMaterial()}
+            </mesh>
+            {[
+              [0.4, 0, 0.4], [-0.4, 0, 0.4],
+              [0.4, 0, -0.4], [-0.4, 0, -0.4]
+            ].map((pos, i) => (
+              <group key={i}>
+                <mesh position={pos as [number, number, number]} castShadow>
+                  <cylinderGeometry args={[0.025, 0.025, 0.45, 16]} />
+                  <meshStandardMaterial 
+                    color={component.color}
+                    metalness={0.8}
+                    roughness={0.2}
+                  />
+                </mesh>
+                <mesh position={pos as [number, number, number]}>
+                  <cylinderGeometry args={[0.08, 0.08, 0.05, 16]} />
+                  <meshStandardMaterial color="#1a1a1a" metalness={0.6} roughness={0.4} />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        );
+      
+      case "axle":
+        return (
+          <group ref={groupRef}>
+            <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.035, 0.035, 1, 24]} />
+              <meshStandardMaterial 
+                color={component.color}
+                metalness={0.95}
+                roughness={0.1}
+              />
+            </mesh>
+          </group>
+        );
+      
       default:
         return (
           <mesh castShadow receiveShadow>
-            <boxGeometry args={[1, 1, 1]} />
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
             {getMaterial()}
           </mesh>
         );
@@ -294,15 +499,11 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
 
   return (
     <group
-      ref={groupRef}
       position={[component.position.x, component.position.y, component.position.z]}
       rotation={[component.rotation.x, component.rotation.y, component.rotation.z]}
       onClick={handleClick}
     >
-      <mesh ref={meshRef}>
-        {getGeometry()}
-      </mesh>
-      {/* Selection indicator */}
+      {getRealisticGeometry()}
       {isSelected && (
         <mesh>
           <sphereGeometry args={[1.5, 16, 16]} />
