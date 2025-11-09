@@ -407,5 +407,12 @@ void loop() {
 };
 
 export const getProjectCode = (projectId: string): string => {
-  return PROJECT_CODE[projectId] || `// No code template available for ${projectId}`;
+  const ALIASES: Record<string, string> = {
+    rc_car_4wd: "rc_car_basic",
+    racing_quadcopter: "quadcopter_drone",
+    rc_speed_boat: "rc_boat",
+    mecanum_robot: "rc_car_basic",
+  };
+  const resolved = ALIASES[projectId] || projectId;
+  return PROJECT_CODE[resolved] || `// No code template available for ${projectId}`;
 };

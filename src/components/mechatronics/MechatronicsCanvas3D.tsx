@@ -39,17 +39,183 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
       rotation={[component.rotation.x, component.rotation.y, component.rotation.z]}
       scale={[component.scale.x, component.scale.y, component.scale.z]}
     >
-      <group ref={groupRef}>
-        <mesh ref={meshRef} castShadow receiveShadow onClick={handleClick}>
-          <boxGeometry args={[0.5, 0.5, 0.5]} />
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.6}
-            roughness={0.4}
-            emissive={emissive}
-            emissiveIntensity={emissiveIntensity}
-          />
-        </mesh>
+      <group ref={groupRef} onClick={handleClick}>
+        {isWheelComponent(component.type) && (
+          <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.25, 0.25, 0.12, 24]} />
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.5}
+              roughness={0.6}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
+
+        {isPropellerComponent(component.type) && (
+          <group>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.8, 0.02, 0.1]} />
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.3}
+                roughness={0.5}
+                emissive={emissive}
+                emissiveIntensity={emissiveIntensity}
+              />
+            </mesh>
+            <mesh castShadow receiveShadow rotation={[0, Math.PI / 2, 0]}>
+              <boxGeometry args={[0.8, 0.02, 0.1]} />
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.3}
+                roughness={0.5}
+                emissive={emissive}
+                emissiveIntensity={emissiveIntensity}
+              />
+            </mesh>
+            <mesh castShadow receiveShadow>
+              <cylinderGeometry args={[0.03, 0.03, 0.05, 12]} />
+              <meshStandardMaterial color="#888888" />
+            </mesh>
+          </group>
+        )}
+
+        {isMotorComponent(component.type) && (
+          <group>
+            <mesh castShadow receiveShadow rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.15, 0.15, 0.3, 24]} />
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.6}
+                roughness={0.4}
+                emissive={emissive}
+                emissiveIntensity={emissiveIntensity}
+              />
+            </mesh>
+            <mesh castShadow receiveShadow position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.03, 0.03, 0.1, 12]} />
+              <meshStandardMaterial color="#bbbbbb" />
+            </mesh>
+          </group>
+        )}
+
+        {isServoComponent(component.type) && (
+          <group>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.25, 0.2, 0.4]} />
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.4}
+                roughness={0.5}
+                emissive={emissive}
+                emissiveIntensity={emissiveIntensity}
+              />
+            </mesh>
+            <mesh castShadow receiveShadow position={[0, 0.15, 0]}>
+              <boxGeometry args={[0.1, 0.02, 0.2]} />
+              <meshStandardMaterial color="#dddddd" />
+            </mesh>
+          </group>
+        )}
+
+        {isBatteryComponent(component.type) && (
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.5, 0.25, 0.3]} />
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.2}
+              roughness={0.6}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
+
+        {isESCComponent(component.type) && (
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.4, 0.1, 0.25]} />
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.3}
+              roughness={0.5}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
+
+        {isControllerComponent(component.type) && (
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.5, 0.1, 0.35]} />
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.2}
+              roughness={0.6}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
+
+        {isChassisComponent(component.type) && (
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[1.2, 0.1, 0.7]} />
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.3}
+              roughness={0.7}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
+
+        {isSensorComponent(component.type) && (
+          <group>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.2, 0.1, 0.1]} />
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.2}
+                roughness={0.6}
+                emissive={emissive}
+                emissiveIntensity={emissiveIntensity}
+              />
+            </mesh>
+            {component.type === 'ultrasonic_sensor' && (
+              <group position={[0, 0.02, 0.06]}>
+                <mesh>
+                  <cylinderGeometry args={[0.025, 0.025, 0.02, 16]} />
+                  <meshStandardMaterial color="#666666" />
+                </mesh>
+                <mesh position={[0.08, 0, 0]}>
+                  <cylinderGeometry args={[0.025, 0.025, 0.02, 16]} />
+                  <meshStandardMaterial color="#666666" />
+                </mesh>
+              </group>
+            )}
+          </group>
+        )}
+
+        {!isWheelComponent(component.type) && !isPropellerComponent(component.type) &&
+         !isMotorComponent(component.type) && !isServoComponent(component.type) &&
+         !isBatteryComponent(component.type) && !isESCComponent(component.type) &&
+         !isControllerComponent(component.type) && !isChassisComponent(component.type) &&
+         !isSensorComponent(component.type) && (
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.6}
+              roughness={0.4}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
+
         {isSelected && (
           <lineSegments>
             <edgesGeometry args={[new THREE.BoxGeometry(0.52, 0.52, 0.52)]} />

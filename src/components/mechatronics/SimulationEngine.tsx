@@ -13,6 +13,7 @@ import {
   calculatePropellerThrust,
   calculateDrag,
   vecScale,
+  vecSub,
   GRAVITY,
   Battery,
   updateBattery,
@@ -262,13 +263,14 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         setRecordedPath((prev) => [...prev, newBody]);
       }
 
-      // Update component positions based on simulation
+      // Update component positions based on simulation (use delta to avoid drift)
+      const deltaPos = vecSub(newBody.position, rigidBody.position);
       const updatedComponents = components.map((comp) => ({
         ...comp,
         position: {
-          x: comp.position.x + newBody.position.x,
-          y: comp.position.y + newBody.position.y,
-          z: comp.position.z + newBody.position.z,
+          x: comp.position.x + deltaPos.x,
+          y: comp.position.y + deltaPos.y,
+          z: comp.position.z + deltaPos.z,
         },
       }));
 
