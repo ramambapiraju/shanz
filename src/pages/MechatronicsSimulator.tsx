@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, FolderOpen } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import MechatronicsCanvas3D from "@/components/mechatronics/MechatronicsCanvas3D";
 import ComponentLibrary3D from "@/components/mechatronics/ComponentLibrary3D";
@@ -13,6 +13,7 @@ import TelemetryPanel from "@/components/mechatronics/TelemetryPanel";
 import ConnectionManager from "@/components/mechatronics/ConnectionManager";
 import { CodePanel } from "@/components/mechatronics/CodePanel";
 import { RCTransmitterUI, RCControls } from "@/components/mechatronics/RCTransmitterUI";
+import { DamageSystem, ComponentDamage } from "@/components/mechatronics/DamageSystem";
 import { MechanicalComponent, createComponent, ComponentType } from "@/components/mechatronics/MechanicalComponent";
 import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3D";
 import { validateProject } from "@/utils/projectValidator";
@@ -21,12 +22,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MechatronicsSimulator = () => {
   const navigate = useNavigate();
-  const [components, setComponents] = useState<MechanicalComponent[]>([]);
+  const [components, setComponents] = useState<MechanicalComponent[]>(() => {
+    // Load quadcopter project by default for testing
+    return loadProjectTemplate("quadcopter_x_frame");
+  });
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [simulationTime, setSimulationTime] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [currentProjectId, setCurrentProjectId] = useState<string>("rc_car_basic");
-  const [projectCode, setProjectCode] = useState<string>(getProjectCode("rc_car_basic"));
+  const [currentProjectId, setCurrentProjectId] = useState<string>("quadcopter_x_frame");
+  const [projectCode, setProjectCode] = useState<string>(getProjectCode("quadcopter_x_frame"));
   const [rcControls, setRCControls] = useState<RCControls>({
     throttle: 0,
     yaw: 0,
@@ -34,6 +38,27 @@ const MechatronicsSimulator = () => {
     roll: 0,
     steering: 0,
   });
+  const [damages, setDamages] = useState<ComponentDamage[]>(() => {
+    // Initialize damage tracking for default quadcopter
+    const initialComponents = loadProjectTemplate("quadcopter_x_frame");
+    return initialComponents.map(comp => ({
+      id: comp.id,
+      name: comp.name,
+      health: 100,
+      temperature: 25,
+      voltage: 11.1,
+      status: 'normal' as const,
+      warnings: [],
+    }));
+  });
+  
+  useEffect(() => {
+    // Show welcome message with instructions
+    toast.success(
+      "🚁 Quadcopter loaded! Press 'Start' in Simulation Engine, use RC Transmitter or arrow keys to fly. Toggle FPV/Wiring views!",
+      { duration: 5000 }
+    );
+  }, []);
   
   const vehicleType = useMemo(() => {
     if (currentProjectId.includes('quadcopter') || currentProjectId.includes('drone')) {
@@ -80,6 +105,19 @@ const MechatronicsSimulator = () => {
     setSelectedComponent(null);
     setCurrentProjectId(templateId);
     setProjectCode(getProjectCode(templateId));
+    
+    // Initialize damage tracking for all components
+    const initialDamages: ComponentDamage[] = projectComponents.map(comp => ({
+      id: comp.id,
+      name: comp.name,
+      health: 100,
+      temperature: 25,
+      voltage: 11.1,
+      status: 'normal',
+      warnings: [],
+    }));
+    setDamages(initialDamages);
+    
     toast.success("Project loaded successfully!");
   };
 
@@ -158,6 +196,8 @@ const MechatronicsSimulator = () => {
             components={components}
             selectedComponent={selectedComponent}
             onSelectComponent={setSelectedComponent}
+            vehiclePosition={components[0]?.position}
+            vehicleRotation={components[0]?.rotation}
           />
         </div>
 
@@ -178,6 +218,7 @@ const MechatronicsSimulator = () => {
             onControlChange={setRCControls}
             vehicleType={vehicleType as 'drone' | 'car' | 'boat'}
           />
+          <DamageSystem damages={damages} />
           <TelemetryPanel
             components={components}
             time={simulationTime}

@@ -1,23 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, ContactShadows } from '@react-three/drei';
 import { MechanicalComponent } from './MechanicalComponent';
 import { ComponentModel3D } from './ComponentModel3D';
+import { FPVCamera } from './FPVCamera';
+import { WiringVisualizer } from './WiringVisualizer';
+import { Button } from '@/components/ui/button';
+import { Eye, Zap } from 'lucide-react';
 import * as THREE from 'three';
 
 interface MechatronicsCanvas3DProps {
   components: MechanicalComponent[];
   selectedComponent: string | null;
   onSelectComponent: (id: string | null) => void;
+  vehiclePosition?: { x: number; y: number; z: number };
+  vehicleRotation?: { x: number; y: number; z: number };
 }
 
 const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
   components,
   selectedComponent,
   onSelectComponent,
+  vehiclePosition = { x: 0, y: 0, z: 0 },
+  vehicleRotation = { x: 0, y: 0, z: 0 },
 }) => {
+  const [fpvEnabled, setFpvEnabled] = useState(false);
+  const [wiringEnabled, setWiringEnabled] = useState(false);
+  const [currentFlow, setCurrentFlow] = useState(0);
+  
+  // Animate current flow
+  React.useEffect(() => {
+    if (!wiringEnabled) return;
+    const interval = setInterval(() => {
+      setCurrentFlow((prev) => (prev + 0.05) % 1);
+    }, 50);
+    return () => clearInterval(interval);
+  }, [wiringEnabled]);
+  
   return (
-    <div className="w-full h-full bg-background">
+    <div className="w-full h-full bg-background relative">
+      {/* Controls overlay */}
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <Button
+          size="sm"
+          variant={fpvEnabled ? "default" : "outline"}
+          onClick={() => setFpvEnabled(!fpvEnabled)}
+        >
+          <Eye className="h-4 w-4 mr-2" />
+          FPV
+        </Button>
+        <Button
+          size="sm"
+          variant={wiringEnabled ? "default" : "outline"}
+          onClick={() => setWiringEnabled(!wiringEnabled)}
+        >
+          <Zap className="h-4 w-4 mr-2" />
+          Wiring
+        </Button>
+      </div>
       <Canvas
         camera={{ position: [5, 5, 5], fov: 50 }}
         shadows
@@ -106,6 +146,20 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           />
         </mesh>
         
+        {/* FPV Camera */}
+        <FPVCamera
+          vehiclePosition={vehiclePosition}
+          vehicleRotation={vehicleRotation}
+          enabled={fpvEnabled}
+        />
+        
+        {/* Wiring Visualization */}
+        <WiringVisualizer
+          components={components}
+          showWiring={wiringEnabled}
+          currentFlow={currentFlow}
+        />
+        
         {/* Render Components with realistic models */}
         {components.map((component) => {
           const isSelected = selectedComponent === component.id;
@@ -120,6 +174,7 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
         })}
         
         <OrbitControls
+          enabled={!fpvEnabled}
           enableDamping
           dampingFactor={0.05}
           minDistance={2}
