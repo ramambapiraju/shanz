@@ -72,9 +72,9 @@ const SimpleFallback: React.FC<{ component: MechanicalComponent; isSelected: boo
   return (
     <mesh castShadow>
       <boxGeometry args={[
-        component.scale?.[0] || 0.5,
-        component.scale?.[1] || 0.5,
-        component.scale?.[2] || 0.5
+        component.scale?.x ?? 0.5,
+        component.scale?.y ?? 0.5,
+        component.scale?.z ?? 0.5
       ]} />
       <meshStandardMaterial color={color} metalness={0.3} roughness={0.6} />
     </mesh>
@@ -93,8 +93,8 @@ export const ComponentModel3D: React.FC<ComponentModel3DProps> = ({
     
     try {
       if (modelConfig.type === 'procedural' && modelConfig.generator) {
-        const scaleArray = component.scale 
-          ? [component.scale[0], component.scale[1], component.scale[2]] as [number, number, number]
+        const scaleArray: [number, number, number] = component.scale 
+          ? [component.scale.x || 1, component.scale.y || 1, component.scale.z || 1]
           : modelConfig.defaultScale;
         return modelConfig.generator(scaleArray);
       }

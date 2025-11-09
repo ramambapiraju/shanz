@@ -24,7 +24,7 @@ const MechatronicsSimulator = () => {
   const navigate = useNavigate();
   const [components, setComponents] = useState<MechanicalComponent[]>(() => {
     // Load quadcopter project by default for testing
-    return loadProjectTemplate("quadcopter_x_frame");
+    return loadProjectTemplate("racing_quadcopter");
   });
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [simulationTime, setSimulationTime] = useState(0);
