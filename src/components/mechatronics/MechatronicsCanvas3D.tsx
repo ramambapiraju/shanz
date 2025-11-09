@@ -1,15 +1,9 @@
-import React, { useRef, useMemo } from "react";
-import { Canvas, useFrame, ThreeEvent } from "@react-three/fiber";
-import { OrbitControls, Grid, GizmoHelper, GizmoViewport, PerspectiveCamera, ContactShadows, Environment } from "@react-three/drei";
-import { MechanicalComponent } from "./MechanicalComponent";
-import { isPropellerComponent, isWheelComponent, isMotorComponent, isServoComponent, isBatteryComponent, isESCComponent, isSensorComponent, isControllerComponent, isRCComponent, isChassisComponent } from "./ComponentCategories";
-import * as THREE from "three";
-
-interface ComponentMeshProps {
-  component: MechanicalComponent;
-  isSelected: boolean;
-  onClick: (e: ThreeEvent<MouseEvent>) => void;
-}
+import React from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Grid, Environment, ContactShadows } from '@react-three/drei';
+import { MechanicalComponent } from './MechanicalComponent';
+import { ComponentModel3D } from './ComponentModel3D';
+import * as THREE from 'three';
 
 // Realistic Materials
 const RealisticMaterials = {
