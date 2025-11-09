@@ -23,11 +23,13 @@ import { Slider } from "@/components/ui/slider";
 interface SimulationEngineProps {
   components: MechanicalComponent[];
   onUpdateComponents: (components: MechanicalComponent[]) => void;
+  onSimulationStateChange?: (time: number, isRunning: boolean) => void;
 }
 
 const SimulationEngine: React.FC<SimulationEngineProps> = ({
   components,
   onUpdateComponents,
+  onSimulationStateChange,
 }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -120,7 +122,11 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
 
       setRigidBody(newBody);
       setBattery(newBattery);
-      setTimeElapsed((t) => t + deltaTime);
+      setTimeElapsed((t) => {
+        const newTime = t + deltaTime;
+        onSimulationStateChange?.(newTime, true);
+        return newTime;
+      });
 
       // Update component positions based on simulation
       const updatedComponents = components.map((comp) => ({
@@ -147,6 +153,7 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     setIsRunning(false);
     setTimeElapsed(0);
     setThrottle(0);
+    onSimulationStateChange?.(0, false);
     setRigidBody({
       mass: 2,
       position: { x: 0, y: 0, z: 0 },

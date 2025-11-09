@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, FolderOpen, Play } from "lucide-react";
+import { ArrowLeft, Save, FolderOpen } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import MechatronicsCanvas3D from "@/components/mechatronics/MechatronicsCanvas3D";
@@ -9,6 +9,8 @@ import PropertyPanel3D from "@/components/mechatronics/PropertyPanel3D";
 import SimulationEngine from "@/components/mechatronics/SimulationEngine";
 import ProjectSelector from "@/components/mechatronics/ProjectSelector";
 import ValidationPanel from "@/components/mechatronics/ValidationPanel";
+import TelemetryPanel from "@/components/mechatronics/TelemetryPanel";
+import ConnectionManager from "@/components/mechatronics/ConnectionManager";
 import { MechanicalComponent, createComponent, ComponentType } from "@/components/mechatronics/MechanicalComponent";
 import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3D";
 import { validateProject } from "@/utils/projectValidator";
@@ -18,9 +20,16 @@ const MechatronicsSimulator = () => {
   const navigate = useNavigate();
   const [components, setComponents] = useState<MechanicalComponent[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
+  const [simulationTime, setSimulationTime] = useState(0);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   // Memoize validation to prevent unnecessary recalculations
   const validationErrors = useMemo(() => validateProject(components), [components]);
+
+  const handleSimulationStateChange = (time: number, running: boolean) => {
+    setSimulationTime(time);
+    setIsSimulating(running);
+  };
 
   const handleAddComponent = (type: ComponentType) => {
     const newComponent = createComponent(type, { x: 0, y: 1, z: 0 });
@@ -59,7 +68,7 @@ const MechatronicsSimulator = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
-          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 1)</h1>
+          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 2)</h1>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <Save className="h-4 w-4 mr-2" />
@@ -77,10 +86,11 @@ const MechatronicsSimulator = () => {
         {/* Left Panel */}
         <div className="col-span-3 space-y-4 overflow-auto max-h-[calc(100vh-8rem)]">
           <Tabs defaultValue="library">
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="library">Library</TabsTrigger>
               <TabsTrigger value="projects">Projects</TabsTrigger>
               <TabsTrigger value="validate">Validate</TabsTrigger>
+              <TabsTrigger value="connect">Connect</TabsTrigger>
             </TabsList>
             <TabsContent value="library">
               <ComponentLibrary3D onAddComponent={handleAddComponent} />
@@ -90,6 +100,13 @@ const MechatronicsSimulator = () => {
             </TabsContent>
             <TabsContent value="validate">
               <ValidationPanel errors={validationErrors} />
+            </TabsContent>
+            <TabsContent value="connect">
+              <ConnectionManager 
+                components={components}
+                selectedComponent={selectedComponent}
+                onUpdateComponent={handleUpdateComponent}
+              />
             </TabsContent>
           </Tabs>
         </div>
@@ -113,6 +130,12 @@ const MechatronicsSimulator = () => {
           <SimulationEngine
             components={components}
             onUpdateComponents={setComponents}
+            onSimulationStateChange={handleSimulationStateChange}
+          />
+          <TelemetryPanel
+            components={components}
+            time={simulationTime}
+            isRunning={isSimulating}
           />
         </div>
       </div>
