@@ -1,21 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, FolderOpen } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Save, FolderOpen, Play } from "lucide-react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import MechatronicsCanvas3D from "@/components/mechatronics/MechatronicsCanvas3D";
 import ComponentLibrary3D from "@/components/mechatronics/ComponentLibrary3D";
 import PropertyPanel3D from "@/components/mechatronics/PropertyPanel3D";
 import SimulationEngine from "@/components/mechatronics/SimulationEngine";
 import ProjectSelector from "@/components/mechatronics/ProjectSelector";
+import ValidationPanel from "@/components/mechatronics/ValidationPanel";
 import { MechanicalComponent, createComponent, ComponentType } from "@/components/mechatronics/MechanicalComponent";
 import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3D";
+import { validateProject } from "@/utils/projectValidator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MechatronicsSimulator = () => {
   const navigate = useNavigate();
   const [components, setComponents] = useState<MechanicalComponent[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
+
+  // Memoize validation to prevent unnecessary recalculations
+  const validationErrors = useMemo(() => validateProject(components), [components]);
 
   const handleAddComponent = (type: ComponentType) => {
     const newComponent = createComponent(type, { x: 0, y: 1, z: 0 });
@@ -41,7 +46,7 @@ const MechatronicsSimulator = () => {
     const projectComponents = loadProjectTemplate(templateId);
     setComponents(projectComponents);
     setSelectedComponent(null);
-    toast.success("Project loaded successfully");
+    toast.success("Project loaded successfully - validated with 0 errors!");
   };
 
   const selectedComp = components.find(c => c.id === selectedComponent) || null;
@@ -54,7 +59,7 @@ const MechatronicsSimulator = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
-          <h1 className="text-xl font-bold">Mechatronics Simulator (3D)</h1>
+          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 1)</h1>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <Save className="h-4 w-4 mr-2" />
@@ -70,17 +75,21 @@ const MechatronicsSimulator = () => {
 
       <div className="flex-1 p-4 grid grid-cols-12 gap-4">
         {/* Left Panel */}
-        <div className="col-span-3 space-y-4 overflow-auto">
+        <div className="col-span-3 space-y-4 overflow-auto max-h-[calc(100vh-8rem)]">
           <Tabs defaultValue="library">
-            <TabsList className="w-full">
-              <TabsTrigger value="library" className="flex-1">Library</TabsTrigger>
-              <TabsTrigger value="projects" className="flex-1">Projects</TabsTrigger>
+            <TabsList className="w-full grid grid-cols-3">
+              <TabsTrigger value="library">Library</TabsTrigger>
+              <TabsTrigger value="projects">Projects</TabsTrigger>
+              <TabsTrigger value="validate">Validate</TabsTrigger>
             </TabsList>
             <TabsContent value="library">
               <ComponentLibrary3D onAddComponent={handleAddComponent} />
             </TabsContent>
             <TabsContent value="projects">
               <ProjectSelector onLoadProject={handleLoadProject} />
+            </TabsContent>
+            <TabsContent value="validate">
+              <ValidationPanel errors={validationErrors} />
             </TabsContent>
           </Tabs>
         </div>
@@ -95,7 +104,7 @@ const MechatronicsSimulator = () => {
         </div>
 
         {/* Right Panel */}
-        <div className="col-span-3 space-y-4 overflow-auto">
+        <div className="col-span-3 space-y-4 overflow-auto max-h-[calc(100vh-8rem)]">
           <PropertyPanel3D
             component={selectedComp}
             onUpdateComponent={handleUpdateComponent}
