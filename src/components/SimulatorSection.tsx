@@ -70,7 +70,7 @@ export const SimulatorSection = () => {
                   Mechatronics Simulator
                   <Cpu className="ml-2 h-5 w-5" />
                 </Button>
-                <span className="text-sm text-muted-foreground text-center">Coming Soon</span>
+                <span className="text-sm text-muted-foreground text-center">Open the 3D simulator</span>
               </div>
             </div>
           </div>
