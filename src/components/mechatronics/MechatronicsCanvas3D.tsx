@@ -63,23 +63,22 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
 
 interface MechatronicsCanvas3DProps {
   components: MechanicalComponent[];
-  selectedComponent: MechanicalComponent | null;
-  onComponentSelect: (component: MechanicalComponent | null) => void;
-  onComponentMove: (id: string, position: { x: number; y: number; z: number }) => void;
+  selectedComponent: string | null;
+  onSelectComponent: (id: string | null) => void;
 }
 
 const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
   components,
   selectedComponent,
-  onComponentSelect,
+  onSelectComponent,
 }) => {
   const handleComponentClick = (component: MechanicalComponent) => (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    onComponentSelect(component);
+    onSelectComponent(component.id);
   };
 
   const handleCanvasClick = () => {
-    onComponentSelect(null);
+    onSelectComponent(null);
   };
 
   return (
@@ -99,7 +98,7 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           <ComponentMesh
             key={component.id}
             component={component}
-            isSelected={selectedComponent?.id === component.id}
+            isSelected={selectedComponent === component.id}
             onClick={handleComponentClick(component)}
           />
         ))}
