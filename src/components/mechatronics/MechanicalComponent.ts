@@ -1,18 +1,41 @@
 import { Vector3D } from "@/utils/physicsEngine";
 
-export type ComponentType = 
-  | "dc_motor" 
-  | "servo_motor" 
-  | "stepper_motor"
-  | "wheel"
-  | "propeller"
-  | "chassis"
-  | "battery"
-  | "esc"
-  | "gear"
-  | "axle"
-  | "frame"
-  | "sensor";
+export type ComponentType =
+  // Motors & Actuators
+  | "dc_motor_775"
+  | "brushless_motor_2212"
+  | "servo_mg996r"
+  | "servo_sg90"
+  | "stepper_nema17"
+  // Wheels & Propulsion
+  | "rubber_wheel_100mm"
+  | "omni_wheel"
+  | "mecanum_wheel"
+  | "propeller_10x4.5"
+  | "propeller_5x3"
+  // Control Electronics
+  | "receiver_2.4ghz"
+  | "transmitter_2.4ghz"
+  | "esc_30a"
+  | "esc_60a"
+  | "flight_controller"
+  | "arduino_uno"
+  | "arduino_nano"
+  | "raspberry_pi"
+  // Power
+  | "lipo_2s_2200mah"
+  | "lipo_3s_5000mah"
+  | "lipo_4s_3300mah"
+  | "voltage_regulator"
+  // Structure
+  | "aluminum_chassis"
+  | "carbon_frame"
+  | "plastic_body"
+  // Sensors
+  | "ultrasonic_sensor"
+  | "gyro_mpu6050"
+  | "gps_module"
+  | "camera_module";
 
 export interface MechanicalComponent {
   id: string;
@@ -26,178 +49,420 @@ export interface MechanicalComponent {
   connections: string[];
 }
 
-// Component library with real specifications
+// Component library with real professional specifications
 export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalComponent, "id" | "position" | "rotation" | "connections">> = {
-  dc_motor: {
-    type: "dc_motor",
-    name: "DC Brushless Motor",
+  // DC Motors
+  dc_motor_775: {
+    type: "dc_motor_775",
+    name: "775 DC Motor",
     scale: { x: 1, y: 1, z: 1 },
-    color: "#3b82f6",
+    color: "#4A5568",
     properties: {
-      maxTorque: 0.5, // N⋅m
-      maxRPM: 8000,
-      voltage: 12, // V
+      maxRPM: 15000,
+      maxTorque: 0.5,
+      voltage: 12,
+      noLoadCurrent: 0.8,
+      stallCurrent: 35,
+      efficiency: 0.75,
+    },
+  },
+  brushless_motor_2212: {
+    type: "brushless_motor_2212",
+    name: "2212 Brushless Motor",
+    scale: { x: 1, y: 1, z: 1 },
+    color: "#2D3748",
+    properties: {
+      maxRPM: 11100,
+      kv: 920,
+      voltage: 11.1,
+      maxCurrent: 18,
       efficiency: 0.85,
-      weight: 0.15, // kg
-      kv: 1000, // RPM per volt
-      resistance: 0.1, // Ω
-      noLoadCurrent: 0.5, // A
+      mass: 0.052,
     },
   },
-  servo_motor: {
-    type: "servo_motor",
-    name: "Servo Motor",
+  
+  // Servos
+  servo_mg996r: {
+    type: "servo_mg996r",
+    name: "MG996R Servo",
     scale: { x: 0.8, y: 0.8, z: 0.8 },
-    color: "#f59e0b",
+    color: "#3182CE",
     properties: {
-      maxTorque: 0.15, // N⋅m
-      maxAngle: 180, // degrees
-      speed: 0.17, // sec/60°
-      voltage: 6, // V
-      weight: 0.055, // kg
-      stallCurrent: 1.5, // A
-      operatingCurrent: 0.3, // A
+      maxAngle: 180,
+      speed: 0.17,
+      stallTorque: 11,
+      voltage: 6,
+      noLoadCurrent: 0.1,
+      stallCurrent: 2.5,
     },
   },
-  stepper_motor: {
-    type: "stepper_motor",
-    name: "Stepper Motor",
+  servo_sg90: {
+    type: "servo_sg90",
+    name: "SG90 Micro Servo",
+    scale: { x: 0.6, y: 0.6, z: 0.6 },
+    color: "#4299E1",
+    properties: {
+      maxAngle: 180,
+      speed: 0.12,
+      stallTorque: 1.8,
+      voltage: 5,
+      noLoadCurrent: 0.01,
+      stallCurrent: 0.65,
+    },
+  },
+  
+  // Stepper Motor
+  stepper_nema17: {
+    type: "stepper_nema17",
+    name: "NEMA17 Stepper",
     scale: { x: 1, y: 1, z: 1 },
-    color: "#8b5cf6",
+    color: "#1A202C",
     properties: {
       stepsPerRevolution: 200,
-      holdingTorque: 0.4, // N⋅m
-      voltage: 12, // V
-      current: 1.7, // A per phase
-      weight: 0.28, // kg
-      stepAngle: 1.8, // degrees
+      holdingTorque: 0.4,
+      voltage: 12,
+      current: 1.7,
     },
   },
-  wheel: {
-    type: "wheel",
-    name: "Wheel",
+  
+  // Wheels
+  rubber_wheel_100mm: {
+    type: "rubber_wheel_100mm",
+    name: "100mm Rubber Wheel",
     scale: { x: 1, y: 1, z: 1 },
-    color: "#1f2937",
+    color: "#1A1A1A",
     properties: {
-      diameter: 0.1, // meters
-      width: 0.04, // meters
-      weight: 0.05, // kg
-      frictionCoeff: 0.7,
-      material: "rubber",
+      diameter: 0.1,
+      width: 0.03,
+      friction: 0.9,
+      material: "Rubber",
+      mass: 0.15,
     },
   },
-  propeller: {
-    type: "propeller",
-    name: "Propeller",
+  omni_wheel: {
+    type: "omni_wheel",
+    name: "Omni Wheel",
+    scale: { x: 0.8, y: 0.8, z: 0.8 },
+    color: "#2D2D2D",
+    properties: {
+      diameter: 0.06,
+      width: 0.04,
+      friction: 0.7,
+      material: "Plastic with rollers",
+      mass: 0.08,
+    },
+  },
+  mecanum_wheel: {
+    type: "mecanum_wheel",
+    name: "Mecanum Wheel",
+    scale: { x: 1, y: 1, z: 1 },
+    color: "#3A3A3A",
+    properties: {
+      diameter: 0.1,
+      width: 0.05,
+      friction: 0.75,
+      material: "Plastic with 45° rollers",
+      mass: 0.2,
+    },
+  },
+  
+  // Propellers
+  "propeller_10x4.5": {
+    type: "propeller_10x4.5",
+    name: "10x4.5 Propeller",
     scale: { x: 1, y: 0.1, z: 1 },
-    color: "#06b6d4",
+    color: "#FFA500",
     properties: {
-      diameter: 10, // inches
-      pitch: 4.5, // inches
-      blades: 2,
-      thrustCoefficient: 0.109,
-      powerCoefficient: 0.04,
-      weight: 0.015, // kg
-      material: "carbon_fiber",
+      diameter: 10,
+      pitch: 4.5,
+      bladesCount: 2,
+      thrustCoefficient: 0.11,
+      powerCoefficient: 0.045,
+      mass: 0.015,
     },
   },
-  chassis: {
-    type: "chassis",
-    name: "Chassis",
-    scale: { x: 2, y: 0.2, z: 1.5 },
-    color: "#ef4444",
+  "propeller_5x3": {
+    type: "propeller_5x3",
+    name: "5x3 Propeller",
+    scale: { x: 0.6, y: 0.1, z: 0.6 },
+    color: "#FF8C00",
     properties: {
-      length: 0.3, // meters
-      width: 0.2, // meters
-      height: 0.05, // meters
-      weight: 0.5, // kg
-      material: "aluminum",
-      dragCoefficient: 0.8,
-      frontalArea: 0.06, // m²
+      diameter: 5,
+      pitch: 3,
+      bladesCount: 3,
+      thrustCoefficient: 0.09,
+      powerCoefficient: 0.035,
+      mass: 0.004,
     },
   },
-  battery: {
-    type: "battery",
-    name: "LiPo Battery",
-    scale: { x: 1.5, y: 0.5, z: 0.8 },
-    color: "#22c55e",
+  
+  // Control Electronics
+  "receiver_2.4ghz": {
+    type: "receiver_2.4ghz",
+    name: "2.4GHz Receiver",
+    scale: { x: 0.8, y: 0.4, z: 0.6 },
+    color: "#48BB78",
     properties: {
-      capacity: 2200, // mAh
-      voltage: 11.1, // V (3S)
-      cells: 3,
-      weight: 0.185, // kg
-      cRating: 30, // discharge rate
-      internalResistance: 0.01, // Ω
-      maxCurrent: 66, // A (capacity * C-rating / 1000)
+      frequency: 2400,
+      channels: 6,
+      range: 1000,
+      protocol: "PPM/PWM",
+      voltage: 5,
+      current: 0.05,
     },
   },
-  esc: {
-    type: "esc",
-    name: "ESC (Electronic Speed Controller)",
+  "transmitter_2.4ghz": {
+    type: "transmitter_2.4ghz",
+    name: "2.4GHz Transmitter",
+    scale: { x: 1.5, y: 1, z: 2 },
+    color: "#38A169",
+    properties: {
+      frequency: 2400,
+      channels: 6,
+      range: 1000,
+      protocol: "PPM/PWM",
+    },
+  },
+  esc_30a: {
+    type: "esc_30a",
+    name: "30A ESC",
     scale: { x: 1, y: 0.3, z: 0.7 },
-    color: "#6366f1",
+    color: "#E53E3E",
     properties: {
-      maxCurrent: 30, // A
-      voltage: "2-4S", // LiPo cells
-      weight: 0.035, // kg
-      bec: "5V/2A", // battery eliminator circuit
-      frequency: 400, // Hz
-      protocol: "PWM/OneShot",
+      maxCurrent: 30,
+      burstCurrent: 40,
+      cellCount: "2-3S",
+      pwmFrequency: 8000,
+      voltage: 11.1,
     },
   },
-  gear: {
-    type: "gear",
-    name: "Gear",
+  esc_60a: {
+    type: "esc_60a",
+    name: "60A ESC",
+    scale: { x: 1.2, y: 0.4, z: 0.8 },
+    color: "#C53030",
+    properties: {
+      maxCurrent: 60,
+      burstCurrent: 80,
+      cellCount: "3-6S",
+      pwmFrequency: 8000,
+      voltage: 14.8,
+    },
+  },
+  flight_controller: {
+    type: "flight_controller",
+    name: "Flight Controller",
     scale: { x: 0.8, y: 0.3, z: 0.8 },
-    color: "#64748b",
+    color: "#805AD5",
     properties: {
-      teeth: 20,
-      module: 1, // mm
-      pressureAngle: 20, // degrees
-      ratio: 2, // gear ratio
-      efficiency: 0.95,
-      weight: 0.02, // kg
+      processor: "STM32F4",
+      flashMemory: 512,
+      sram: 128,
+      clockSpeed: 168,
+      pwmPins: 8,
+      voltage: 5,
+      current: 0.2,
     },
   },
-  axle: {
-    type: "axle",
-    name: "Axle",
-    scale: { x: 0.2, y: 2, z: 0.2 },
-    color: "#475569",
+  arduino_uno: {
+    type: "arduino_uno",
+    name: "Arduino UNO",
+    scale: { x: 1, y: 0.3, z: 0.8 },
+    color: "#00979D",
     properties: {
-      diameter: 0.006, // meters (6mm)
-      length: 0.15, // meters
-      weight: 0.015, // kg
-      material: "steel",
-      frictionCoeff: 0.15,
+      processor: "ATmega328P",
+      flashMemory: 32,
+      sram: 2,
+      clockSpeed: 16,
+      digitalPins: 14,
+      analogPins: 6,
+      pwmPins: 6,
+      voltage: 5,
     },
   },
-  frame: {
-    type: "frame",
-    name: "Frame",
-    scale: { x: 2, y: 2, z: 0.2 },
-    color: "#f97316",
+  arduino_nano: {
+    type: "arduino_nano",
+    name: "Arduino Nano",
+    scale: { x: 0.6, y: 0.3, z: 0.5 },
+    color: "#00A5BB",
     properties: {
-      width: 0.45, // meters
-      length: 0.45, // meters
-      height: 0.15, // meters
-      weight: 0.8, // kg
-      material: "carbon_fiber",
-      armLength: 0.225, // meters (for drone/quadcopter)
+      processor: "ATmega328P",
+      flashMemory: 32,
+      sram: 2,
+      clockSpeed: 16,
+      digitalPins: 14,
+      analogPins: 8,
+      pwmPins: 6,
+      voltage: 5,
     },
   },
-  sensor: {
-    type: "sensor",
-    name: "IMU Sensor",
+  raspberry_pi: {
+    type: "raspberry_pi",
+    name: "Raspberry Pi 4B",
+    scale: { x: 1.2, y: 0.3, z: 1 },
+    color: "#C51A4A",
+    properties: {
+      processor: "Cortex-A72",
+      sram: 4096000,
+      clockSpeed: 1500,
+      digitalPins: 40,
+      voltage: 5,
+      current: 3,
+    },
+  },
+  
+  // Batteries
+  lipo_2s_2200mah: {
+    type: "lipo_2s_2200mah",
+    name: "2S 2200mAh LiPo",
+    scale: { x: 1.5, y: 0.5, z: 0.8 },
+    color: "#FFD700",
+    properties: {
+      capacity: 2200,
+      cellCount: 2,
+      voltage: 7.4,
+      cRating: 30,
+      maxDischarge: 66,
+      internalResistance: 0.005,
+      mass: 0.12,
+    },
+  },
+  lipo_3s_5000mah: {
+    type: "lipo_3s_5000mah",
+    name: "3S 5000mAh LiPo",
+    scale: { x: 2, y: 0.7, z: 1 },
+    color: "#FFC107",
+    properties: {
+      capacity: 5000,
+      cellCount: 3,
+      voltage: 11.1,
+      cRating: 50,
+      maxDischarge: 250,
+      internalResistance: 0.003,
+      mass: 0.385,
+    },
+  },
+  lipo_4s_3300mah: {
+    type: "lipo_4s_3300mah",
+    name: "4S 3300mAh LiPo",
+    scale: { x: 1.8, y: 0.6, z: 0.9 },
+    color: "#FF9800",
+    properties: {
+      capacity: 3300,
+      cellCount: 4,
+      voltage: 14.8,
+      cRating: 45,
+      maxDischarge: 148.5,
+      internalResistance: 0.004,
+      mass: 0.342,
+    },
+  },
+  voltage_regulator: {
+    type: "voltage_regulator",
+    name: "5V Voltage Regulator",
+    scale: { x: 0.6, y: 0.3, z: 0.6 },
+    color: "#795548",
+    properties: {
+      voltage: 5,
+      maxCurrent: 3,
+      efficiency: 0.85,
+    },
+  },
+  
+  // Structure
+  aluminum_chassis: {
+    type: "aluminum_chassis",
+    name: "Aluminum Chassis",
+    scale: { x: 2, y: 0.2, z: 1.5 },
+    color: "#90A4AE",
+    properties: {
+      length: 0.3,
+      width: 0.15,
+      height: 0.05,
+      mass: 0.4,
+      material: "Aluminum 6061",
+    },
+  },
+  carbon_frame: {
+    type: "carbon_frame",
+    name: "Carbon Fiber Frame",
+    scale: { x: 2, y: 0.15, z: 2 },
+    color: "#212121",
+    properties: {
+      length: 0.25,
+      width: 0.25,
+      height: 0.02,
+      mass: 0.15,
+      material: "Carbon Fiber",
+    },
+  },
+  plastic_body: {
+    type: "plastic_body",
+    name: "Plastic Body Shell",
+    scale: { x: 2.5, y: 0.8, z: 1.2 },
+    color: "#2196F3",
+    properties: {
+      length: 0.35,
+      width: 0.18,
+      height: 0.12,
+      mass: 0.25,
+      material: "ABS Plastic",
+    },
+  },
+  
+  // Sensors
+  ultrasonic_sensor: {
+    type: "ultrasonic_sensor",
+    name: "HC-SR04 Ultrasonic",
+    scale: { x: 0.7, y: 0.4, z: 0.5 },
+    color: "#00BCD4",
+    properties: {
+      type: "Distance",
+      range: 4,
+      accuracy: 0.3,
+      updateRate: 40,
+      voltage: 5,
+      current: 0.015,
+    },
+  },
+  gyro_mpu6050: {
+    type: "gyro_mpu6050",
+    name: "MPU6050 Gyro/Accel",
     scale: { x: 0.5, y: 0.2, z: 0.5 },
-    color: "#a855f7",
+    color: "#9C27B0",
     properties: {
-      type: "IMU", // accelerometer + gyroscope
-      sampleRate: 1000, // Hz
-      weight: 0.003, // kg
-      voltage: 5, // V
-      current: 0.015, // A
-      outputs: ["accel_x", "accel_y", "accel_z", "gyro_x", "gyro_y", "gyro_z"],
+      type: "IMU",
+      range: 16,
+      accuracy: 0.001,
+      updateRate: 1000,
+      voltage: 3.3,
+      current: 0.005,
+    },
+  },
+  gps_module: {
+    type: "gps_module",
+    name: "NEO-6M GPS",
+    scale: { x: 0.8, y: 0.3, z: 0.8 },
+    color: "#4CAF50",
+    properties: {
+      type: "GPS",
+      range: 50000,
+      accuracy: 2.5,
+      updateRate: 5,
+      voltage: 3.3,
+      current: 0.045,
+    },
+  },
+  camera_module: {
+    type: "camera_module",
+    name: "FPV Camera",
+    scale: { x: 0.6, y: 0.6, z: 0.8 },
+    color: "#FF5722",
+    properties: {
+      type: "Camera",
+      range: 300,
+      voltage: 5,
+      current: 0.15,
     },
   },
 };

@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Activity } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MechanicalComponent } from "./MechanicalComponent";
+import { isChassisComponent, isBatteryComponent, isAnyMotorType } from "./ComponentCategories";
 
 interface TelemetryPanelProps {
   components: MechanicalComponent[];
@@ -26,9 +27,9 @@ const TelemetryPanel = ({ components, time, isRunning }: TelemetryPanelProps) =>
     if (!isRunning) return;
 
     // Calculate current telemetry
-    const chassis = components.find(c => c.type === 'chassis' || c.type === 'frame');
-    const battery = components.find(c => c.type === 'battery');
-    const motors = components.filter(c => c.type === 'dc_motor' || c.type === 'servo_motor');
+    const chassis = components.find(c => isChassisComponent(c.type));
+    const battery = components.find(c => isBatteryComponent(c.type));
+    const motors = components.filter(c => isAnyMotorType(c.type));
 
     const avgAltitude = chassis ? chassis.position.y : 0;
     const totalPower = motors.reduce((sum, m) => {

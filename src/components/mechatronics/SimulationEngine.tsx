@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, RotateCcw, Settings, Keyboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MechanicalComponent } from "./MechanicalComponent";
+import { isWheelComponent, isPropellerComponent, isMotorComponent, isESCComponent, isChassisComponent, isBatteryComponent, isAnyMotorType } from "./ComponentCategories";
 import { 
   RigidBody, 
   updateRigidBody, 
@@ -138,11 +139,11 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
       });
 
       // Motor/Propeller thrust and steering
-      const hasWheels = components.some(c => c.type === "wheel");
-      const hasPropellers = components.some(c => c.type === "propeller");
+      const hasWheels = components.some(c => isWheelComponent(c.type));
+      const hasPropellers = components.some(c => isPropellerComponent(c.type));
       
       components.forEach((comp) => {
-        if (comp.type === "propeller") {
+        if (isPropellerComponent(comp.type)) {
           const thrust = calculatePropellerThrust({
             diameter: comp.properties.diameter,
             pitch: comp.properties.pitch,
@@ -167,7 +168,7 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
           }
         }
 
-        if (comp.type === "dc_motor") {
+        if (isMotorComponent(comp.type)) {
           const current = (comp.properties.voltage / comp.properties.resistance) * throttle;
           totalCurrent += current;
           
@@ -181,7 +182,7 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
           }
         }
 
-        if (comp.type === "esc") {
+        if (isESCComponent(comp.type)) {
           totalCurrent += 0.1;
         }
       });
