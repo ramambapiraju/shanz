@@ -15,12 +15,21 @@ import {
   GRAVITY,
   Battery,
   updateBattery,
-  Motor
+  Motor,
+  PIDController,
+  updatePID,
+  resolveGroundCollision,
+  calculateBuoyancy,
+  calculateWaterDrag,
+  calculateWaveForce
 } from "@/utils/physicsEngine";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
 import { Badge } from "@/components/ui/badge";
+import PIDTuningPanel from "./PIDTuningPanel";
+import FlightRecorder from "./FlightRecorder";
+import PerformanceAnalytics from "./PerformanceAnalytics";
 
 interface SimulationEngineProps {
   components: MechanicalComponent[];
@@ -56,6 +65,28 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     internalResistance: 0.01,
     dischargeCurrent: 0,
   });
+
+  // PID Controllers for stability (Phase 3)
+  const [pidX, setPidX] = useState<PIDController>({
+    kp: 1.5, ki: 0.05, kd: 0.5, integral: 0, previousError: 0
+  });
+  const [pidY, setPidY] = useState<PIDController>({
+    kp: 2.0, ki: 0.1, kd: 0.8, integral: 0, previousError: 0
+  });
+  const [pidZ, setPidZ] = useState<PIDController>({
+    kp: 1.5, ki: 0.05, kd: 0.5, integral: 0, previousError: 0
+  });
+
+  // Flight recorder (Phase 3)
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedPath, setRecordedPath] = useState<RigidBody[]>([]);
+  const [isPlayback, setIsPlayback] = useState(false);
+  const [playbackIndex, setPlaybackIndex] = useState(0);
+
+  // Performance metrics (Phase 3)
+  const [totalCurrent, setTotalCurrent] = useState(0);
+  const [efficiency, setEfficiency] = useState(100);
+  const [powerConsumption, setPowerConsumption] = useState(0);
 
   // Handle keyboard controls - update continuously
   useEffect(() => {
@@ -175,14 +206,47 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         point: { x: 0, y: 0, z: 0 },
       });
 
+      // Buoyancy for boats (Phase 3)
+      const hasBoat = hasPropellers && !hasWheels;
+      if (hasBoat && rigidBody.position.y < 0.2) {
+        const submergedVolume = 0.05; // m³
+        const buoyancy = calculateBuoyancy(submergedVolume);
+        forces.push({ vector: buoyancy, point: { x: 0, y: 0, z: 0 } });
+
+        const waterDrag = calculateWaterDrag(rigidBody.velocity);
+        forces.push({ vector: waterDrag, point: { x: 0, y: 0, z: 0 } });
+
+        const waveForce = calculateWaveForce(rigidBody.position, timeElapsed);
+        forces.push({ vector: waveForce, point: { x: 0, y: 0, z: 0 } });
+      }
+
       // Update physics
-      const newBody = updateRigidBody({
+      let newBody = updateRigidBody({
         ...rigidBody,
         mass: totalMass,
       }, forces, deltaTime);
 
+      // Ground collision (Phase 3)
+      newBody = resolveGroundCollision(newBody, 0.5);
+
+      // Apply PID control for drones (Phase 3)
+      if (hasPropellers && !hasWheels && isRunning) {
+        const targetAltitude = 2; // meters
+        const altitudeError = targetAltitude - newBody.position.y;
+        const pidResult = updatePID(pidY, altitudeError, deltaTime);
+        setPidY(pidResult.pid);
+        // Apply PID output as additional force (simplified)
+      }
+
       // Update battery
       const newBattery = updateBattery(battery, totalCurrent, deltaTime);
+
+      // Update metrics (Phase 3)
+      setTotalCurrent(totalCurrent);
+      const power = totalCurrent * newBattery.voltage;
+      setPowerConsumption(power);
+      const theoreticalPower = totalMass * GRAVITY * Math.abs(rigidBody.velocity.y);
+      setEfficiency(theoreticalPower > 0 ? Math.min(100, (theoreticalPower / power) * 100) : 100);
 
       setRigidBody(newBody);
       setBattery(newBattery);
@@ -191,6 +255,11 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         onSimulationStateChange?.(newTime, true);
         return newTime;
       });
+
+      // Record flight path (Phase 3)
+      if (isRecording) {
+        setRecordedPath((prev) => [...prev, newBody]);
+      }
 
       // Update component positions based on simulation
       const updatedComponents = components.map((comp) => ({
@@ -244,15 +313,47 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     rigidBody.velocity.z ** 2
   ) * 3.6; // m/s to km/h
 
+  const handleStartRecording = () => {
+    setIsRecording(true);
+    setRecordedPath([]);
+  };
+
+  const handleStopRecording = () => {
+    setIsRecording(false);
+  };
+
+  const handlePlayback = () => {
+    // Implement playback logic
+    setIsPlayback(true);
+    setPlaybackIndex(0);
+  };
+
+  const handleDownloadPath = () => {
+    const data = JSON.stringify(recordedPath, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flight-path-${Date.now()}.json`;
+    a.click();
+  };
+
+  const resetPID = () => {
+    setPidX({ kp: 1.5, ki: 0.05, kd: 0.5, integral: 0, previousError: 0 });
+    setPidY({ kp: 2.0, ki: 0.1, kd: 0.8, integral: 0, previousError: 0 });
+    setPidZ({ kp: 1.5, ki: 0.05, kd: 0.5, integral: 0, previousError: 0 });
+  };
+
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
-          Simulation Engine
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Simulation Engine
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
         <div className="flex gap-2">
           <Button
             onClick={() => setIsRunning(!isRunning)}
@@ -374,6 +475,36 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         </div>
       </CardContent>
     </Card>
+
+    <PIDTuningPanel
+      pidX={pidX}
+      pidY={pidY}
+      pidZ={pidZ}
+      onUpdatePID={(axis, pid) => {
+        if (axis === 'x') setPidX(pid);
+        else if (axis === 'y') setPidY(pid);
+        else setPidZ(pid);
+      }}
+      onReset={resetPID}
+    />
+
+    <FlightRecorder
+      isRecording={isRecording}
+      recordedPath={recordedPath}
+      onStartRecording={handleStartRecording}
+      onStopRecording={handleStopRecording}
+      onPlayback={handlePlayback}
+      onDownload={handleDownloadPath}
+    />
+
+    <PerformanceAnalytics
+      battery={battery}
+      totalCurrent={totalCurrent}
+      speedKmh={speedKmh}
+      efficiency={efficiency}
+      powerConsumption={powerConsumption}
+    />
+    </div>
   );
 };
 

@@ -74,7 +74,7 @@ const MechatronicsSimulator = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
-          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 2 - Complete)</h1>
+          <h1 className="text-xl font-bold">Mechatronics Simulator 3D (Phase 3 - Advanced)</h1>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <Save className="h-4 w-4 mr-2" />

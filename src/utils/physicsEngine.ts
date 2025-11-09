@@ -236,6 +236,77 @@ export const checkCollision = (pos1: Vector3D, radius1: number, pos2: Vector3D, 
   return distance < (radius1 + radius2);
 };
 
+// Collision response with elasticity
+export const resolveCollision = (
+  body1: RigidBody,
+  body2: RigidBody,
+  elasticity: number = 0.8
+): { body1: RigidBody; body2: RigidBody } => {
+  const normal = vecNorm(vecSub(body2.position, body1.position));
+  const relativeVelocity = vecSub(body1.velocity, body2.velocity);
+  const velocityAlongNormal = vecDot(relativeVelocity, normal);
+
+  if (velocityAlongNormal > 0) return { body1, body2 };
+
+  const impulse = -(1 + elasticity) * velocityAlongNormal / (1 / body1.mass + 1 / body2.mass);
+
+  const impulseVector = vecScale(normal, impulse);
+  
+  return {
+    body1: {
+      ...body1,
+      velocity: vecAdd(body1.velocity, vecScale(impulseVector, 1 / body1.mass)),
+    },
+    body2: {
+      ...body2,
+      velocity: vecSub(body2.velocity, vecScale(impulseVector, 1 / body2.mass)),
+    },
+  };
+};
+
+// Ground collision
+export const checkGroundCollision = (position: Vector3D, groundLevel: number = 0): boolean => {
+  return position.y <= groundLevel;
+};
+
+export const resolveGroundCollision = (body: RigidBody, elasticity: number = 0.5): RigidBody => {
+  if (body.position.y < 0) {
+    return {
+      ...body,
+      position: { ...body.position, y: 0 },
+      velocity: { ...body.velocity, y: -body.velocity.y * elasticity },
+    };
+  }
+  return body;
+};
+
+// Fluid dynamics for boats
+export const calculateBuoyancy = (
+  submergedVolume: number,
+  fluidDensity: number = WATER_DENSITY
+): Vector3D => {
+  // F_b = ρ * V * g
+  const buoyancyForce = fluidDensity * submergedVolume * GRAVITY;
+  return { x: 0, y: buoyancyForce, z: 0 };
+};
+
+export const calculateWaterDrag = (velocity: Vector3D, dragCoefficient: number = 1.5): Vector3D => {
+  // Water drag is similar to air drag but with water density
+  const speed = vecMag(velocity);
+  if (speed === 0) return { x: 0, y: 0, z: 0 };
+  
+  const dragMag = 0.5 * WATER_DENSITY * speed * speed * dragCoefficient * 0.1; // area
+  const direction = vecNorm(velocity);
+  return vecScale(direction, -dragMag);
+};
+
+export const calculateWaveForce = (position: Vector3D, time: number, amplitude: number = 0.3): Vector3D => {
+  // Simple sinusoidal wave
+  const waveHeight = amplitude * Math.sin(position.x * 0.5 + time * 2);
+  const waveForce = waveHeight * 10; // Force based on wave
+  return { x: 0, y: waveForce, z: 0 };
+};
+
 // Simple PID controller for stability
 export interface PIDController {
   kp: number; // proportional gain
