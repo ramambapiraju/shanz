@@ -31,18 +31,21 @@ import { useKeyboardControls } from "@/hooks/useKeyboardControls";
 import { Badge } from "@/components/ui/badge";
 import PIDTuningPanel from "./PIDTuningPanel";
 import FlightRecorder from "./FlightRecorder";
+import { RCControls } from "./RCTransmitterUI";
 import PerformanceAnalytics from "./PerformanceAnalytics";
 
 interface SimulationEngineProps {
   components: MechanicalComponent[];
   onUpdateComponents: (components: MechanicalComponent[]) => void;
   onSimulationStateChange?: (time: number, isRunning: boolean) => void;
+  rcControls?: RCControls;
 }
 
 const SimulationEngine: React.FC<SimulationEngineProps> = ({
   components,
   onUpdateComponents,
   onSimulationStateChange,
+  rcControls,
 }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -95,29 +98,35 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     if (!isRunning) return;
     
     const updateControls = () => {
-      // Update throttle based on keyboard
-      if (keyboardControls.throttleUp || keyboardControls.forward) {
-        setThrottle((prev) => Math.min(1, prev + 0.02));
-      }
-      if (keyboardControls.throttleDown || keyboardControls.backward) {
-        setThrottle((prev) => Math.max(0, prev - 0.02));
-      }
-      
-      // Update steering based on keyboard
-      if (keyboardControls.left) {
-        setSteering((prev) => Math.max(-1, prev - 0.05));
-      } else if (keyboardControls.right) {
-        setSteering((prev) => Math.min(1, prev + 0.05));
+      // Use RC controls if available, otherwise use keyboard
+      if (rcControls) {
+        setThrottle(Math.max(0, Math.min(1, (rcControls.throttle + 1) / 2))); // Map -1,1 to 0,1
+        setSteering(rcControls.steering || rcControls.yaw);
       } else {
-        // Return to center
-        setSteering((prev) => Math.abs(prev) < 0.05 ? 0 : prev * 0.9);
+        // Update throttle based on keyboard
+        if (keyboardControls.throttleUp || keyboardControls.forward) {
+          setThrottle((prev) => Math.min(1, prev + 0.02));
+        }
+        if (keyboardControls.throttleDown || keyboardControls.backward) {
+          setThrottle((prev) => Math.max(0, prev - 0.02));
+        }
+        
+        // Update steering based on keyboard
+        if (keyboardControls.left) {
+          setSteering((prev) => Math.max(-1, prev - 0.05));
+        } else if (keyboardControls.right) {
+          setSteering((prev) => Math.min(1, prev + 0.05));
+        } else {
+          // Return to center
+          setSteering((prev) => Math.abs(prev) < 0.05 ? 0 : prev * 0.9);
+        }
       }
     };
 
     // Update at 60fps
     const interval = setInterval(updateControls, 16);
     return () => clearInterval(interval);
-  }, [isRunning, keyboardControls]);
+  }, [isRunning, keyboardControls, rcControls]);
 
   useEffect(() => {
     if (!isRunning) return;

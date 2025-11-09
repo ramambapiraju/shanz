@@ -12,6 +12,7 @@ import ValidationPanel from "@/components/mechatronics/ValidationPanel";
 import TelemetryPanel from "@/components/mechatronics/TelemetryPanel";
 import ConnectionManager from "@/components/mechatronics/ConnectionManager";
 import { CodePanel } from "@/components/mechatronics/CodePanel";
+import { RCTransmitterUI, RCControls } from "@/components/mechatronics/RCTransmitterUI";
 import { MechanicalComponent, createComponent, ComponentType } from "@/components/mechatronics/MechanicalComponent";
 import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3D";
 import { validateProject } from "@/utils/projectValidator";
@@ -26,6 +27,24 @@ const MechatronicsSimulator = () => {
   const [isSimulating, setIsSimulating] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string>("rc_car_basic");
   const [projectCode, setProjectCode] = useState<string>(getProjectCode("rc_car_basic"));
+  const [rcControls, setRCControls] = useState<RCControls>({
+    throttle: 0,
+    yaw: 0,
+    pitch: 0,
+    roll: 0,
+    steering: 0,
+  });
+  
+  const vehicleType = useMemo(() => {
+    if (currentProjectId.includes('quadcopter') || currentProjectId.includes('drone')) {
+      return 'drone';
+    } else if (currentProjectId.includes('car')) {
+      return 'car';
+    } else if (currentProjectId.includes('boat')) {
+      return 'boat';
+    }
+    return 'drone';
+  }, [currentProjectId]);
 
   // Memoize validation to prevent unnecessary recalculations
   const validationErrors = useMemo(() => validateProject(components), [components]);
@@ -153,6 +172,11 @@ const MechatronicsSimulator = () => {
             components={components}
             onUpdateComponents={setComponents}
             onSimulationStateChange={handleSimulationStateChange}
+            rcControls={rcControls}
+          />
+          <RCTransmitterUI
+            onControlChange={setRCControls}
+            vehicleType={vehicleType as 'drone' | 'car' | 'boat'}
           />
           <TelemetryPanel
             components={components}
