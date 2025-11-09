@@ -91,31 +91,38 @@ const MechatronicsSimulator = () => {
       <div className="flex-1 p-4 grid grid-cols-12 gap-4">
         {/* Left Panel */}
         <div className="col-span-3 space-y-4 overflow-auto max-h-[calc(100vh-8rem)]">
-          <Tabs defaultValue="library">
-            <TabsList className="w-full grid grid-cols-5">
-              <TabsTrigger value="library">Library</TabsTrigger>
-              <TabsTrigger value="projects">Projects</TabsTrigger>
-              <TabsTrigger value="validate">Validate</TabsTrigger>
-              <TabsTrigger value="connect">Connect</TabsTrigger>
-              <TabsTrigger value="code">Code</TabsTrigger>
-            </TabsList>
-            <TabsContent value="library">
+          <Tabs defaultValue="library" className="h-full">
+            <div className="space-y-2">
+              {/* First row of tabs */}
+              <TabsList className="w-full grid grid-cols-3">
+                <TabsTrigger value="library">Library</TabsTrigger>
+                <TabsTrigger value="projects">Projects</TabsTrigger>
+                <TabsTrigger value="validate">Validate</TabsTrigger>
+              </TabsList>
+              {/* Second row of tabs */}
+              <TabsList className="w-full grid grid-cols-2">
+                <TabsTrigger value="connect">Connect</TabsTrigger>
+                <TabsTrigger value="code">Code</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="library" className="mt-4">
               <ComponentLibrary3D onAddComponent={handleAddComponent} />
             </TabsContent>
-            <TabsContent value="projects">
+            <TabsContent value="projects" className="mt-4">
               <ProjectSelector onLoadProject={handleLoadProject} />
             </TabsContent>
-            <TabsContent value="validate">
+            <TabsContent value="validate" className="mt-4">
               <ValidationPanel errors={validationErrors} />
             </TabsContent>
-            <TabsContent value="connect">
+            <TabsContent value="connect" className="mt-4">
               <ConnectionManager 
                 components={components}
                 selectedComponent={selectedComponent}
                 onUpdateComponent={handleUpdateComponent}
               />
             </TabsContent>
-            <TabsContent value="code">
+            <TabsContent value="code" className="mt-4">
               <CodePanel
                 projectId={currentProjectId}
                 code={projectCode}

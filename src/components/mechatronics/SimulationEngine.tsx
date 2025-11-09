@@ -57,35 +57,33 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     dischargeCurrent: 0,
   });
 
-  // Handle keyboard controls
+  // Handle keyboard controls - update continuously
   useEffect(() => {
     if (!isRunning) return;
     
-    // Update throttle based on keyboard
-    if (keyboardControls.throttleUp) {
-      setThrottle((prev) => Math.min(1, prev + 0.02));
-    }
-    if (keyboardControls.throttleDown) {
-      setThrottle((prev) => Math.max(0, prev - 0.02));
-    }
-    
-    // Update steering based on keyboard
-    if (keyboardControls.left) {
-      setSteering((prev) => Math.max(-1, prev - 0.05));
-    } else if (keyboardControls.right) {
-      setSteering((prev) => Math.min(1, prev + 0.05));
-    } else {
-      // Return to center
-      setSteering((prev) => prev * 0.9);
-    }
-    
-    // Forward/backward for direct throttle control
-    if (keyboardControls.forward) {
-      setThrottle((prev) => Math.min(1, prev + 0.01));
-    }
-    if (keyboardControls.backward) {
-      setThrottle((prev) => Math.max(0, prev - 0.01));
-    }
+    const updateControls = () => {
+      // Update throttle based on keyboard
+      if (keyboardControls.throttleUp || keyboardControls.forward) {
+        setThrottle((prev) => Math.min(1, prev + 0.02));
+      }
+      if (keyboardControls.throttleDown || keyboardControls.backward) {
+        setThrottle((prev) => Math.max(0, prev - 0.02));
+      }
+      
+      // Update steering based on keyboard
+      if (keyboardControls.left) {
+        setSteering((prev) => Math.max(-1, prev - 0.05));
+      } else if (keyboardControls.right) {
+        setSteering((prev) => Math.min(1, prev + 0.05));
+      } else {
+        // Return to center
+        setSteering((prev) => Math.abs(prev) < 0.05 ? 0 : prev * 0.9);
+      }
+    };
+
+    // Update at 60fps
+    const interval = setInterval(updateControls, 16);
+    return () => clearInterval(interval);
   }, [isRunning, keyboardControls]);
 
   useEffect(() => {
@@ -108,7 +106,10 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         point: { x: 0, y: 0, z: 0 },
       });
 
-      // Motor/Propeller thrust
+      // Motor/Propeller thrust and steering
+      const hasWheels = components.some(c => c.type === "wheel");
+      const hasPropellers = components.some(c => c.type === "propeller");
+      
       components.forEach((comp) => {
         if (comp.type === "propeller") {
           const thrust = calculatePropellerThrust({
@@ -116,24 +117,52 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
             pitch: comp.properties.pitch,
             thrustCoefficient: comp.properties.thrustCoefficient,
             powerCoefficient: comp.properties.powerCoefficient,
-            rpm: 8000 * throttle, // RPM based on throttle
+            rpm: 8000 * throttle,
           });
 
-          forces.push({
-            vector: { x: 0, y: thrust, z: 0 },
-            point: comp.position,
-          });
+          // Apply thrust based on position (for drones, forward for boats/planes)
+          if (hasPropellers && !hasWheels) {
+            // Drone - vertical thrust
+            forces.push({
+              vector: { x: 0, y: thrust, z: 0 },
+              point: comp.position,
+            });
+          } else {
+            // Boat/plane - forward thrust
+            forces.push({
+              vector: { x: 0, y: 0, z: thrust },
+              point: comp.position,
+            });
+          }
         }
 
         if (comp.type === "dc_motor") {
           const current = (comp.properties.voltage / comp.properties.resistance) * throttle;
           totalCurrent += current;
+          
+          // For wheeled vehicles, apply forward/backward force
+          if (hasWheels && throttle > 0) {
+            const motorForce = throttle * 15; // N
+            forces.push({
+              vector: { x: 0, y: 0, z: motorForce },
+              point: comp.position,
+            });
+          }
         }
 
         if (comp.type === "esc") {
-          totalCurrent += 0.1; // ESC draw
+          totalCurrent += 0.1;
         }
       });
+
+      // Apply steering forces for wheeled vehicles
+      if (hasWheels && Math.abs(steering) > 0.01) {
+        const steeringForce = steering * 5; // Lateral force
+        forces.push({
+          vector: { x: steeringForce, y: 0, z: 0 },
+          point: { x: 0, y: 0, z: 1 }, // Front of vehicle
+        });
+      }
 
       // Drag
       const dragForce = calculateDrag(

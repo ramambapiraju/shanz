@@ -28,112 +28,9 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
     onClick(e);
   };
 
-  const getRotation = (type: string): [number, number, number] => {
-    // Adjust rotation for cylindrical components
-    if (type === "wheel") {
-      return [0, 0, Math.PI / 2]; // Rotate wheels to stand upright
-    }
-    if (type === "axle") {
-      return [0, 0, Math.PI / 2]; // Rotate axles horizontally
-    }
-    return [component.rotation.x, component.rotation.y, component.rotation.z];
-  };
-
-  const getMaterial = () => {
+  const getRealisticGeometry = () => {
     const baseColor = isSelected ? "#fbbf24" : component.color;
     
-    switch (component.type) {
-      case "dc_motor":
-      case "servo_motor":
-      case "stepper_motor":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.7}
-            roughness={0.3}
-            emissive={isSelected ? "#f59e0b" : "#000000"}
-            emissiveIntensity={isSelected ? 0.5 : 0}
-          />
-        );
-      case "wheel":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.2}
-            roughness={0.9}
-            emissive={isSelected ? "#f59e0b" : "#000000"}
-            emissiveIntensity={isSelected ? 0.3 : 0}
-          />
-        );
-      case "propeller":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.8}
-            roughness={0.2}
-            transparent
-            opacity={0.7}
-            emissive={isSelected ? "#f59e0b" : "#000000"}
-            emissiveIntensity={isSelected ? 0.4 : 0}
-          />
-        );
-      case "battery":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.5}
-            roughness={0.5}
-            emissive={isSelected ? "#f59e0b" : "#22c55e"}
-            emissiveIntensity={isSelected ? 0.5 : 0.1}
-          />
-        );
-      case "chassis":
-      case "frame":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.6}
-            roughness={0.4}
-            emissive={isSelected ? "#f59e0b" : "#000000"}
-            emissiveIntensity={isSelected ? 0.4 : 0}
-          />
-        );
-      case "gear":
-      case "axle":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.9}
-            roughness={0.2}
-            emissive={isSelected ? "#f59e0b" : "#000000"}
-            emissiveIntensity={isSelected ? 0.4 : 0}
-          />
-        );
-      case "esc":
-      case "sensor":
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.3}
-            roughness={0.6}
-            emissive={isSelected ? "#f59e0b" : "#3b82f6"}
-            emissiveIntensity={isSelected ? 0.5 : 0.2}
-          />
-        );
-      default:
-        return (
-          <meshStandardMaterial 
-            color={baseColor}
-            metalness={0.5}
-            roughness={0.5}
-            emissive={isSelected ? "#f59e0b" : "#000000"}
-            emissiveIntensity={isSelected ? 0.4 : 0}
-          />
-        );
-    }
-  };
-
-  const getRealisticGeometry = () => {
     switch (component.type) {
       case "dc_motor":
       case "stepper_motor":
@@ -141,7 +38,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <cylinderGeometry args={[0.18, 0.18, 0.4, 32]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.7}
+                roughness={0.3}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.5 : 0}
+              />
             </mesh>
             <mesh position={[0, 0.25, 0]} castShadow>
               <cylinderGeometry args={[0.04, 0.04, 0.15, 16]} />
@@ -163,7 +66,7 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                 rotation={[0, 0, 0]}
               >
                 <torusGeometry args={[0.19, 0.01, 8, 32]} />
-                <meshStandardMaterial color={component.color} metalness={0.8} roughness={0.3} />
+                <meshStandardMaterial color={baseColor} metalness={0.8} roughness={0.3} />
               </mesh>
             ))}
           </group>
@@ -174,7 +77,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <boxGeometry args={[0.35, 0.2, 0.3]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.6}
+                roughness={0.4}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.5 : 0}
+              />
             </mesh>
             <mesh position={[0, 0.15, 0]} castShadow>
               <cylinderGeometry args={[0.08, 0.08, 0.05, 16]} />
@@ -187,7 +96,7 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
             {[-1, 1].map((side, i) => (
               <mesh key={i} position={[side * 0.2, 0, 0]}>
                 <boxGeometry args={[0.05, 0.15, 0.3]} />
-                <meshStandardMaterial color={component.color} metalness={0.6} roughness={0.4} />
+                <meshStandardMaterial color={baseColor} metalness={0.6} roughness={0.4} />
               </mesh>
             ))}
           </group>
@@ -196,14 +105,22 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
       case "wheel":
         return (
           <group ref={groupRef} rotation={[0, 0, Math.PI / 2]}>
+            {/* Tire */}
             <mesh castShadow receiveShadow>
               <cylinderGeometry args={[0.22, 0.22, 0.18, 32]} />
-              <meshStandardMaterial color="#1a1a1a" roughness={0.95} />
+              <meshStandardMaterial 
+                color="#1a1a1a" 
+                roughness={0.95}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.3 : 0}
+              />
             </mesh>
+            {/* Rim */}
             <mesh position={[0, 0, 0]}>
               <cylinderGeometry args={[0.15, 0.15, 0.19, 32]} />
               <meshStandardMaterial color="#808080" metalness={0.9} roughness={0.2} />
             </mesh>
+            {/* Rim spokes */}
             {Array.from({ length: 6 }).map((_, i) => (
               <mesh 
                 key={i}
@@ -218,10 +135,12 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                 <meshStandardMaterial color="#606060" metalness={0.8} roughness={0.3} />
               </mesh>
             ))}
+            {/* Hub */}
             <mesh position={[0, 0, 0]}>
               <cylinderGeometry args={[0.04, 0.04, 0.22, 16]} />
               <meshStandardMaterial color="#303030" metalness={0.7} roughness={0.4} />
             </mesh>
+            {/* Tire tread */}
             {Array.from({ length: 24 }).map((_, i) => (
               <mesh 
                 key={`tread-${i}`}
@@ -243,6 +162,7 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
         const bladeCount = component.properties.blades || 2;
         return (
           <group ref={groupRef}>
+            {/* Hub */}
             <mesh castShadow receiveShadow>
               <cylinderGeometry args={[0.06, 0.08, 0.06, 16]} />
               <meshStandardMaterial 
@@ -251,10 +171,12 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                 roughness={0.2}
               />
             </mesh>
+            {/* Center mounting */}
             <mesh position={[0, 0.04, 0]}>
               <cylinderGeometry args={[0.03, 0.03, 0.02, 12]} />
               <meshStandardMaterial color="#c0c0c0" metalness={0.95} roughness={0.1} />
             </mesh>
+            {/* Blades */}
             {Array.from({ length: bladeCount }).map((_, i) => {
               const angle = (i / bladeCount) * Math.PI * 2;
               return (
@@ -266,12 +188,17 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                   >
                     <boxGeometry args={[0.75, 0.02, 0.12]} />
                     <meshStandardMaterial 
-                      color={component.color}
+                      color={baseColor}
                       metalness={0.5}
                       roughness={0.15}
                       side={THREE.DoubleSide}
+                      transparent
+                      opacity={0.85}
+                      emissive={isSelected ? "#f59e0b" : "#000000"}
+                      emissiveIntensity={isSelected ? 0.4 : 0}
                     />
                   </mesh>
+                  {/* Blade reinforcement */}
                   <mesh 
                     position={[0.4, 0.015, 0]}
                     rotation={[0, 0, Math.PI / 12]}
@@ -290,7 +217,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <boxGeometry args={[0.45, 0.18, 0.28]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.5}
+                roughness={0.5}
+                emissive={isSelected ? "#f59e0b" : "#22c55e"}
+                emissiveIntensity={isSelected ? 0.5 : 0.1}
+              />
             </mesh>
             <mesh position={[0.15, 0.12, 0.1]} castShadow>
               <cylinderGeometry args={[0.025, 0.025, 0.05, 12]} />
@@ -322,7 +255,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <boxGeometry args={[0.28, 0.1, 0.2]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.7}
+                roughness={0.3}
+                emissive={isSelected ? "#f59e0b" : "#3b82f6"}
+                emissiveIntensity={isSelected ? 0.5 : 0.2}
+              />
             </mesh>
             {Array.from({ length: 7 }).map((_, i) => (
               <mesh 
@@ -361,7 +300,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <cylinderGeometry args={[0.22, 0.22, 0.1, teeth * 2]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.9}
+                roughness={0.2}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.4 : 0}
+              />
             </mesh>
             {Array.from({ length: teeth }).map((_, i) => {
               const angle = (i / teeth) * Math.PI * 2;
@@ -378,7 +323,7 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                 >
                   <boxGeometry args={[0.06, 0.1, 0.05]} />
                   <meshStandardMaterial 
-                    color={component.color}
+                    color={baseColor}
                     metalness={0.9}
                     roughness={0.15}
                   />
@@ -395,14 +340,22 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
       case "sensor":
         return (
           <group ref={groupRef}>
+            {/* Sensor PCB */}
             <mesh castShadow receiveShadow>
               <boxGeometry args={[0.18, 0.02, 0.18]} />
-              <meshStandardMaterial color="#006400" roughness={0.8} />
+              <meshStandardMaterial 
+                color="#006400" 
+                roughness={0.8}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.3 : 0}
+              />
             </mesh>
+            {/* Sensor chip */}
             <mesh position={[0, 0.02, 0]} castShadow>
               <boxGeometry args={[0.08, 0.025, 0.08]} />
               <meshStandardMaterial color="#1a1a1a" metalness={0.5} roughness={0.5} />
             </mesh>
+            {/* LED indicator */}
             <mesh position={[0.05, 0.02, 0.05]}>
               <sphereGeometry args={[0.015, 12, 12]} />
               <meshStandardMaterial 
@@ -411,6 +364,7 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                 emissiveIntensity={0.7}
               />
             </mesh>
+            {/* Pin headers */}
             {[-0.06, -0.02, 0.02, 0.06].map((x, i) => (
               <mesh key={i} position={[x, -0.025, 0.07]}>
                 <boxGeometry args={[0.015, 0.04, 0.015]} />
@@ -425,12 +379,18 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <boxGeometry args={[1, 0.12, 0.65]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.6}
+                roughness={0.4}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.4 : 0}
+              />
             </mesh>
             {[-0.35, 0, 0.35].map((x, i) => (
               <mesh key={i} position={[x, -0.05, 0]}>
                 <boxGeometry args={[0.03, 0.02, 0.6]} />
-                <meshStandardMaterial color={component.color} metalness={0.7} roughness={0.3} />
+                <meshStandardMaterial color={baseColor} metalness={0.7} roughness={0.3} />
               </mesh>
             ))}
             {[-0.4, -0.2, 0.2, 0.4].map((x) =>
@@ -449,7 +409,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
           <group ref={groupRef}>
             <mesh castShadow receiveShadow>
               <boxGeometry args={[0.9, 0.06, 0.9]} />
-              {getMaterial()}
+              <meshStandardMaterial 
+                color={baseColor}
+                metalness={0.6}
+                roughness={0.4}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.4 : 0}
+              />
             </mesh>
             {[
               [0.4, 0, 0.4], [-0.4, 0, 0.4],
@@ -459,7 +425,7 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
                 <mesh position={pos as [number, number, number]} castShadow>
                   <cylinderGeometry args={[0.025, 0.025, 0.45, 16]} />
                   <meshStandardMaterial 
-                    color={component.color}
+                    color={baseColor}
                     metalness={0.8}
                     roughness={0.2}
                   />
@@ -479,9 +445,11 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
             <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
               <cylinderGeometry args={[0.035, 0.035, 1, 24]} />
               <meshStandardMaterial 
-                color={component.color}
+                color={baseColor}
                 metalness={0.95}
                 roughness={0.1}
+                emissive={isSelected ? "#f59e0b" : "#000000"}
+                emissiveIntensity={isSelected ? 0.4 : 0}
               />
             </mesh>
           </group>
@@ -491,7 +459,13 @@ const ComponentMesh: React.FC<ComponentMeshProps> = ({ component, isSelected, on
         return (
           <mesh castShadow receiveShadow>
             <boxGeometry args={[0.5, 0.5, 0.5]} />
-            {getMaterial()}
+            <meshStandardMaterial 
+              color={baseColor}
+              metalness={0.5}
+              roughness={0.5}
+              emissive={isSelected ? "#f59e0b" : "#000000"}
+              emissiveIntensity={isSelected ? 0.4 : 0}
+            />
           </mesh>
         );
     }
