@@ -47,27 +47,27 @@ export const Header = () => {
           </div>
 
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-3 hover:bg-muted/50 rounded-lg transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
           </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden pb-6 animate-fade-in">
-            <div className="flex flex-col gap-4">
+          <div className="md:hidden pb-6 animate-fade-in bg-background/95 backdrop-blur-md">
+            <div className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className="text-foreground hover:text-primary transition-colors font-medium text-left py-2"
+                  className="text-foreground hover:text-primary hover:bg-muted/50 transition-colors font-medium text-left py-4 px-4 rounded-lg"
                 >
                   {item.label}
                 </button>
               ))}
-              <Button variant="default" size="lg" onClick={() => scrollToSection("join")}>
+              <Button variant="default" size="lg" className="mt-2" onClick={() => scrollToSection("join")}>
                 Get Started
               </Button>
             </div>

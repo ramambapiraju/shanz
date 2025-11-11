@@ -32,22 +32,22 @@ export const HeroSection = () => {
             </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in leading-tight px-4">
             Inspiring Gen Z from{" "}
             <span className="text-secondary">Scrolling</span> to{" "}
             <span className="text-secondary">Building</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-primary-foreground/90 mb-12 animate-fade-in max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-12 animate-fade-in max-w-3xl mx-auto px-4">
             A next-gen STEM and innovation platform merging learning with creation through DIY electronics, 
             mechatronics projects, and AI-integrated simulations.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in px-4">
             <Button 
               size="lg" 
               variant="secondary"
-              className="text-lg px-8 py-6 font-semibold shadow-lg hover:shadow-xl transition-all"
+              className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 font-semibold shadow-lg hover:shadow-xl transition-all min-h-[48px]"
               onClick={() => scrollToSection("simulator")}
             >
               Try Simulator Beta
@@ -56,7 +56,7 @@ export const HeroSection = () => {
             <Button 
               size="lg" 
               variant="outline"
-              className="text-lg px-8 py-6 font-semibold bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
+              className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 font-semibold bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 min-h-[48px]"
               onClick={() => scrollToSection("about")}
             >
               Learn More
