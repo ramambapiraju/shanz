@@ -279,13 +279,13 @@ All colors MUST be HSL.
     --primary: 221 83% 33%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 24 95% 53%;
+    --secondary: 24 95% 42%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 18% 97%;
     --muted-foreground: 221 39% 45%;
 
-    --accent: 24 95% 53%;
+    --accent: 24 95% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -301,8 +301,8 @@ All colors MUST be HSL.
     --brand-blue: 221 83% 33%;
     --brand-blue-light: 221 83% 45%;
     --brand-blue-dark: 221 83% 20%;
-    --brand-orange: 24 95% 53%;
-    --brand-orange-light: 24 95% 65%;
+    --brand-orange: 24 95% 42%;
+    --brand-orange-light: 24 95% 55%;
     
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--brand-blue)) 0%, hsl(var(--brand-blue-light)) 100%);
