@@ -80,9 +80,9 @@ export const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Recognition</h3>
             <div className="bg-secondary/20 backdrop-blur-sm rounded-lg p-4 border border-secondary/30">
               <p className="text-sm text-primary-foreground/90 leading-relaxed">
-                <strong>3rd Prize Winner</strong><br />
-                ASME IMECE 2025<br />
-                International Pitchathon
+                <strong>WINNER</strong><br />
+                AMERICAN SOCIETY OF MECHANICAL ENGINEERS<br />
+                (ASME IMECE) INTERNATIONAL PITCHATHON 2025
               </p>
             </div>
           </div>
