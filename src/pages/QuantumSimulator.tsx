@@ -1,19 +1,69 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AvatarSelection } from "@/components/quantum/AvatarSelection";
+import { QuantumGameWorld } from "@/components/quantum/QuantumGameWorld";
+import { GameOverScreen } from "@/components/quantum/GameOverScreen";
 import { QuantumCanvas } from "@/components/quantum/QuantumCanvas";
 import { QuantumCircuit } from "@/components/quantum/QuantumCircuit";
 import { QuantumTutorial } from "@/components/quantum/QuantumTutorial";
 import { QuantumChallenges } from "@/components/quantum/QuantumChallenges";
-import { Sparkles, Zap, Network, Award } from "lucide-react";
+import { Sparkles, Zap, Network, Award, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 
+type GameState = "menu" | "avatar-select" | "playing" | "game-over";
+
+interface PlayerData {
+  name: string;
+  avatar: {
+    id: string;
+    name: string;
+    icon: any;
+    color: string;
+    specialty: string;
+  };
+  score: number;
+  survived: boolean;
+}
+
 const QuantumSimulator = () => {
+  const navigate = useNavigate();
+  const [gameState, setGameState] = useState<GameState>("menu");
+  const [playerData, setPlayerData] = useState<PlayerData | null>(null);
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [activeTab, setActiveTab] = useState("playground");
+
+  const handleStartGame = () => {
+    setGameState("avatar-select");
+  };
+
+  const handleAvatarSelected = (playerName: string, avatar: any) => {
+    setPlayerData({
+      name: playerName,
+      avatar,
+      score: 0,
+      survived: false
+    });
+    setGameState("playing");
+  };
+
+  const handleGameOver = (finalScore: number, survived: boolean) => {
+    setPlayerData(prev => prev ? { ...prev, score: finalScore, survived } : null);
+    setGameState("game-over");
+  };
+
+  const handleRestart = () => {
+    setGameState("avatar-select");
+  };
+
+  const handleExit = () => {
+    setGameState("menu");
+    setPlayerData(null);
+  };
 
   const handleLevelComplete = (points: number) => {
     setScore(prev => prev + points);
@@ -23,6 +73,34 @@ const QuantumSimulator = () => {
     });
   };
 
+  // Game Mode - Battle Royale Style
+  if (gameState === "avatar-select") {
+    return <AvatarSelection onStart={handleAvatarSelected} />;
+  }
+
+  if (gameState === "playing" && playerData) {
+    return (
+      <QuantumGameWorld
+        playerName={playerData.name}
+        avatar={playerData.avatar}
+        onGameOver={handleGameOver}
+      />
+    );
+  }
+
+  if (gameState === "game-over" && playerData) {
+    return (
+      <GameOverScreen
+        playerName={playerData.name}
+        score={playerData.score}
+        survived={playerData.survived}
+        onRestart={handleRestart}
+        onExit={handleExit}
+      />
+    );
+  }
+
+  // Menu Mode - Learning Playground
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -40,9 +118,36 @@ const QuantumSimulator = () => {
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Not a textbook. Not a lecture. A game — where intuition becomes the teacher.
-            Discover the quantum universe through play, experimentation, and wonder.
+            Choose your adventure: Jump into battle royale mode or explore the quantum universe at your own pace!
           </p>
+
+          {/* Mode Selection */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
+            <Card 
+              className="p-8 cursor-pointer hover:scale-105 transition-all bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/50 hover:border-purple-500"
+              onClick={handleStartGame}
+            >
+              <Gamepad2 className="h-16 w-16 mx-auto mb-4 text-purple-400" />
+              <h3 className="text-2xl font-bold mb-2">Battle Royale Mode</h3>
+              <p className="text-muted-foreground mb-4">
+                Enter as an avatar, survive quantum challenges, and compete to become the champion!
+              </p>
+              <Button size="lg" className="w-full bg-purple-600 hover:bg-purple-500">
+                START GAME
+              </Button>
+            </Card>
+
+            <Card className="p-8 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-500/50">
+              <Sparkles className="h-16 w-16 mx-auto mb-4 text-blue-400" />
+              <h3 className="text-2xl font-bold mb-2">Learning Playground</h3>
+              <p className="text-muted-foreground mb-4">
+                Explore quantum concepts freely without pressure. Perfect for beginners!
+              </p>
+              <Button size="lg" variant="outline" className="w-full">
+                EXPLORE (Below)
+              </Button>
+            </Card>
+          </div>
 
           {/* Stats Bar */}
           <div className="flex justify-center gap-6 mb-8">
@@ -68,7 +173,7 @@ const QuantumSimulator = () => {
           </div>
         </div>
 
-        {/* Main Tabs */}
+        {/* Learning Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="playground" className="gap-2">
