@@ -39,10 +39,10 @@ export const QuantumSection = () => {
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Quantum Computing{" "}
             <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Learning Game
+              QUANTUM SPAN
             </span>
+            {" "}Battle Royale
           </h2>
           
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
