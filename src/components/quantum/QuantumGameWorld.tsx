@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, Sphere, Text, Box, Cylinder, Ring } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { PerspectiveCamera, Sphere, Text, Box, Ring, KeyboardControls } from "@react-three/drei";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Shield, Clock, Target, Activity } from "lucide-react";
+import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Clock, Activity } from "lucide-react";
 import { toast } from "sonner";
 import * as THREE from "three";
+import { useKeyboardControls } from "@/hooks/useKeyboardControls";
 
 interface PlayerAvatar {
   id: string;
@@ -117,24 +118,54 @@ const CHALLENGES: Challenge[] = [
   }
 ];
 
-const PlayerModel = ({ position, color }: { position: [number, number, number]; color: string }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+const FPVPlayer = ({ 
+  color, 
+  onPositionChange 
+}: { 
+  color: string;
+  onPositionChange: (pos: THREE.Vector3, rot: THREE.Euler) => void;
+}) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+  const keys = useKeyboardControls();
+  const velocity = useRef(new THREE.Vector3());
+  const direction = useRef(new THREE.Vector3());
 
-  useEffect(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.01;
+  useFrame((state, delta) => {
+    if (!groupRef.current || !cameraRef.current) return;
+
+    // Movement
+    direction.current.set(0, 0, 0);
+    
+    if (keys.forward) direction.current.z -= 1;
+    if (keys.backward) direction.current.z += 1;
+    if (keys.left) direction.current.x -= 1;
+    if (keys.right) direction.current.x += 1;
+
+    if (direction.current.length() > 0) {
+      direction.current.normalize();
+      direction.current.applyEuler(groupRef.current.rotation);
+      
+      velocity.current.lerp(direction.current.multiplyScalar(5), 0.1);
+    } else {
+      velocity.current.lerp(new THREE.Vector3(), 0.1);
     }
+
+    groupRef.current.position.add(velocity.current.clone().multiplyScalar(delta));
+    groupRef.current.position.y = 1.5; // Keep at ground level
+
+    // Camera follows player
+    cameraRef.current.position.copy(groupRef.current.position);
+    cameraRef.current.position.y += 0.6; // Eye height
+    
+    onPositionChange(groupRef.current.position, groupRef.current.rotation);
   });
 
   return (
-    <group position={position}>
-      <Sphere args={[0.5, 32, 32]} ref={meshRef}>
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
-      </Sphere>
-      <Cylinder args={[0.3, 0.3, 1, 32]} position={[0, -1, 0]}>
-        <meshStandardMaterial color={color} />
-      </Cylinder>
-    </group>
+    <>
+      <PerspectiveCamera ref={cameraRef} makeDefault fov={75} near={0.1} far={1000} />
+      <group ref={groupRef} position={[0, 1.5, 0]} />
+    </>
   );
 };
 
@@ -181,6 +212,8 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
   const [gameTime, setGameTime] = useState(0);
   const [safeZoneRadius, setSafeZoneRadius] = useState(30);
   const [challengeTimer, setChallengeTimer] = useState<number | null>(null);
+  const [playerPosition, setPlayerPosition] = useState(new THREE.Vector3(0, 0, 0));
+  const [playerRotation, setPlayerRotation] = useState(new THREE.Euler(0, 0, 0));
 
   // Safe zone shrinks over time (battle royale mechanic)
   useEffect(() => {
@@ -196,7 +229,10 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
     const timer = setInterval(() => {
       setGameTime(prev => prev + 1);
       // Environmental damage if outside safe zone
-      const playerDistance = 0; // Player is at origin
+      const playerDistance = Math.sqrt(
+        playerPosition.x * playerPosition.x + 
+        playerPosition.z * playerPosition.z
+      );
       if (playerDistance > safeZoneRadius) {
         setHealth(prev => Math.max(0, prev - 2));
         toast.error("Outside safe zone! Taking damage!");
@@ -204,7 +240,7 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [safeZoneRadius]);
+  }, [safeZoneRadius, playerPosition]);
 
   // Challenge timer
   useEffect(() => {
@@ -232,7 +268,7 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
       }
     }
     if (challengesCompleted >= CHALLENGES.length) {
-      toast.success("🏆 QUANTUM CLASH CHAMPION!", {
+      toast.success("🏆 SHAN Z WORLD CHAMPION!", {
         description: "You conquered the quantum universe!"
       });
       onGameOver(score, true);
@@ -240,11 +276,27 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
   }, [health, lives, challengesCompleted, score, onGameOver]);
 
   const handleOrbClick = (challengeIndex: number) => {
+    if (currentChallenge) return; // Don't allow multiple challenges at once
     if (challengeIndex < challengesCompleted) {
       toast.info("Challenge already completed!");
       return;
     }
+    
     const challenge = CHALLENGES[challengeIndex];
+    const angle = (challengeIndex / CHALLENGES.length) * Math.PI * 2;
+    const radius = 8;
+    const orbX = Math.cos(angle) * radius;
+    const orbZ = Math.sin(angle) * radius;
+    const distance = Math.sqrt(
+      Math.pow(playerPosition.x - orbX, 2) + 
+      Math.pow(playerPosition.z - orbZ, 2)
+    );
+    
+    if (distance > 3) {
+      toast.error("Too far! Move closer to the challenge orb.");
+      return;
+    }
+    
     setCurrentChallenge(challenge);
     setChallengeTimer(challenge.timeLimit);
     toast.info(`${challenge.title} - ${challenge.timeLimit}s`, {
@@ -441,16 +493,19 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
       {/* 3D Game World */}
       <div className="h-screen pt-32">
         <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 5, 15]} />
-          <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2} />
-          
           <ambientLight intensity={0.3} />
           <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
           <pointLight position={[-10, 10, -10]} intensity={0.5} color="#8b5cf6" />
           <pointLight position={[0, 20, 0]} intensity={0.8} color="#ec4899" />
 
-          {/* Player */}
-          <PlayerModel position={[0, 0.5, 0]} color={avatar.color.split(' ')[1]} />
+          {/* FPV Player */}
+          <FPVPlayer 
+            color={avatar.color.split(' ')[1]} 
+            onPositionChange={(pos, rot) => {
+              setPlayerPosition(pos);
+              setPlayerRotation(rot);
+            }}
+          />
 
           {/* Challenge Orbs */}
           {CHALLENGES.map((challenge, index) => {
@@ -501,6 +556,17 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
           
           <gridHelper args={[80, 80, "#6366f1", "#312e81"]} />
         </Canvas>
+        
+        {/* Controls Info */}
+        <div className="fixed bottom-4 left-4 z-10">
+          <Card className="p-3 bg-slate-900/80 backdrop-blur-lg border-purple-500/30">
+            <div className="text-xs text-slate-300 space-y-1">
+              <div><span className="font-bold">WASD</span> - Move</div>
+              <div><span className="font-bold">Mouse</span> - Look Around</div>
+              <div><span className="font-bold">Click Orb</span> - Start Challenge</div>
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* Challenge Modal */}

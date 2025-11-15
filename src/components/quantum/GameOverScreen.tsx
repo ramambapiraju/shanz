@@ -19,10 +19,10 @@ export const GameOverScreen = ({ playerName, score, survived, onRestart, onExit 
             <div className="space-y-4">
               <Trophy className="h-24 w-24 mx-auto text-yellow-500 animate-pulse" />
               <h1 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                VICTORY ROYALE!
+                QUANTUM CHAMPION!
               </h1>
               <p className="text-xl text-purple-200">
-                Congratulations, {playerName}! You mastered the quantum universe!
+                Congratulations, {playerName}! You survived Shan Z World and mastered quantum computing!
               </p>
             </div>
           </>

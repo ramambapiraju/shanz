@@ -40,7 +40,7 @@ export const QuantumSection = () => {
           
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              QUANTUM CLASH
+              SHAN Z WORLD
             </span>
           </h2>
           
