@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AvatarSelection } from "@/components/quantum/AvatarSelection";
+import { AircraftDrop } from "@/components/quantum/AircraftDrop";
 import { QuantumGameWorld } from "@/components/quantum/QuantumGameWorld";
 import { GameOverScreen } from "@/components/quantum/GameOverScreen";
 import { QuantumCanvas } from "@/components/quantum/QuantumCanvas";
@@ -14,7 +15,7 @@ import { QuantumChallenges } from "@/components/quantum/QuantumChallenges";
 import { Sparkles, Zap, Network, Award, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 
-type GameState = "menu" | "avatar-select" | "playing" | "game-over";
+type GameState = "menu" | "avatar-select" | "aircraft-drop" | "playing" | "game-over";
 
 interface PlayerData {
   name: string;
@@ -48,6 +49,10 @@ const QuantumSimulator = () => {
       score: 0,
       survived: false
     });
+    setGameState("aircraft-drop");
+  };
+
+  const handleLanded = () => {
     setGameState("playing");
   };
 
@@ -76,6 +81,15 @@ const QuantumSimulator = () => {
   // Game Mode - Battle Royale Style
   if (gameState === "avatar-select") {
     return <AvatarSelection onStart={handleAvatarSelected} />;
+  }
+
+  if (gameState === "aircraft-drop" && playerData) {
+    return (
+      <AircraftDrop
+        playerName={playerData.name}
+        onLanded={handleLanded}
+      />
+    );
   }
 
   if (gameState === "playing" && playerData) {
@@ -114,7 +128,7 @@ const QuantumSimulator = () => {
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Quantum Computing Playground
+            QUANTUM SPAN
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">

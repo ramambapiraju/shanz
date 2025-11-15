@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, Sphere, Text, Box, Cylinder } from "@react-three/drei";
+import { OrbitControls, PerspectiveCamera, Sphere, Text, Box, Cylinder, Ring } from "@react-three/drei";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Zap, Trophy, AlertCircle, ChevronRight } from "lucide-react";
+import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Shield, Clock } from "lucide-react";
 import { toast } from "sonner";
 import * as THREE from "three";
 
@@ -20,45 +20,47 @@ interface PlayerAvatar {
 interface Challenge {
   id: number;
   topic: string;
-  question: string;
-  options: string[];
-  correct: number;
+  type: "quiz" | "circuit" | "combat" | "collect";
+  title: string;
+  description: string;
+  question?: string;
+  options?: string[];
+  correct?: number;
   points: number;
   zone: string;
+  difficulty: "easy" | "medium" | "hard";
+  timeLimit: number;
 }
 
 const CHALLENGES: Challenge[] = [
   {
     id: 1,
     topic: "Quantum Mechanics",
-    question: "What is superposition?",
-    options: [
-      "A qubit being 0 AND 1 at the same time",
-      "A qubit being either 0 OR 1",
-      "Two qubits connected",
-      "Measuring a quantum state"
-    ],
-    correct: 0,
-    points: 100,
-    zone: "Mechanics Zone"
+    type: "combat",
+    title: "Superposition Strike",
+    description: "Apply Hadamard gate to defeat quantum enemies!",
+    points: 150,
+    zone: "Mechanics Arena",
+    difficulty: "easy",
+    timeLimit: 30
   },
   {
     id: 2,
-    topic: "Qiskit Basics",
-    question: "Which Qiskit class creates a quantum circuit?",
-    options: [
-      "QuantumGate()",
-      "QuantumCircuit()",
-      "QuantumRegister()",
-      "QuantumSimulator()"
-    ],
-    correct: 1,
-    points: 150,
-    zone: "Qiskit Zone"
+    topic: "Qiskit",
+    type: "circuit",
+    title: "Circuit Builder",
+    description: "Build a working quantum circuit in 60 seconds!",
+    points: 200,
+    zone: "Qiskit Lab",
+    difficulty: "medium",
+    timeLimit: 60
   },
   {
     id: 3,
     topic: "Quantum Hardware",
+    type: "quiz",
+    title: "Hardware Knowledge",
+    description: "Answer quantum hardware questions correctly!",
     question: "What temperature do quantum computers operate at?",
     options: [
       "Room temperature",
@@ -67,26 +69,39 @@ const CHALLENGES: Challenge[] = [
       "100°C"
     ],
     correct: 2,
-    points: 200,
-    zone: "Hardware Zone"
+    points: 150,
+    zone: "Hardware Sector",
+    difficulty: "medium",
+    timeLimit: 20
   },
   {
     id: 4,
     topic: "Entanglement",
-    question: "What happens when you measure one entangled qubit?",
-    options: [
-      "Nothing changes",
-      "The other qubit's state is instantly determined",
-      "Both qubits become 0",
-      "The entanglement breaks slowly"
-    ],
-    correct: 1,
-    points: 150,
-    zone: "Mechanics Zone"
+    type: "combat",
+    title: "Entanglement Battle",
+    description: "Create entangled pairs to neutralize threats!",
+    points: 250,
+    zone: "Entanglement Field",
+    difficulty: "hard",
+    timeLimit: 45
   },
   {
     id: 5,
-    topic: "Quantum Heat Transfer",
+    topic: "Quantum Resources",
+    type: "collect",
+    title: "Qubit Collection",
+    description: "Collect quantum resources before time runs out!",
+    points: 100,
+    zone: "Resource Zone",
+    difficulty: "easy",
+    timeLimit: 40
+  },
+  {
+    id: 6,
+    topic: "Heat Transfer",
+    type: "quiz",
+    title: "Cooling Crisis",
+    description: "Solve heat transfer problems to survive!",
     question: "Why do quantum computers need extreme cooling?",
     options: [
       "To make them faster",
@@ -95,8 +110,10 @@ const CHALLENGES: Challenge[] = [
       "To make them smaller"
     ],
     correct: 1,
-    points: 250,
-    zone: "Hardware Zone"
+    points: 200,
+    zone: "Thermal Zone",
+    difficulty: "hard",
+    timeLimit: 25
   }
 ];
 
@@ -156,26 +173,59 @@ interface Props {
 
 export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
   const [health, setHealth] = useState(100);
+  const [shield, setShield] = useState(50);
   const [score, setScore] = useState(0);
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [challengesCompleted, setChallengesCompleted] = useState(0);
   const [gameTime, setGameTime] = useState(0);
+  const [safeZoneRadius, setSafeZoneRadius] = useState(30);
+  const [challengeTimer, setChallengeTimer] = useState<number | null>(null);
 
+  // Safe zone shrinks over time (battle royale mechanic)
+  useEffect(() => {
+    const shrinkInterval = setInterval(() => {
+      setSafeZoneRadius(prev => Math.max(10, prev - 0.5));
+    }, 5000);
+
+    return () => clearInterval(shrinkInterval);
+  }, []);
+
+  // Game timer
   useEffect(() => {
     const timer = setInterval(() => {
       setGameTime(prev => prev + 1);
+      // Environmental damage if outside safe zone
+      const playerDistance = 0; // Player is at origin
+      if (playerDistance > safeZoneRadius) {
+        setHealth(prev => Math.max(0, prev - 2));
+        toast.error("Outside safe zone! Taking damage!");
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [safeZoneRadius]);
+
+  // Challenge timer
+  useEffect(() => {
+    if (challengeTimer !== null && challengeTimer > 0) {
+      const timer = setTimeout(() => {
+        setChallengeTimer(prev => prev ? prev - 1 : 0);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (challengeTimer === 0) {
+      handleChallengeFailed();
+    }
+  }, [challengeTimer]);
 
   useEffect(() => {
     if (health <= 0) {
-      toast.error("Game Over! You ran out of health.");
+      toast.error("💀 Eliminated! You ran out of health.");
       onGameOver(score, false);
     }
     if (challengesCompleted >= CHALLENGES.length) {
-      toast.success("Victory! You mastered the quantum universe!");
+      toast.success("🏆 QUANTUM SPAN CHAMPION!", {
+        description: "You conquered the quantum universe!"
+      });
       onGameOver(score, true);
     }
   }, [health, challengesCompleted, score]);
@@ -185,25 +235,75 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
       toast.info("Challenge already completed!");
       return;
     }
-    setCurrentChallenge(CHALLENGES[challengeIndex]);
+    const challenge = CHALLENGES[challengeIndex];
+    setCurrentChallenge(challenge);
+    setChallengeTimer(challenge.timeLimit);
+    toast.info(`${challenge.title} - ${challenge.timeLimit}s`, {
+      description: challenge.description
+    });
+  };
+
+  const handleChallengeFailed = () => {
+    if (!currentChallenge) return;
+    
+    const damage = currentChallenge.difficulty === "hard" ? 30 : 
+                   currentChallenge.difficulty === "medium" ? 20 : 15;
+    
+    if (shield > 0) {
+      setShield(prev => Math.max(0, prev - damage));
+      toast.warning("Shield absorbed damage!", {
+        description: `-${damage} shield`
+      });
+    } else {
+      setHealth(prev => Math.max(0, prev - damage));
+      toast.error("Challenge failed! Taking damage!", {
+        description: `-${damage} HP`
+      });
+    }
+    
+    setCurrentChallenge(null);
+    setChallengeTimer(null);
+  };
+
+  const handleChallengeSuccess = () => {
+    if (!currentChallenge) return;
+
+    const bonusPoints = Math.floor(currentChallenge.points * (challengeTimer || 0) / currentChallenge.timeLimit);
+    const totalPoints = currentChallenge.points + bonusPoints;
+    
+    setScore(prev => prev + totalPoints);
+    setChallengesCompleted(prev => prev + 1);
+    
+    toast.success(`${currentChallenge.title} Complete! 🎯`, {
+      description: `+${totalPoints} points (${bonusPoints} time bonus)`
+    });
+    
+    // Restore some shield on success
+    setShield(prev => Math.min(100, prev + 10));
+    
+    setCurrentChallenge(null);
+    setChallengeTimer(null);
   };
 
   const handleAnswer = (selectedIndex: number) => {
-    if (!currentChallenge) return;
+    if (!currentChallenge || currentChallenge.type !== "quiz") return;
 
     if (selectedIndex === currentChallenge.correct) {
-      setScore(prev => prev + currentChallenge.points);
-      setChallengesCompleted(prev => prev + 1);
-      toast.success("Correct! ⚡", {
-        description: `+${currentChallenge.points} points!`
-      });
+      handleChallengeSuccess();
     } else {
-      setHealth(prev => Math.max(0, prev - 20));
-      toast.error("Wrong answer! -20 HP", {
-        description: "Study and try again!"
-      });
+      handleChallengeFailed();
     }
-    setCurrentChallenge(null);
+  };
+
+  const handleCombatAction = (action: "hadamard" | "entangle" | "measure") => {
+    // Simulate combat success based on action
+    const success = Math.random() > 0.3; // 70% success rate
+    if (success) {
+      handleChallengeSuccess();
+    } else {
+      toast.error("Attack missed!");
+      handleChallengeFailed();
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -226,10 +326,17 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
                   <Badge className="bg-purple-500/20 text-purple-300">{avatar.specialty}</Badge>
                 </div>
                 <div className="font-bold text-white text-lg">{playerName}</div>
-                <div className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-red-500" />
-                  <Progress value={health} className="flex-1" />
-                  <span className="text-sm font-mono text-white">{health}%</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-red-500" />
+                    <Progress value={health} className="flex-1" />
+                    <span className="text-sm font-mono text-white">{health}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-blue-400" />
+                    <Progress value={shield} className="flex-1 h-2" />
+                    <span className="text-xs font-mono text-blue-300">{shield}</span>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -255,11 +362,19 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
               </div>
             </Card>
 
-            {/* Objective */}
+            {/* Objective & Safe Zone */}
             <Card className="p-4 bg-slate-900/80 backdrop-blur-lg border-purple-500/30">
-              <div className="text-sm">
-                <div className="text-slate-400 mb-1">Mission Objective:</div>
-                <div className="text-white font-semibold">Complete all quantum challenges to survive!</div>
+              <div className="text-sm space-y-2">
+                <div>
+                  <div className="text-slate-400 mb-1">Mission:</div>
+                  <div className="text-white font-semibold">Complete challenges & survive!</div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Safe Zone:</span>
+                  <span className={`font-mono ${safeZoneRadius < 15 ? 'text-red-400 animate-pulse' : 'text-cyan-400'}`}>
+                    {Math.round(safeZoneRadius)}m
+                  </span>
+                </div>
               </div>
             </Card>
           </div>
@@ -308,47 +423,133 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
             );
           })}
 
+          {/* Safe Zone Ring */}
+          <Ring 
+            args={[safeZoneRadius, safeZoneRadius + 1, 64]} 
+            position={[0, 0.1, 0]} 
+            rotation={[-Math.PI / 2, 0, 0]}
+          >
+            <meshBasicMaterial 
+              color={safeZoneRadius < 15 ? "#ef4444" : "#10b981"} 
+              transparent 
+              opacity={0.5} 
+              side={THREE.DoubleSide}
+            />
+          </Ring>
+
           {/* Ground */}
-          <Box args={[40, 0.5, 40]} position={[0, -0.25, 0]}>
+          <Box args={[80, 0.5, 80]} position={[0, -0.25, 0]}>
             <meshStandardMaterial color="#1e1b4b" />
           </Box>
           
-          <gridHelper args={[40, 40, "#6366f1", "#312e81"]} />
+          <gridHelper args={[80, 80, "#6366f1", "#312e81"]} />
         </Canvas>
       </div>
 
       {/* Challenge Modal */}
       {currentChallenge && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-2xl p-8 bg-slate-900 border-purple-500/50">
-            <div className="space-y-6">
-              <div>
-                <Badge className="mb-2 bg-purple-500/20 text-purple-300">
-                  {currentChallenge.topic}
-                </Badge>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Challenge #{currentChallenge.id}
-                </h2>
-                <p className="text-xl text-slate-200">{currentChallenge.question}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-2xl p-8 bg-slate-900 border-purple-500/50 relative">
+            {/* Timer Bar */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-slate-800 rounded-t-lg overflow-hidden">
+              <div 
+                className={`h-full transition-all ${challengeTimer && challengeTimer < 10 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}
+                style={{ width: `${((challengeTimer || 0) / currentChallenge.timeLimit) * 100}%` }}
+              />
+            </div>
+
+            <div className="space-y-6 mt-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className={`${
+                      currentChallenge.difficulty === 'hard' ? 'bg-red-500/20 text-red-400' :
+                      currentChallenge.difficulty === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-green-500/20 text-green-400'
+                    }`}>
+                      {currentChallenge.difficulty.toUpperCase()}
+                    </Badge>
+                    <Badge className="bg-purple-500/20 text-purple-300">
+                      {currentChallenge.topic}
+                    </Badge>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {currentChallenge.title}
+                  </h2>
+                  <p className="text-slate-300">{currentChallenge.description}</p>
+                </div>
+                <div className="text-right">
+                  <Clock className="h-6 w-6 text-purple-400 mx-auto mb-1" />
+                  <div className={`text-3xl font-mono font-bold ${challengeTimer && challengeTimer < 10 ? 'text-red-400 animate-pulse' : 'text-purple-400'}`}>
+                    {challengeTimer}s
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                {currentChallenge.options.map((option, index) => (
+              {currentChallenge.type === "quiz" && currentChallenge.options && (
+                <div className="space-y-3">
+                  <p className="text-xl text-white font-semibold">{currentChallenge.question}</p>
+                  {currentChallenge.options.map((option, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => handleAnswer(index)}
+                      variant="outline"
+                      className="w-full p-6 text-left justify-start text-lg hover:bg-purple-500/20 hover:border-purple-500"
+                    >
+                      <ChevronRight className="mr-2 h-5 w-5" />
+                      {option}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
+              {currentChallenge.type === "combat" && (
+                <div className="space-y-4">
+                  <div className="text-center p-6 bg-slate-800/50 rounded-lg">
+                    <p className="text-lg text-slate-300 mb-4">Choose your quantum attack!</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Button
+                      onClick={() => handleCombatAction("hadamard")}
+                      className="p-6 h-auto flex-col gap-2 bg-purple-600 hover:bg-purple-500"
+                    >
+                      <Zap className="h-8 w-8" />
+                      <span>Hadamard Strike</span>
+                    </Button>
+                    <Button
+                      onClick={() => handleCombatAction("entangle")}
+                      className="p-6 h-auto flex-col gap-2 bg-pink-600 hover:bg-pink-500"
+                    >
+                      <Trophy className="h-8 w-8" />
+                      <span>Entangle</span>
+                    </Button>
+                    <Button
+                      onClick={() => handleCombatAction("measure")}
+                      className="p-6 h-auto flex-col gap-2 bg-blue-600 hover:bg-blue-500"
+                    >
+                      <AlertCircle className="h-8 w-8" />
+                      <span>Measure</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {currentChallenge.type === "collect" && (
+                <div className="text-center space-y-4">
+                  <p className="text-lg text-slate-300">Collecting quantum resources...</p>
                   <Button
-                    key={index}
-                    onClick={() => handleAnswer(index)}
-                    variant="outline"
-                    className="w-full p-6 text-left justify-start text-lg hover:bg-purple-500/20 hover:border-purple-500"
+                    onClick={handleChallengeSuccess}
+                    size="lg"
+                    className="w-full bg-green-600 hover:bg-green-500"
                   >
-                    <ChevronRight className="mr-2 h-5 w-5" />
-                    {option}
+                    Complete Collection
                   </Button>
-                ))}
-              </div>
+                </div>
+              )}
 
-              <div className="flex items-center justify-between text-sm text-slate-400">
-                <span>Reward: {currentChallenge.points} points</span>
-                <span>Wrong answer: -20 HP</span>
+              <div className="flex items-center justify-between text-sm text-slate-400 pt-4 border-t border-slate-700">
+                <span>Reward: {currentChallenge.points} points + time bonus</span>
+                <span>Fail: -{currentChallenge.difficulty === 'hard' ? 30 : currentChallenge.difficulty === 'medium' ? 20 : 15} HP/Shield</span>
               </div>
             </div>
           </Card>
