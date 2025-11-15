@@ -126,7 +126,7 @@ export const AircraftDrop = ({ playerName, onLanded }: Props) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Plane className="h-6 w-6 text-blue-400" />
-                  <span className="text-xl font-bold text-white">QUANTUM CLASH</span>
+                  <span className="text-xl font-bold text-white">SHAN Z WORLD</span>
                 </div>
                 <div className="text-right">
                   <div className="text-sm text-slate-400">Pilot</div>
