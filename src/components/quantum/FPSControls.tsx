@@ -1,51 +1,35 @@
-import { useEffect, useRef } from 'react';
-import { useThree } from '@react-three/fiber';
-import * as THREE from 'three';
+import { useEffect } from 'react';
 
-export const useFPSControls = () => {
-  const { camera } = useThree();
-  const euler = useRef(new THREE.Euler(0, 0, 0, 'YXZ'));
-  const mouseMovement = useRef({ x: 0, y: 0 });
-  const isLocked = useRef(false);
-
+export const useFPSControls = (onMouseMove: (deltaX: number, deltaY: number) => void) => {
   useEffect(() => {
-    const onMouseMove = (event: MouseEvent) => {
-      if (!isLocked.current) return;
+    let isLocked = false;
 
-      const movementX = event.movementX || 0;
-      const movementY = event.movementY || 0;
-
-      mouseMovement.current.x = movementX;
-      mouseMovement.current.y = movementY;
-
-      euler.current.setFromQuaternion(camera.quaternion);
-      euler.current.y -= movementX * 0.002;
-      euler.current.x -= movementY * 0.002;
-      euler.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.current.x));
-
-      camera.quaternion.setFromEuler(euler.current);
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!isLocked) return;
+      onMouseMove(event.movementX || 0, event.movementY || 0);
     };
 
-    const onPointerLockChange = () => {
-      isLocked.current = document.pointerLockElement === document.body;
+    const handlePointerLockChange = () => {
+      isLocked = document.pointerLockElement !== null;
     };
 
-    const onClick = () => {
-      if (!isLocked.current) {
+    const handleClick = () => {
+      if (!isLocked && document.pointerLockElement === null) {
         document.body.requestPointerLock();
       }
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('pointerlockchange', onPointerLockChange);
-    document.addEventListener('click', onClick);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('click', handleClick);
 
     return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('pointerlockchange', onPointerLockChange);
-      document.removeEventListener('click', onClick);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('click', handleClick);
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      }
     };
-  }, [camera]);
-
-  return { euler: euler.current, isLocked: isLocked.current };
+  }, [onMouseMove]);
 };

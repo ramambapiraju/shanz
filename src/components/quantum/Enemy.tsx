@@ -1,86 +1,49 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Box, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface EnemyProps {
   id: string;
-  initialPosition: [number, number, number];
+  position: [number, number, number];
   playerPosition: THREE.Vector3;
-  onHit: (id: string) => void;
-  onDeath: (id: string) => void;
+  onDamagePlayer: () => void;
 }
 
-export const Enemy = ({ id, initialPosition, playerPosition, onHit, onDeath }: EnemyProps) => {
+export const Enemy = ({ id, position, playerPosition, onDamagePlayer }: EnemyProps) => {
   const groupRef = useRef<THREE.Group>(null);
-  const [health, setHealth] = useState(100);
-  const velocityRef = useRef(new THREE.Vector3());
-  const targetRef = useRef(new THREE.Vector3());
+  const lastHitTime = useRef(0);
 
-  useFrame((state, delta) => {
-    if (!groupRef.current || health <= 0) return;
+  useFrame((state) => {
+    if (!groupRef.current) return;
 
-    // Simple AI: Move toward player
-    targetRef.current.copy(playerPosition);
-    const direction = targetRef.current.sub(groupRef.current.position).normalize();
+    // Simple AI: Move toward player slowly
+    const direction = new THREE.Vector3()
+      .copy(playerPosition)
+      .sub(groupRef.current.position)
+      .normalize();
     
-    // Add some randomness to movement
-    const wanderX = Math.sin(state.clock.elapsedTime * 2) * 0.3;
-    const wanderZ = Math.cos(state.clock.elapsedTime * 2) * 0.3;
-    
-    direction.x += wanderX;
-    direction.z += wanderZ;
-    direction.normalize();
-
-    velocityRef.current.lerp(direction.multiplyScalar(2), delta * 2);
-    groupRef.current.position.add(velocityRef.current.clone().multiplyScalar(delta));
-    
-    // Keep at ground level
+    groupRef.current.position.add(direction.multiplyScalar(0.02));
     groupRef.current.position.y = 1.5;
 
     // Look at player
-    groupRef.current.lookAt(playerPosition.x, groupRef.current.position.y, playerPosition.z);
+    groupRef.current.lookAt(playerPosition.x, 1.5, playerPosition.z);
 
-    // Attack player if close enough
+    // Attack player if close (with cooldown)
     const distanceToPlayer = groupRef.current.position.distanceTo(playerPosition);
-    if (distanceToPlayer < 2) {
-      onHit(id);
+    if (distanceToPlayer < 2 && state.clock.elapsedTime - lastHitTime.current > 1) {
+      lastHitTime.current = state.clock.elapsedTime;
+      onDamagePlayer();
     }
   });
 
-  const takeDamage = (damage: number) => {
-    const newHealth = health - damage;
-    setHealth(newHealth);
-    if (newHealth <= 0) {
-      onDeath(id);
-    }
-  };
-
-  if (health <= 0) return null;
-
   return (
-    <group ref={groupRef} position={initialPosition}>
-      {/* Enemy body */}
+    <group ref={groupRef} position={position}>
       <Box args={[0.8, 1.6, 0.8]}>
-        <meshStandardMaterial 
-          color="#ef4444" 
-          emissive="#dc2626" 
-          emissiveIntensity={0.5}
-        />
+        <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={0.3} />
       </Box>
-      
-      {/* Enemy head */}
-      <Sphere args={[0.4, 16, 16]} position={[0, 1, 0]}>
-        <meshStandardMaterial 
-          color="#7f1d1d" 
-          emissive="#991b1b" 
-          emissiveIntensity={0.3}
-        />
-      </Sphere>
-
-      {/* Health indicator */}
-      <Sphere args={[0.1, 8, 8]} position={[0, 2.2, 0]}>
-        <meshBasicMaterial color={health > 50 ? "#10b981" : health > 25 ? "#f59e0b" : "#ef4444"} />
+      <Sphere args={[0.4, 8, 8]} position={[0, 1, 0]}>
+        <meshStandardMaterial color="#7f1d1d" />
       </Sphere>
     </group>
   );
