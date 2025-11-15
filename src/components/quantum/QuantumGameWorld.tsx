@@ -138,10 +138,20 @@ const FPVPlayer = ({
   const keys = useKeyboardControls();
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
-  useFPSControls();
+  const yaw = useRef(0);
+  const pitch = useRef(0);
+
+  useFPSControls((deltaX, deltaY) => {
+    yaw.current -= deltaX * 0.002;
+    pitch.current -= deltaY * 0.002;
+    pitch.current = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch.current));
+  });
 
   useFrame((state, delta) => {
     if (!groupRef.current || !cameraRef.current) return;
+
+    // Apply mouse rotation
+    cameraRef.current.rotation.set(pitch.current, yaw.current, 0, 'YXZ');
 
     // Movement
     direction.current.set(0, 0, 0);
@@ -167,7 +177,7 @@ const FPVPlayer = ({
     cameraRef.current.position.copy(groupRef.current.position);
     cameraRef.current.position.y += 0.6;
     
-    onPositionChange(groupRef.current.position, new THREE.Euler().setFromQuaternion(cameraRef.current.quaternion));
+    onPositionChange(groupRef.current.position, new THREE.Euler(pitch.current, yaw.current, 0, 'YXZ'));
   });
 
   return (
@@ -229,6 +239,14 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
   const [isShooting, setIsShooting] = useState(false);
   const [kills, setKills] = useState(0);
 
+  // Show controls on start
+  useEffect(() => {
+    toast.info("🎮 Click anywhere to start!", {
+      description: "Use WASD to move, Mouse to look, LMB to shoot",
+      duration: 5000
+    });
+  }, []);
+
   // Safe zone shrinks over time (battle royale mechanic)
   useEffect(() => {
     const shrinkInterval = setInterval(() => {
@@ -268,14 +286,14 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
     }
   }, [challengeTimer]);
 
-  // Enemy spawning system
+  // Enemy spawning system (limited and slower to prevent context loss)
   useEffect(() => {
     const spawnInterval = setInterval(() => {
-      if (enemies.length < 5) {
+      if (enemies.length < 3 && challengesCompleted > 0) { // Max 3 enemies, only after first challenge
         const angle = Math.random() * Math.PI * 2;
-        const distance = 15 + Math.random() * 10;
+        const distance = 15;
         const newEnemy = {
-          id: `enemy-${Date.now()}-${Math.random()}`,
+          id: `enemy-${Date.now()}`,
           position: [
             Math.cos(angle) * distance,
             1.5,
@@ -284,51 +302,57 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
         };
         setEnemies(prev => [...prev, newEnemy]);
       }
-    }, 8000);
+    }, 12000); // Slower spawn rate
 
     return () => clearInterval(spawnInterval);
-  }, [enemies.length]);
+  }, [enemies.length, challengesCompleted]);
 
   // Shooting mechanic
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
-      if (e.button === 0 && weapons.length > 0) {
+      if (e.button === 0 && weapons.length > 0 && !currentChallenge) {
         setIsShooting(true);
-        setTimeout(() => setIsShooting(false), 100);
+        setTimeout(() => setIsShooting(false), 200);
         
-        // Raycast for hit detection (simplified)
-        const hit = enemies.find(enemy => {
+        // Find closest enemy in front
+        let closestEnemy: typeof enemies[0] | null = null;
+        let minDistance = 25; // Max shooting range
+        
+        enemies.forEach(enemy => {
           const enemyPos = new THREE.Vector3(...enemy.position);
           const distance = playerPosition.distanceTo(enemyPos);
-          // Simple angle check for hit
-          return distance < 20; // Hit range
+          
+          if (distance < minDistance) {
+            // Check if enemy is roughly in front (simple angle check)
+            const toEnemy = enemyPos.clone().sub(playerPosition).normalize();
+            const forward = new THREE.Vector3(0, 0, -1).applyEuler(playerRotation);
+            const dot = toEnemy.dot(forward);
+            
+            if (dot > 0.7 && distance < minDistance) { // Within ~45 degree cone
+              minDistance = distance;
+              closestEnemy = enemy;
+            }
+          }
         });
         
-        if (hit && Math.random() > 0.4) {
-          handleEnemyHit(hit.id);
+        if (closestEnemy) {
+          handleEnemyKilled(closestEnemy.id);
+          toast.success("🎯 Enemy Eliminated!");
         }
       }
     };
 
-    window.addEventListener('mousedown', handleMouseDown);
-    return () => window.removeEventListener('mousedown', handleMouseDown);
-  }, [weapons, enemies, playerPosition]);
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, [weapons, enemies, playerPosition, playerRotation, currentChallenge]);
 
-  const handleEnemyHit = (enemyId: string) => {
-    setScore(prev => prev + 50);
-    toast.success("+50 Enemy Eliminated!");
-  };
-
-  const handleEnemyDeath = (enemyId: string) => {
+  const handleEnemyKilled = (enemyId: string) => {
     setEnemies(prev => prev.filter(e => e.id !== enemyId));
     setScore(prev => prev + 100);
     setKills(prev => prev + 1);
-    toast.success("🎯 Enemy Eliminated! +100", {
-      description: `Total Kills: ${kills + 1}`
-    });
   };
 
-  const handlePlayerHit = (enemyId: string) => {
+  const handlePlayerHit = () => {
     setHealth(prev => Math.max(0, prev - 5));
   };
 
@@ -354,7 +378,7 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
   }, [health, lives, challengesCompleted, score, onGameOver]);
 
   const handleOrbClick = (challengeIndex: number) => {
-    if (currentChallenge) return; // Don't allow multiple challenges at once
+    if (currentChallenge) return;
     if (challengeIndex < challengesCompleted) {
       toast.info("Challenge already completed!");
       return;
@@ -370,17 +394,42 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
       Math.pow(playerPosition.z - orbZ, 2)
     );
     
-    if (distance > 3) {
+    if (distance > 5) {
       toast.error("Too far! Move closer to the challenge orb.");
       return;
     }
     
     setCurrentChallenge(challenge);
     setChallengeTimer(challenge.timeLimit);
-    toast.info(`${challenge.title} - ${challenge.timeLimit}s`, {
-      description: challenge.description
+    toast.success(`🎯 ${challenge.title} Started!`, {
+      description: `${challenge.timeLimit}s - ${challenge.description}`
     });
   };
+
+  // Auto-detect nearby challenges
+  useEffect(() => {
+    if (currentChallenge) return;
+    
+    CHALLENGES.forEach((challenge, index) => {
+      if (index >= challengesCompleted) {
+        const angle = (index / CHALLENGES.length) * Math.PI * 2;
+        const radius = 8;
+        const orbX = Math.cos(angle) * radius;
+        const orbZ = Math.sin(angle) * radius;
+        const distance = Math.sqrt(
+          Math.pow(playerPosition.x - orbX, 2) + 
+          Math.pow(playerPosition.z - orbZ, 2)
+        );
+        
+        if (distance < 3) {
+          toast.info(`📍 Near ${challenge.zone}`, {
+            description: "Click the orb to start challenge!",
+            duration: 2000
+          });
+        }
+      }
+    });
+  }, [playerPosition, currentChallenge, challengesCompleted]);
 
   const handleChallengeFailed = () => {
     if (!currentChallenge) return;
@@ -575,6 +624,17 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
 
       {/* 3D Game World */}
       <div className="h-screen pt-32">
+        {/* Crosshair */}
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
+          <div className="relative">
+            <div className="w-0.5 h-4 bg-white absolute left-1/2 -translate-x-1/2 -top-5" />
+            <div className="w-0.5 h-4 bg-white absolute left-1/2 -translate-x-1/2 top-1" />
+            <div className="w-4 h-0.5 bg-white absolute top-1/2 -translate-y-1/2 -left-5" />
+            <div className="w-4 h-0.5 bg-white absolute top-1/2 -translate-y-1/2 left-1" />
+            <div className="w-1 h-1 bg-red-500 rounded-full" />
+          </div>
+        </div>
+
         <Canvas>
           <ambientLight intensity={0.3} />
           <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
@@ -639,10 +699,9 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
             <Enemy
               key={enemy.id}
               id={enemy.id}
-              initialPosition={enemy.position}
+              position={enemy.position}
               playerPosition={playerPosition}
-              onHit={handlePlayerHit}
-              onDeath={handleEnemyDeath}
+              onDamagePlayer={handlePlayerHit}
             />
           ))}
 
@@ -658,10 +717,11 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
         <div className="fixed bottom-4 left-4 z-10">
           <Card className="p-3 bg-slate-900/80 backdrop-blur-lg border-purple-500/30">
             <div className="text-xs text-slate-300 space-y-1">
+              <div className="text-amber-400 font-bold mb-1">🎮 CLICK TO START</div>
               <div><span className="font-bold">WASD</span> - Move</div>
               <div><span className="font-bold">Mouse</span> - Look Around</div>
-              <div><span className="font-bold">LMB</span> - Shoot</div>
-              <div><span className="font-bold">Click Orb</span> - Challenge</div>
+              <div><span className="font-bold">LMB</span> - Shoot (Need weapon)</div>
+              <div><span className="font-bold">Near Orb</span> - Start Challenge</div>
             </div>
           </Card>
         </div>
