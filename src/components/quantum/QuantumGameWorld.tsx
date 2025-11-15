@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Shield, Clock } from "lucide-react";
+import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Shield, Clock, Target, Activity } from "lucide-react";
 import { toast } from "sonner";
 import * as THREE from "three";
 
@@ -172,9 +172,10 @@ interface Props {
 }
 
 export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
+  const [lives, setLives] = useState(3);
   const [health, setHealth] = useState(100);
-  const [shield, setShield] = useState(50);
   const [score, setScore] = useState(0);
+  const [weapons, setWeapons] = useState<string[]>([]);
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [challengesCompleted, setChallengesCompleted] = useState(0);
   const [gameTime, setGameTime] = useState(0);
@@ -219,16 +220,24 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
 
   useEffect(() => {
     if (health <= 0) {
-      toast.error("💀 Eliminated! You ran out of health.");
-      onGameOver(score, false);
+      if (lives > 1) {
+        setLives(prev => prev - 1);
+        setHealth(100);
+        toast.error(`Life Lost! ${lives - 1} lives remaining`, {
+          description: "You respawned with full health!"
+        });
+      } else {
+        toast.error("💀 Eliminated! You ran out of lives.");
+        onGameOver(score, false);
+      }
     }
     if (challengesCompleted >= CHALLENGES.length) {
-      toast.success("🏆 QUANTUM SPAN CHAMPION!", {
+      toast.success("🏆 QUANTUM CLASH CHAMPION!", {
         description: "You conquered the quantum universe!"
       });
       onGameOver(score, true);
     }
-  }, [health, challengesCompleted, score]);
+  }, [health, lives, challengesCompleted, score, onGameOver]);
 
   const handleOrbClick = (challengeIndex: number) => {
     if (challengeIndex < challengesCompleted) {
@@ -249,17 +258,10 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
     const damage = currentChallenge.difficulty === "hard" ? 30 : 
                    currentChallenge.difficulty === "medium" ? 20 : 15;
     
-    if (shield > 0) {
-      setShield(prev => Math.max(0, prev - damage));
-      toast.warning("Shield absorbed damage!", {
-        description: `-${damage} shield`
-      });
-    } else {
-      setHealth(prev => Math.max(0, prev - damage));
-      toast.error("Challenge failed! Taking damage!", {
-        description: `-${damage} HP`
-      });
-    }
+    setHealth(prev => Math.max(0, prev - damage));
+    toast.error("Challenge failed! Taking damage!", {
+      description: `-${damage} HP`
+    });
     
     setCurrentChallenge(null);
     setChallengeTimer(null);
@@ -274,12 +276,25 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
     setScore(prev => prev + totalPoints);
     setChallengesCompleted(prev => prev + 1);
     
-    toast.success(`${currentChallenge.title} Complete! 🎯`, {
-      description: `+${totalPoints} points (${bonusPoints} time bonus)`
-    });
+    // Random weapon/power-up rewards
+    const weaponRewards = [
+      "Superposition Blaster",
+      "Entanglement Shield",
+      "Quantum Teleporter",
+      "Hadamard Hammer",
+      "Pauli Sword",
+      "CNOT Crossbow",
+      "Measurement Mirror",
+      "Phase Shift Pistol",
+      "Toffoli Torpedo"
+    ];
     
-    // Restore some shield on success
-    setShield(prev => Math.min(100, prev + 10));
+    const newWeapon = weaponRewards[Math.floor(Math.random() * weaponRewards.length)];
+    setWeapons(prev => [...prev, newWeapon]);
+    
+    toast.success(`${currentChallenge.title} Complete! 🎯`, {
+      description: `+${totalPoints} points | 🎁 ${newWeapon}`
+    });
     
     setCurrentChallenge(null);
     setChallengeTimer(null);
@@ -326,18 +341,60 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
                   <Badge className="bg-purple-500/20 text-purple-300">{avatar.specialty}</Badge>
                 </div>
                 <div className="font-bold text-white text-lg">{playerName}</div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-red-500" />
-                    <Progress value={health} className="flex-1" />
-                    <span className="text-sm font-mono text-white">{health}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-blue-400" />
-                    <Progress value={shield} className="flex-1 h-2" />
-                    <span className="text-xs font-mono text-blue-300">{shield}</span>
+                
+                {/* Lives Display */}
+                <div className="flex items-center gap-3 mb-2">
+                  <Heart className="h-5 w-5 text-red-400" />
+                  <div className="flex gap-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm ${
+                          i < lives
+                            ? "bg-red-500 border-red-400 text-white"
+                            : "bg-slate-700 border-slate-600 text-slate-500"
+                        }`}
+                      >
+                        {i < lives ? "♥" : "✗"}
+                      </div>
+                    ))}
                   </div>
                 </div>
+                
+                {/* Health Bar */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-green-400" />
+                    <span className="text-xs text-slate-400">Health</span>
+                    <span className="text-xs font-mono text-white ml-auto">{health}%</span>
+                  </div>
+                  <Progress value={health} className="h-2" />
+                </div>
+                
+                {/* Weapons Display */}
+                {weapons.length > 0 && (
+                  <div className="pt-2 border-t border-slate-700">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap className="h-4 w-4 text-amber-400" />
+                      <span className="text-xs text-slate-400">Arsenal</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {weapons.slice(-2).map((weapon, i) => (
+                        <div
+                          key={i}
+                          className="text-xs px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        >
+                          {weapon.split(' ')[0]}
+                        </div>
+                      ))}
+                      {weapons.length > 2 && (
+                        <div className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300">
+                          +{weapons.length - 2}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
 
