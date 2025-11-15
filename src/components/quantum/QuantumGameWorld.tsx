@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { PerspectiveCamera, Sphere, Text, Box, Ring, KeyboardControls } from "@react-three/drei";
+import { PerspectiveCamera, Sphere, Text, Box, Ring } from "@react-three/drei";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Clock, Activity } from "lucide-react";
+import { Heart, Zap, Trophy, AlertCircle, ChevronRight, Clock, Activity, Target } from "lucide-react";
 import { toast } from "sonner";
 import * as THREE from "three";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
+import { useFPSControls } from "./FPSControls";
+import { Enemy } from "./Enemy";
+import { WeaponDisplay } from "./WeaponDisplay";
+import { Minimap } from "./Minimap";
 
 interface PlayerAvatar {
   id: string;
@@ -119,10 +123,14 @@ const CHALLENGES: Challenge[] = [
 ];
 
 const FPVPlayer = ({ 
-  color, 
+  color,
+  currentWeapon,
+  isShooting,
   onPositionChange 
 }: { 
   color: string;
+  currentWeapon: string;
+  isShooting: boolean;
   onPositionChange: (pos: THREE.Vector3, rot: THREE.Euler) => void;
 }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -130,6 +138,7 @@ const FPVPlayer = ({
   const keys = useKeyboardControls();
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
+  useFPSControls();
 
   useFrame((state, delta) => {
     if (!groupRef.current || !cameraRef.current) return;
@@ -144,7 +153,7 @@ const FPVPlayer = ({
 
     if (direction.current.length() > 0) {
       direction.current.normalize();
-      direction.current.applyEuler(groupRef.current.rotation);
+      direction.current.applyQuaternion(cameraRef.current.quaternion);
       
       velocity.current.lerp(direction.current.multiplyScalar(5), 0.1);
     } else {
@@ -152,19 +161,21 @@ const FPVPlayer = ({
     }
 
     groupRef.current.position.add(velocity.current.clone().multiplyScalar(delta));
-    groupRef.current.position.y = 1.5; // Keep at ground level
+    groupRef.current.position.y = 1.5;
 
     // Camera follows player
     cameraRef.current.position.copy(groupRef.current.position);
-    cameraRef.current.position.y += 0.6; // Eye height
+    cameraRef.current.position.y += 0.6;
     
-    onPositionChange(groupRef.current.position, groupRef.current.rotation);
+    onPositionChange(groupRef.current.position, new THREE.Euler().setFromQuaternion(cameraRef.current.quaternion));
   });
 
   return (
     <>
       <PerspectiveCamera ref={cameraRef} makeDefault fov={75} near={0.1} far={1000} />
-      <group ref={groupRef} position={[0, 1.5, 0]} />
+      <group ref={groupRef} position={[0, 1.5, 0]}>
+        <WeaponDisplay weaponType={currentWeapon} isShooting={isShooting} />
+      </group>
     </>
   );
 };
@@ -214,6 +225,9 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
   const [challengeTimer, setChallengeTimer] = useState<number | null>(null);
   const [playerPosition, setPlayerPosition] = useState(new THREE.Vector3(0, 0, 0));
   const [playerRotation, setPlayerRotation] = useState(new THREE.Euler(0, 0, 0));
+  const [enemies, setEnemies] = useState<Array<{ id: string; position: [number, number, number] }>>([]);
+  const [isShooting, setIsShooting] = useState(false);
+  const [kills, setKills] = useState(0);
 
   // Safe zone shrinks over time (battle royale mechanic)
   useEffect(() => {
@@ -253,6 +267,70 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
       handleChallengeFailed();
     }
   }, [challengeTimer]);
+
+  // Enemy spawning system
+  useEffect(() => {
+    const spawnInterval = setInterval(() => {
+      if (enemies.length < 5) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 15 + Math.random() * 10;
+        const newEnemy = {
+          id: `enemy-${Date.now()}-${Math.random()}`,
+          position: [
+            Math.cos(angle) * distance,
+            1.5,
+            Math.sin(angle) * distance
+          ] as [number, number, number]
+        };
+        setEnemies(prev => [...prev, newEnemy]);
+      }
+    }, 8000);
+
+    return () => clearInterval(spawnInterval);
+  }, [enemies.length]);
+
+  // Shooting mechanic
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button === 0 && weapons.length > 0) {
+        setIsShooting(true);
+        setTimeout(() => setIsShooting(false), 100);
+        
+        // Raycast for hit detection (simplified)
+        const hit = enemies.find(enemy => {
+          const enemyPos = new THREE.Vector3(...enemy.position);
+          const distance = playerPosition.distanceTo(enemyPos);
+          // Simple angle check for hit
+          return distance < 20; // Hit range
+        });
+        
+        if (hit && Math.random() > 0.4) {
+          handleEnemyHit(hit.id);
+        }
+      }
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    return () => window.removeEventListener('mousedown', handleMouseDown);
+  }, [weapons, enemies, playerPosition]);
+
+  const handleEnemyHit = (enemyId: string) => {
+    setScore(prev => prev + 50);
+    toast.success("+50 Enemy Eliminated!");
+  };
+
+  const handleEnemyDeath = (enemyId: string) => {
+    setEnemies(prev => prev.filter(e => e.id !== enemyId));
+    setScore(prev => prev + 100);
+    setKills(prev => prev + 1);
+    toast.success("🎯 Enemy Eliminated! +100", {
+      description: `Total Kills: ${kills + 1}`
+    });
+  };
+
+  const handlePlayerHit = (enemyId: string) => {
+    setHealth(prev => Math.max(0, prev - 5));
+  };
 
   useEffect(() => {
     if (health <= 0) {
@@ -452,11 +530,16 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
 
             {/* Stats */}
             <Card className="p-4 bg-slate-900/80 backdrop-blur-lg border-purple-500/30">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
                   <Trophy className="h-5 w-5 mx-auto text-yellow-500 mb-1" />
                   <div className="text-xl font-bold text-white">{score}</div>
                   <div className="text-xs text-slate-400">Score</div>
+                </div>
+                <div>
+                  <Target className="h-5 w-5 mx-auto text-red-500 mb-1" />
+                  <div className="text-xl font-bold text-white">{kills}</div>
+                  <div className="text-xs text-slate-400">Kills</div>
                 </div>
                 <div>
                   <Zap className="h-5 w-5 mx-auto text-purple-500 mb-1" />
@@ -500,7 +583,9 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
 
           {/* FPV Player */}
           <FPVPlayer 
-            color={avatar.color.split(' ')[1]} 
+            color={avatar.color.split(' ')[1]}
+            currentWeapon={weapons[weapons.length - 1] || ""}
+            isShooting={isShooting}
             onPositionChange={(pos, rot) => {
               setPlayerPosition(pos);
               setPlayerRotation(rot);
@@ -549,6 +634,18 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
             />
           </Ring>
 
+          {/* Enemies */}
+          {enemies.map((enemy) => (
+            <Enemy
+              key={enemy.id}
+              id={enemy.id}
+              initialPosition={enemy.position}
+              playerPosition={playerPosition}
+              onHit={handlePlayerHit}
+              onDeath={handleEnemyDeath}
+            />
+          ))}
+
           {/* Ground */}
           <Box args={[80, 0.5, 80]} position={[0, -0.25, 0]}>
             <meshStandardMaterial color="#1e1b4b" />
@@ -563,10 +660,26 @@ export const QuantumGameWorld = ({ playerName, avatar, onGameOver }: Props) => {
             <div className="text-xs text-slate-300 space-y-1">
               <div><span className="font-bold">WASD</span> - Move</div>
               <div><span className="font-bold">Mouse</span> - Look Around</div>
-              <div><span className="font-bold">Click Orb</span> - Start Challenge</div>
+              <div><span className="font-bold">LMB</span> - Shoot</div>
+              <div><span className="font-bold">Click Orb</span> - Challenge</div>
             </div>
           </Card>
         </div>
+
+        {/* Minimap */}
+        <Minimap
+          playerPosition={playerPosition}
+          safeZoneRadius={safeZoneRadius}
+          challengePositions={CHALLENGES.map((c, i) => {
+            const angle = (i / CHALLENGES.length) * Math.PI * 2;
+            return {
+              x: Math.cos(angle) * 8,
+              z: Math.sin(angle) * 8,
+              completed: i < challengesCompleted
+            };
+          })}
+          enemyPositions={enemies.map(e => ({ x: e.position[0], z: e.position[2] }))}
+        />
       </div>
 
       {/* Challenge Modal */}
