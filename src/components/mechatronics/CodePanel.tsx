@@ -1,10 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Editor from "@monaco-editor/react";
 import { useTheme } from "next-themes";
 import { Code2, Download, Play, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { BlockCodeEditor } from "@/components/simulator/BlockCodeEditor";
 
 interface CodePanelProps {
   projectId: string;
@@ -83,31 +85,44 @@ export const CodePanel = ({ projectId, code, onCodeChange, readOnly = false }: C
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col min-h-0">
-        <div className="border rounded-lg overflow-hidden flex-1">
-          <Editor
-            height="100%"
-            defaultLanguage="cpp"
-            value={code}
-            onChange={(value) => !readOnly && onCodeChange(value || "")}
-            theme={theme === "dark" ? "vs-dark" : "light"}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 13,
-              lineNumbers: "on",
-              readOnly: readOnly,
-              scrollBeyondLastLine: false,
-              wordWrap: "on",
-              automaticLayout: true,
-              tabSize: 2,
-              formatOnPaste: true,
-              formatOnType: true,
-            }}
-          />
-        </div>
-        <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-          <span>{code.split('\n').length} lines</span>
-          <span>{code.length} characters</span>
-        </div>
+        <Tabs defaultValue="code" className="flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="code">Code Editor</TabsTrigger>
+            <TabsTrigger value="blocks">Block Editor</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="code" className="flex-1 flex flex-col mt-2">
+            <div className="border rounded-lg overflow-hidden flex-1">
+              <Editor
+                height="100%"
+                defaultLanguage="cpp"
+                value={code}
+                onChange={(value) => !readOnly && onCodeChange(value || "")}
+                theme={theme === "dark" ? "vs-dark" : "light"}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 13,
+                  lineNumbers: "on",
+                  readOnly: readOnly,
+                  scrollBeyondLastLine: false,
+                  wordWrap: "on",
+                  automaticLayout: true,
+                  tabSize: 2,
+                  formatOnPaste: true,
+                  formatOnType: true,
+                }}
+              />
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+              <span>{code.split('\n').length} lines</span>
+              <span>{code.length} characters</span>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="blocks" className="flex-1 mt-2">
+            <BlockCodeEditor onCodeGenerated={onCodeChange} />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

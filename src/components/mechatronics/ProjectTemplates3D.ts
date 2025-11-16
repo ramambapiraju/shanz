@@ -13,6 +13,50 @@ export interface ProjectTemplate {
 
 export const PROJECT_TEMPLATES: ProjectTemplate[] = [
   {
+    id: "ir_sensor_bot",
+    name: "IR Sensor Bot",
+    description: "Multi-functional robot with IR sensors for obstacle avoidance, line following, and remote control",
+    difficulty: "beginner",
+    estimatedTime: "30 minutes",
+    category: "robot",
+    learningObjectives: [
+      "IR sensor integration",
+      "Obstacle avoidance logic",
+      "Line following algorithms",
+      "Motor control basics",
+      "Sensor data processing"
+    ],
+    components: [
+      // Chassis
+      { ...createComponent("aluminum_chassis", { x: 0, y: 0.05, z: 0 }), scale: { x: 1, y: 0.2, z: 0.6 } },
+      
+      // Motors (2 DC motors)
+      { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: -0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
+      { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: 0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
+      
+      // Wheels
+      { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
+      { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
+      
+      // IR Sensors (4 sensors for comprehensive detection)
+      { ...createComponent("ultrasonic_sensor", { x: 0.45, y: 0.08, z: 0 }), scale: { x: 0.4, y: 0.3, z: 0.4 } }, // Front center
+      { ...createComponent("ultrasonic_sensor", { x: 0.35, y: 0.08, z: -0.2 }), scale: { x: 0.3, y: 0.3, z: 0.3 } }, // Front left
+      { ...createComponent("ultrasonic_sensor", { x: 0.35, y: 0.08, z: 0.2 }), scale: { x: 0.3, y: 0.3, z: 0.3 } }, // Front right
+      { ...createComponent("ultrasonic_sensor", { x: 0.05, y: 0.03, z: 0 }), scale: { x: 0.3, y: 0.2, z: 0.3 } }, // Bottom line sensor
+      
+      // Electronics
+      { ...createComponent("arduino_uno", { x: 0, y: 0.12, z: 0 }), scale: { x: 0.5, y: 0.3, z: 0.6 } },
+      { ...createComponent("receiver_2.4ghz", { x: 0.1, y: 0.12, z: 0.15 }), scale: { x: 0.4, y: 0.2, z: 0.5 } },
+      { ...createComponent("esc_30a", { x: -0.2, y: 0.12, z: 0 }), scale: { x: 0.5, y: 0.2, z: 0.4 } },
+      
+      // Power
+      { ...createComponent("lipo_2s_2200mah", { x: 0, y: 0.16, z: -0.1 }), scale: { x: 0.7, y: 0.4, z: 0.5 } },
+      { ...createComponent("voltage_regulator", { x: 0.15, y: 0.12, z: -0.15 }), scale: { x: 0.3, y: 0.2, z: 0.3 } },
+    ],
+  },
+  {
     id: "rc_car_4wd",
     name: "4WD RC Car",
     description: "Professional 4-wheel drive RC car with independent motor control and servo steering",
