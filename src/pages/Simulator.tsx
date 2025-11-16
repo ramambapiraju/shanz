@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CircuitDesigner } from "@/components/simulator/CircuitDesigner";
 import { CodeEditor } from "@/components/simulator/CodeEditor";
+import { BlockCodeEditor } from "@/components/simulator/BlockCodeEditor";
 import { AIAssistant } from "@/components/simulator/AIAssistant";
 import { SerialMonitor } from "@/components/simulator/SerialMonitor";
 import { SimulatorControls } from "@/components/simulator/SimulatorControls";
@@ -501,11 +502,14 @@ export default function Simulator() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
             <Tabs defaultValue="circuit" className="w-full" key={activeTemplate}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="circuit">Circuit Design</TabsTrigger>
                 <TabsTrigger value="code">
-                  Arduino Code 
+                  Code Editor
                   {activeTemplate !== "blank" && <span className="ml-1 text-xs">✨</span>}
+                </TabsTrigger>
+                <TabsTrigger value="blocks">
+                  Block Editor
                 </TabsTrigger>
               </TabsList>
               
@@ -532,6 +536,17 @@ export default function Simulator() {
                   setCode={setCode}
                   isRunning={isRunning}
                 />
+              </TabsContent>
+
+              <TabsContent value="blocks" className="mt-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <BlockCodeEditor onCodeGenerated={setCode} />
+                  <CodeEditor 
+                    code={code}
+                    setCode={setCode}
+                    isRunning={isRunning}
+                  />
+                </div>
               </TabsContent>
             </Tabs>
 
