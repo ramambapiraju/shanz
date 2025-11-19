@@ -58,18 +58,23 @@ export const SimulatorSection = () => {
                 <Code className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
               </Button>
               <div className="flex flex-col gap-2">
-                <Button 
-                  size="lg" 
-                  variant="default"
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => {
-                    navigate("/mechatronics-simulator");
-                    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-                  }}
-                >
-                  Mechatronics Simulator
-                  <Cpu className="ml-2 h-5 w-5" />
-                </Button>
+                <div className="relative">
+                  <Button 
+                    size="lg" 
+                    variant="default"
+                    className="bg-primary hover:bg-primary/90 w-full"
+                    onClick={() => {
+                      navigate("/mechatronics-simulator");
+                      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+                    }}
+                  >
+                    Mechatronics Simulator
+                    <Cpu className="ml-2 h-5 w-5" />
+                  </Button>
+                  <span className="absolute -top-2 -right-2 bg-amber-500 text-xs text-white px-2 py-0.5 rounded-full font-semibold">
+                    Under Development
+                  </span>
+                </div>
                 <span className="text-sm text-muted-foreground text-center">Open the 3D simulator</span>
               </div>
             </div>

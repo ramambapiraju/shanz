@@ -23,14 +23,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const MechatronicsSimulator = () => {
   const navigate = useNavigate();
   const [components, setComponents] = useState<MechanicalComponent[]>(() => {
-    // Load quadcopter project by default for testing
-    return loadProjectTemplate("racing_quadcopter");
+    // Load basic car project by default
+    return loadProjectTemplate("basic_car");
   });
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [simulationTime, setSimulationTime] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [currentProjectId, setCurrentProjectId] = useState<string>("quadcopter_x_frame");
-  const [projectCode, setProjectCode] = useState<string>(getProjectCode("quadcopter_x_frame"));
+  const [currentProjectId, setCurrentProjectId] = useState<string>("basic_car");
+  const [projectCode, setProjectCode] = useState<string>(getProjectCode("basic_car"));
   const [rcControls, setRCControls] = useState<RCControls>({
     throttle: 0,
     yaw: 0,
@@ -39,8 +39,8 @@ const MechatronicsSimulator = () => {
     steering: 0,
   });
   const [damages, setDamages] = useState<ComponentDamage[]>(() => {
-    // Initialize damage tracking for default quadcopter
-    const initialComponents = loadProjectTemplate("quadcopter_x_frame");
+    // Initialize damage tracking for default basic car
+    const initialComponents = loadProjectTemplate("basic_car");
     return initialComponents.map(comp => ({
       id: comp.id,
       name: comp.name,

@@ -91,14 +91,19 @@ export const QuantumSection = () => {
         </div>
 
         <div className="text-center">
-          <Button 
-            size="lg" 
-            onClick={() => navigate("/quantum-simulator")}
-            className="text-lg px-8 py-6 hover-scale"
-          >
-            <Atom className="mr-2 h-5 w-5" />
-            Enter the Quantum Realm
-          </Button>
+          <div className="relative inline-block">
+            <Button 
+              size="lg" 
+              onClick={() => navigate("/quantum-simulator")}
+              className="text-lg px-8 py-6 hover-scale"
+            >
+              <Atom className="mr-2 h-5 w-5" />
+              Enter the Quantum Realm
+            </Button>
+            <span className="absolute -top-2 -right-2 bg-amber-500 text-xs text-white px-2 py-0.5 rounded-full font-semibold">
+              Under Development
+            </span>
+          </div>
           <p className="text-sm text-muted-foreground mt-4">
             No prior knowledge needed • Ages 10+ • Free to explore
           </p>

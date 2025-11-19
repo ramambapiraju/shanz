@@ -1,6 +1,516 @@
 // Microcontroller code templates for each project
 
 export const PROJECT_CODE: Record<string, string> = {
+  // 5-in-1 Educational Robot Projects
+  basic_car: `/*
+ * Basic Car - Simple 2-Motor Robot
+ * Perfect for beginners learning motor control
+ * 
+ * Hardware:
+ * - Arduino Uno
+ * - 2x DC Motors
+ * - 4x Wheels
+ * - L298N Motor Driver / ESC
+ * - LiPo Battery
+ */
+
+// Motor pin definitions
+#define MOTOR_LEFT_PWM 5
+#define MOTOR_LEFT_DIR1 6
+#define MOTOR_LEFT_DIR2 7
+#define MOTOR_RIGHT_PWM 9
+#define MOTOR_RIGHT_DIR1 10
+#define MOTOR_RIGHT_DIR2 11
+
+#define SPEED 200  // Motor speed (0-255)
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Initialize motor pins
+  pinMode(MOTOR_LEFT_PWM, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR1, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR2, OUTPUT);
+  pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
+  
+  Serial.println("Basic Car Ready!");
+}
+
+void loop() {
+  // Move forward for 2 seconds
+  moveForward();
+  delay(2000);
+  
+  // Turn right for 1 second
+  turnRight();
+  delay(1000);
+  
+  // Move forward for 2 seconds
+  moveForward();
+  delay(2000);
+  
+  // Turn left for 1 second
+  turnLeft();
+  delay(1000);
+}
+
+void moveForward() {
+  Serial.println("Moving Forward");
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void turnRight() {
+  Serial.println("Turning Right");
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  
+  digitalWrite(MOTOR_RIGHT_DIR1, LOW);
+  digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void turnLeft() {
+  Serial.println("Turning Left");
+  digitalWrite(MOTOR_LEFT_DIR1, LOW);
+  digitalWrite(MOTOR_LEFT_DIR2, HIGH);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}`,
+
+  buddy_bot: `/*
+ * Buddy Bot - Hand Following Robot
+ * Follows objects/hands using proximity sensor
+ * 
+ * Hardware:
+ * - Arduino Uno
+ * - 2x DC Motors
+ * - HC-SR04 Ultrasonic Sensor
+ * - L298N Motor Driver
+ * - LiPo Battery
+ */
+
+// Motor pins
+#define MOTOR_LEFT_PWM 5
+#define MOTOR_LEFT_DIR1 6
+#define MOTOR_LEFT_DIR2 7
+#define MOTOR_RIGHT_PWM 9
+#define MOTOR_RIGHT_DIR1 10
+#define MOTOR_RIGHT_DIR2 11
+
+// Sensor pins
+#define TRIG_PIN 12
+#define ECHO_PIN 13
+
+#define TARGET_DISTANCE 20  // Ideal following distance (cm)
+#define TOLERANCE 5         // Distance tolerance
+#define SPEED 180
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Motor pins
+  pinMode(MOTOR_LEFT_PWM, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR1, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR2, OUTPUT);
+  pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
+  
+  // Sensor pins
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  
+  Serial.println("Buddy Bot - Following Mode Active!");
+}
+
+void loop() {
+  float distance = getDistance();
+  
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  
+  if (distance > TARGET_DISTANCE + TOLERANCE) {
+    // Object too far - move forward
+    moveForward();
+    Serial.println("Following...");
+  } else if (distance < TARGET_DISTANCE - TOLERANCE && distance > 5) {
+    // Object too close - move backward
+    moveBackward();
+    Serial.println("Too close, backing up...");
+  } else {
+    // Just right - stop
+    stopMotors();
+    Serial.println("Perfect distance!");
+  }
+  
+  delay(100);
+}
+
+float getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  float distance = duration * 0.034 / 2;
+  
+  return distance;
+}
+
+void moveForward() {
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void moveBackward() {
+  digitalWrite(MOTOR_LEFT_DIR1, LOW);
+  digitalWrite(MOTOR_LEFT_DIR2, HIGH);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, LOW);
+  digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void stopMotors() {
+  analogWrite(MOTOR_LEFT_PWM, 0);
+  analogWrite(MOTOR_RIGHT_PWM, 0);
+}`,
+
+  backoff_bot: `/*
+ * Back Off Bot - Obstacle Avoidance Robot
+ * Moves away from obstacles and finds clear paths
+ * 
+ * Hardware:
+ * - Arduino Uno
+ * - 2x DC Motors
+ * - 3x Ultrasonic Sensors (Front, Left, Right)
+ * - L298N Motor Driver
+ * - LiPo Battery
+ */
+
+// Motor pins
+#define MOTOR_LEFT_PWM 5
+#define MOTOR_LEFT_DIR1 6
+#define MOTOR_LEFT_DIR2 7
+#define MOTOR_RIGHT_PWM 9
+#define MOTOR_RIGHT_DIR1 10
+#define MOTOR_RIGHT_DIR2 11
+
+// Sensor pins
+#define TRIG_FRONT 12
+#define ECHO_FRONT 13
+#define TRIG_LEFT A0
+#define ECHO_LEFT A1
+#define TRIG_RIGHT A2
+#define ECHO_RIGHT A3
+
+#define SAFE_DISTANCE 30  // Safe distance in cm
+#define SPEED 200
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Motor pins
+  pinMode(MOTOR_LEFT_PWM, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR1, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR2, OUTPUT);
+  pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
+  
+  // Sensor pins
+  pinMode(TRIG_FRONT, OUTPUT);
+  pinMode(ECHO_FRONT, INPUT);
+  pinMode(TRIG_LEFT, OUTPUT);
+  pinMode(ECHO_LEFT, INPUT);
+  pinMode(TRIG_RIGHT, OUTPUT);
+  pinMode(ECHO_RIGHT, INPUT);
+  
+  Serial.println("Back Off Bot - Obstacle Avoidance Active!");
+}
+
+void loop() {
+  float frontDist = getDistance(TRIG_FRONT, ECHO_FRONT);
+  float leftDist = getDistance(TRIG_LEFT, ECHO_LEFT);
+  float rightDist = getDistance(TRIG_RIGHT, ECHO_RIGHT);
+  
+  Serial.print("F: "); Serial.print(frontDist);
+  Serial.print(" L: "); Serial.print(leftDist);
+  Serial.print(" R: "); Serial.println(rightDist);
+  
+  if (frontDist < SAFE_DISTANCE) {
+    // Obstacle ahead - back up and turn
+    Serial.println("Obstacle! Avoiding...");
+    moveBackward();
+    delay(500);
+    
+    // Turn toward clearer path
+    if (leftDist > rightDist) {
+      turnLeft();
+      Serial.println("Turning left");
+    } else {
+      turnRight();
+      Serial.println("Turning right");
+    }
+    delay(500);
+  } else {
+    // Path is clear - move forward
+    moveForward();
+    Serial.println("Path clear");
+  }
+  
+  delay(100);
+}
+
+float getDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  long duration = pulseIn(echoPin, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void moveForward() {
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void moveBackward() {
+  digitalWrite(MOTOR_LEFT_DIR1, LOW);
+  digitalWrite(MOTOR_LEFT_DIR2, HIGH);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, LOW);
+  digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void turnLeft() {
+  digitalWrite(MOTOR_LEFT_DIR1, LOW);
+  digitalWrite(MOTOR_LEFT_DIR2, HIGH);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void turnRight() {
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, LOW);
+  digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}`,
+
+  traffic_bot: `/*
+ * Traffic Bot - Auto-Stop Robot
+ * Stops automatically when detecting obstacles
+ * 
+ * Hardware:
+ * - Arduino Uno
+ * - 2x DC Motors
+ * - HC-SR04 Ultrasonic Sensor
+ * - L298N Motor Driver
+ * - LiPo Battery
+ */
+
+// Motor pins
+#define MOTOR_LEFT_PWM 5
+#define MOTOR_LEFT_DIR1 6
+#define MOTOR_LEFT_DIR2 7
+#define MOTOR_RIGHT_PWM 9
+#define MOTOR_RIGHT_DIR1 10
+#define MOTOR_RIGHT_DIR2 11
+
+// Sensor pins
+#define TRIG_PIN 12
+#define ECHO_PIN 13
+
+#define STOP_DISTANCE 15  // Stop distance in cm
+#define SPEED 200
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Motor pins
+  pinMode(MOTOR_LEFT_PWM, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR1, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR2, OUTPUT);
+  pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
+  
+  // Sensor pins
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  
+  Serial.println("Traffic Bot - Auto-Stop Active!");
+}
+
+void loop() {
+  float distance = getDistance();
+  
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  
+  if (distance > STOP_DISTANCE) {
+    // Clear ahead - move forward
+    moveForward();
+    Serial.println("Moving - Clear ahead");
+  } else {
+    // Obstacle detected - STOP!
+    stopMotors();
+    Serial.println("STOP - Obstacle detected!");
+  }
+  
+  delay(100);
+}
+
+float getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void moveForward() {
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, SPEED);
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+}
+
+void stopMotors() {
+  analogWrite(MOTOR_LEFT_PWM, 0);
+  analogWrite(MOTOR_RIGHT_PWM, 0);
+}`,
+
+  line_follower: `/*
+ * Line Follower Robot
+ * Autonomously follows a black line on white surface
+ * 
+ * Hardware:
+ * - Arduino Uno
+ * - 2x DC Motors
+ * - 3x IR Line Sensors (Left, Center, Right)
+ * - L298N Motor Driver
+ * - LiPo Battery
+ */
+
+// Motor pins
+#define MOTOR_LEFT_PWM 5
+#define MOTOR_LEFT_DIR1 6
+#define MOTOR_LEFT_DIR2 7
+#define MOTOR_RIGHT_PWM 9
+#define MOTOR_RIGHT_DIR1 10
+#define MOTOR_RIGHT_DIR2 11
+
+// Line sensor pins (IR sensors)
+#define SENSOR_LEFT A0
+#define SENSOR_CENTER A1
+#define SENSOR_RIGHT A2
+
+#define BASE_SPEED 180
+#define TURN_SPEED 150
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Motor pins
+  pinMode(MOTOR_LEFT_PWM, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR1, OUTPUT);
+  pinMode(MOTOR_LEFT_DIR2, OUTPUT);
+  pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
+  
+  // Sensor pins
+  pinMode(SENSOR_LEFT, INPUT);
+  pinMode(SENSOR_CENTER, INPUT);
+  pinMode(SENSOR_RIGHT, INPUT);
+  
+  Serial.println("Line Follower Active!");
+}
+
+void loop() {
+  // Read sensors (HIGH = white, LOW = black line)
+  int left = digitalRead(SENSOR_LEFT);
+  int center = digitalRead(SENSOR_CENTER);
+  int right = digitalRead(SENSOR_RIGHT);
+  
+  Serial.print("L:"); Serial.print(left);
+  Serial.print(" C:"); Serial.print(center);
+  Serial.print(" R:"); Serial.println(right);
+  
+  // Line following logic
+  if (center == LOW) {
+    // On line - go straight
+    moveForward(BASE_SPEED, BASE_SPEED);
+    Serial.println("Straight");
+  } else if (left == LOW) {
+    // Line on left - turn left
+    moveForward(TURN_SPEED, BASE_SPEED);
+    Serial.println("Turn Left");
+  } else if (right == LOW) {
+    // Line on right - turn right
+    moveForward(BASE_SPEED, TURN_SPEED);
+    Serial.println("Turn Right");
+  } else {
+    // Lost line - stop
+    stopMotors();
+    Serial.println("Line lost!");
+  }
+  
+  delay(50);
+}
+
+void moveForward(int leftSpeed, int rightSpeed) {
+  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
+  digitalWrite(MOTOR_LEFT_DIR2, LOW);
+  analogWrite(MOTOR_LEFT_PWM, leftSpeed);
+  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
+  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
+  analogWrite(MOTOR_RIGHT_PWM, rightSpeed);
+}
+
+void stopMotors() {
+  analogWrite(MOTOR_LEFT_PWM, 0);
+  analogWrite(MOTOR_RIGHT_PWM, 0);
+}`,
+
   rc_car_basic: `/*
  * RC Car Basic - Arduino Control Code
  * 2-wheel drive with servo steering
