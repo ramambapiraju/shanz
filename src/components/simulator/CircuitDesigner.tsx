@@ -71,6 +71,8 @@ const COMPONENTS = [
 
 const PROJECT_TEMPLATES = [
   { id: "blank", name: "Blank Canvas", description: "Start from scratch" },
+  { id: "siren", name: "🎵 Musical Bell/Siren", description: "Sound generator with 555 timer" },
+  { id: "trafficIC", name: "🚦 Traffic Light (IC)", description: "CD4017 counter + 555 timer" },
   { id: "blink", name: "1. Blinking LED 💡", description: "Learn basic LED control" },
   { id: "traffic", name: "2. Traffic Light 🚦", description: "3 LEDs in sequence" },
   { id: "nightlight", name: "3. Night Light 🌙", description: "Auto light with LDR" },
