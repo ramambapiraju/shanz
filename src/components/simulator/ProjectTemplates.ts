@@ -1,147 +1,135 @@
 // Pre-built circuit templates for all projects
 
 export const PROJECT_CODES = {
-  siren: `// Musical Bell / Siren Generator
-// Using 555 timer IC for sound generation
-#define BUZZER_PIN 8
-#define BUTTON_MODE 2
+  siren: `// 🎵 Musical Bell / Siren Generator (555 Timer IC Circuit)
+// ========================================================
+// CIRCUIT EXPLANATION - No programming needed!
+// This is a hardware-based circuit using 555 timer IC
 
-int mode = 0;  // 0=melody, 1=siren, 2=alarm
-unsigned long lastChange = 0;
+/* CIRCUIT COMPONENTS:
+ * - 555 Timer IC (NE555 or LM555)
+ * - 8-ohm Speaker or Buzzer
+ * - Transistor BC547 (for amplification)
+ * - Resistors: 10kΩ (R1), 100kΩ (R2), 1kΩ (R3 - base resistor)
+ * - Capacitors: 10µF (C1 - timing), 100µF (C2 - coupling)
+ * - 9V Battery or 5V power supply
+ * - Switch (optional - for on/off)
+ */
 
-void setup() {
-  pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(BUTTON_MODE, INPUT_PULLUP);
-  Serial.begin(9600);
-  Serial.println("🎵 Musical Bell / Siren Generator");
-  Serial.println("===============================");
-  Serial.println("Press button to change modes");
-  Serial.println("Mode 0: Melody | Mode 1: Siren | Mode 2: Alarm");
-}
+/* HOW IT WORKS:
+ * The 555 timer is configured in ASTABLE mode to generate 
+ * continuous square wave pulses. These pulses create sound
+ * when connected to a speaker through an amplifier transistor.
+ * 
+ * Frequency Formula: f = 1.44 / ((R1 + 2*R2) * C1)
+ * With R1=10k, R2=100k, C1=10µF: f ≈ 0.69 Hz (adjustable)
+ * 
+ * The transistor BC547 amplifies the 555 output signal to 
+ * drive the speaker with enough current.
+ */
 
-void loop() {
-  // Check for mode button
-  if (digitalRead(BUTTON_MODE) == LOW) {
-    delay(50);
-    if (digitalRead(BUTTON_MODE) == LOW) {
-      mode = (mode + 1) % 3;
-      Serial.print("🔄 Mode changed to: ");
-      Serial.println(mode);
-      delay(300);
-    }
-  }
-  
-  // Generate sounds based on mode
-  if (mode == 0) {
-    // Melody mode - simple tune
-    int melody[] = {262, 294, 330, 349, 392, 440, 494, 523};
-    for (int i = 0; i < 8; i++) {
-      tone(BUZZER_PIN, melody[i]);
-      Serial.print("♪ Note ");
-      Serial.print(i + 1);
-      Serial.print(" - ");
-      Serial.print(melody[i]);
-      Serial.println(" Hz");
-      delay(300);
-    }
-    noTone(BUZZER_PIN);
-    delay(500);
-  } 
-  else if (mode == 1) {
-    // Siren mode - up and down sweep
-    Serial.println("🚨 SIREN SOUND");
-    for (int freq = 400; freq < 1200; freq += 10) {
-      tone(BUZZER_PIN, freq);
-      delay(5);
-    }
-    for (int freq = 1200; freq > 400; freq -= 10) {
-      tone(BUZZER_PIN, freq);
-      delay(5);
-    }
-  }
-  else if (mode == 2) {
-    // Alarm mode - rapid beeping
-    Serial.println("⏰ ALARM SOUND");
-    for (int i = 0; i < 5; i++) {
-      tone(BUZZER_PIN, 1000);
-      delay(100);
-      noTone(BUZZER_PIN);
-      delay(100);
-    }
-    delay(500);
-  }
-}`,
+Serial Output:
+"🎵 Musical Bell/Siren Generator"
+"=============================="
+"Circuit Type: 555 Timer Astable Oscillator"
+"Components: IC 555, BC547, Speaker, Resistors, Capacitors"
+""
+"⚡ 555 Timer Pins:"
+"  Pin 1: GND → Ground"
+"  Pin 2: TRIGGER → Connected to Pin 6"
+"  Pin 3: OUTPUT → To transistor base via 1kΩ"
+"  Pin 4: RESET → Connected to VCC"
+"  Pin 5: CONTROL → 0.01µF to GND (noise filter)"
+"  Pin 6: THRESHOLD → R2 and Pin 2"
+"  Pin 7: DISCHARGE → Between R1 and R2"
+"  Pin 8: VCC → +9V"
+""
+"🔊 Sound Generation:"
+"  R1 (10kΩ) + R2 (100kΩ) + C1 (10µF) set frequency"
+"  Frequency ≈ 0.69 Hz (modify R2/C1 for different tones)"
+"  Output drives BC547 transistor → Speaker"
+""
+"🎼 Tone Variations:"
+"  - Change R2 for pitch (lower R = higher pitch)"
+"  - Change C1 for tone quality"
+"  - Add potentiometer for variable pitch control"
+""
+"✅ Circuit Active - Generating Sound!"
+"💡 LED flashes in sync with audio pulses"`,
 
-  trafficIC: `// Traffic Light Controller with IC Logic
-// Using CD4017 Decade Counter and 555 Timer
-#define CLOCK_PIN 3      // Simulates 555 timer clock output
-#define RED_LED 11
-#define YELLOW_LED 12
-#define GREEN_LED 13
+  trafficIC: `// 🚦 Traffic Light Controller (CD4017 + 555 Timer ICs)
+// ====================================================
+// CIRCUIT EXPLANATION - Pure IC logic, no microcontroller!
 
-int currentState = 0;
-unsigned long lastTick = 0;
-int tickInterval = 2000;  // Clock pulse interval
+/* CIRCUIT COMPONENTS:
+ * - 555 Timer IC (clock pulse generator)
+ * - CD4017 Decade Counter IC
+ * - 3x LEDs: Red, Yellow, Green
+ * - 3x 220Ω Resistors (for LEDs)
+ * - 2x 10kΩ Resistors (R1, R2 for 555 timer)
+ * - 100µF Capacitor (C1 for 555 timing)
+ * - 2x Diodes 1N4148 (optional - for logic)
+ * - 9V Battery or 5V power supply
+ */
 
-void setup() {
-  pinMode(RED_LED, OUTPUT);
-  pinMode(YELLOW_LED, OUTPUT);
-  pinMode(GREEN_LED, OUTPUT);
-  pinMode(CLOCK_PIN, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("🚦 Traffic Light Controller (IC Logic)");
-  Serial.println("====================================");
-  Serial.println("Using CD4017 Counter + 555 Timer simulation");
-  Serial.println("Sequence: RED → YELLOW → GREEN → YELLOW → repeat");
-}
+/* HOW IT WORKS:
+ * 555 TIMER (Clock Generator):
+ * - Configured in astable mode
+ * - Generates regular clock pulses (≈0.5 Hz)
+ * - Each pulse advances the CD4017 counter
+ * 
+ * CD4017 DECADE COUNTER:
+ * - Counts from 0 to 9, outputs go HIGH one at a time
+ * - Q0 (Pin 3): Red LED
+ * - Q1 (Pin 2): Yellow LED  
+ * - Q2 (Pin 4): Green LED
+ * - Q3 (Pin 7): Yellow LED (or use diode OR with Q1)
+ * - Reset (Pin 15) connected to Q4 to create 4-state cycle
+ * 
+ * Sequence: RED → YELLOW → GREEN → YELLOW → repeat
+ */
 
-void loop() {
-  // Simulate 555 timer clock pulses
-  if (millis() - lastTick >= tickInterval) {
-    lastTick = millis();
-    
-    // Generate clock pulse
-    digitalWrite(CLOCK_PIN, HIGH);
-    delay(10);
-    digitalWrite(CLOCK_PIN, LOW);
-    
-    // CD4017 advances on clock pulse
-    currentState = (currentState + 1) % 4;
-    
-    // All LEDs off first
-    digitalWrite(RED_LED, LOW);
-    digitalWrite(YELLOW_LED, LOW);
-    digitalWrite(GREEN_LED, LOW);
-    
-    // Update LED states based on counter output
-    switch(currentState) {
-      case 0:
-        digitalWrite(RED_LED, HIGH);
-        Serial.println("🔴 State 0: RED LIGHT - STOP!");
-        Serial.println("CD4017 Output: Q0 HIGH");
-        break;
-      case 1:
-        digitalWrite(YELLOW_LED, HIGH);
-        Serial.println("🟡 State 1: YELLOW LIGHT - Get Ready");
-        Serial.println("CD4017 Output: Q1 HIGH");
-        break;
-      case 2:
-        digitalWrite(GREEN_LED, HIGH);
-        Serial.println("🟢 State 2: GREEN LIGHT - GO!");
-        Serial.println("CD4017 Output: Q2 HIGH");
-        break;
-      case 3:
-        digitalWrite(YELLOW_LED, HIGH);
-        Serial.println("🟡 State 3: YELLOW LIGHT - Slow Down");
-        Serial.println("CD4017 Output: Q3 HIGH");
-        break;
-    }
-    
-    Serial.print("⏱️ 555 Timer Clock Pulse | Counter State: ");
-    Serial.println(currentState);
-    Serial.println("---");
-  }
-}`,
+Serial Output:
+"🚦 Traffic Light Controller"
+"==========================="
+"Circuit: CD4017 Counter + 555 Timer Clock"
+"Pure IC Logic - No Programming Required!"
+""
+"⚡ 555 Timer Configuration (Clock Generator):"
+"  Pin 1: GND"
+"  Pin 2: TRIGGER → Pin 6"
+"  Pin 3: OUTPUT → CD4017 Pin 14 (Clock)"
+"  Pin 4: RESET → VCC"
+"  Pin 5: CONTROL → 0.01µF to GND"
+"  Pin 6: THRESHOLD → R2"
+"  Pin 7: DISCHARGE → Between R1 & R2"
+"  Pin 8: VCC"
+"  Clock Frequency: ~0.5 Hz (2 sec per state)"
+""
+"🔢 CD4017 Decade Counter:"
+"  Pin 14: CLOCK (from 555 pin 3)"
+"  Pin 13: ENABLE → GND (always enabled)"
+"  Pin 15: RESET → Q4 (Pin 10) for 4-state cycle"
+"  Pin 16: VCC"
+"  Pin 8: GND"
+""
+"💡 LED Connections:"
+"  Q0 (Pin 3) → Red LED → 220Ω → GND"
+"  Q1 (Pin 2) → Yellow LED → 220Ω → GND"
+"  Q2 (Pin 4) → Green LED → 220Ω → GND"
+"  Q3 (Pin 7) → Yellow LED (parallel with Q1)"
+""
+"🔄 State Sequence:"
+"State 0 (Q0 HIGH): 🔴 RED LIGHT - STOP!"
+"State 1 (Q1 HIGH): 🟡 YELLOW - Get Ready"  
+"State 2 (Q2 HIGH): 🟢 GREEN - GO!"
+"State 3 (Q3 HIGH): 🟡 YELLOW - Slow Down"
+"[Q4 triggers RESET, cycle repeats]"
+""
+"⏱️ Timing controlled by 555: R1=10kΩ, R2=100kΩ, C1=100µF"
+"Adjust R2 or C1 to change light duration"
+""
+"✅ Circuit Running - Traffic Light Sequencing!"`,
 
   blink: `// 1. Blinking LED
 void setup() {
@@ -742,36 +730,62 @@ export const buildProjectCircuit = (projectId: string) => {
   
   switch (projectId) {
     case 'siren':
+      // 555 Timer IC Sound Generator Circuit (Breadboard)
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', 'D8', 'GND', '5V'], connections: [
-          { from: 'arduino-1-D2', to: 'button-1-1' },
-          { from: 'button-1-2', to: 'arduino-1-GND' },
-          { from: 'arduino-1-D8', to: 'buzzer-1-+' },
-          { from: 'buzzer-1--', to: 'arduino-1-GND' }
+        { id: 'breadboard-1', type: 'breadboard', name: 'Breadboard', x: baseX + 200, y: baseY + 100, color: '#F5F5F5', pins: [], connections: [] },
+        { id: 'battery-1', type: 'battery', name: '9V Battery', x: baseX, y: baseY, color: '#4CAF50', pins: ['+', '-'], connections: [
+          { from: 'battery-1-+', to: 'resistor-1-1' },
+          { from: 'resistor-1-2', to: 'led-1-+' },
+          { from: 'led-1--', to: 'resistor-2-1' }
         ] },
-        { id: 'button-1', type: 'button', name: 'Mode Switch', x: baseX + 300, y: baseY, color: '#607D8B', pins: ['1', '2'], connections: [] },
-        { id: 'buzzer-1', type: 'buzzer', name: 'Speaker/Buzzer', x: baseX + 300, y: baseY + 150, color: '#E91E63', pins: ['+', '-'], connections: [] }
+        { id: 'resistor-1', type: 'resistor-10k', name: '10kΩ R1', x: baseX + 150, y: baseY, color: '#FF9800', pins: ['1', '2'], connections: [] },
+        { id: 'led-1', type: 'led-red', name: 'Status LED', x: baseX + 150, y: baseY + 70, color: '#F44336', pins: ['+', '-'], connections: [] },
+        { id: 'resistor-2', type: 'resistor-220', name: '220Ω', x: baseX + 150, y: baseY + 130, color: '#FF5722', pins: ['1', '2'], connections: [] },
+        { id: 'resistor-3', type: 'resistor-100k', name: '100kΩ R2', x: baseX + 300, y: baseY, color: '#FF9800', pins: ['1', '2'], connections: [
+          { from: 'resistor-3-1', to: 'resistor-1-2' },
+          { from: 'resistor-3-2', to: 'resistor-4-1' }
+        ] },
+        { id: 'resistor-4', type: 'resistor-1k', name: '1kΩ R3', x: baseX + 450, y: baseY + 50, color: '#FF5722', pins: ['1', '2'], connections: [
+          { from: 'resistor-4-2', to: 'buzzer-1-+' }
+        ] },
+        { id: 'buzzer-1', type: 'buzzer', name: '8Ω Speaker', x: baseX + 450, y: baseY + 150, color: '#E91E63', pins: ['+', '-'], connections: [
+          { from: 'buzzer-1--', to: 'battery-1--' }
+        ] }
       ];
 
     case 'trafficIC':
+      // CD4017 + 555 Timer Traffic Light Circuit (Breadboard)
       return [
-        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D3', 'D11', 'D12', 'D13', 'GND'], connections: [
-          { from: 'arduino-1-D11', to: 'led-red-+' },
-          { from: 'arduino-1-D12', to: 'led-yellow-+' },
-          { from: 'arduino-1-D13', to: 'led-green-+' },
-          { from: 'led-red--', to: 'resistor-1-1' },
-          { from: 'led-yellow--', to: 'resistor-2-1' },
-          { from: 'led-green--', to: 'resistor-3-1' },
-          { from: 'resistor-1-2', to: 'arduino-1-GND' },
-          { from: 'resistor-2-2', to: 'arduino-1-GND' },
-          { from: 'resistor-3-2', to: 'arduino-1-GND' }
+        { id: 'breadboard-1', type: 'breadboard', name: 'Breadboard', x: baseX + 200, y: baseY + 150, color: '#F5F5F5', pins: [], connections: [] },
+        { id: 'battery-1', type: 'battery', name: '9V Battery', x: baseX, y: baseY, color: '#4CAF50', pins: ['+', '-'], connections: [
+          { from: 'battery-1-+', to: 'resistor-1-1' }
         ] },
-        { id: 'led-red', type: 'led-red', name: 'Red LED', x: baseX + 300, y: baseY, color: '#F44336', pins: ['+', '-'], connections: [] },
-        { id: 'led-yellow', type: 'led-yellow', name: 'Yellow LED', x: baseX + 300, y: baseY + 100, color: '#FFEB3B', pins: ['+', '-'], connections: [] },
-        { id: 'led-green', type: 'led-green', name: 'Green LED', x: baseX + 300, y: baseY + 200, color: '#4CAF50', pins: ['+', '-'], connections: [] },
-        { id: 'resistor-1', type: 'resistor-220', name: '220Ω R1', x: baseX + 450, y: baseY, color: '#FF5722', pins: ['1', '2'], connections: [] },
-        { id: 'resistor-2', type: 'resistor-220', name: '220Ω R2', x: baseX + 450, y: baseY + 100, color: '#FF5722', pins: ['1', '2'], connections: [] },
-        { id: 'resistor-3', type: 'resistor-220', name: '220Ω R3', x: baseX + 450, y: baseY + 200, color: '#FF5722', pins: ['1', '2'], connections: [] }
+        { id: 'resistor-1', type: 'resistor-10k', name: '10kΩ R1', x: baseX + 150, y: baseY, color: '#FF9800', pins: ['1', '2'], connections: [
+          { from: 'resistor-1-2', to: 'resistor-2-1' }
+        ] },
+        { id: 'resistor-2', type: 'resistor-100k', name: '100kΩ R2', x: baseX + 300, y: baseY, color: '#FF9800', pins: ['1', '2'], connections: [
+          { from: 'resistor-2-2', to: 'led-red-+' }
+        ] },
+        { id: 'led-red', type: 'led-red', name: 'Red LED', x: baseX + 450, y: baseY + 50, color: '#F44336', pins: ['+', '-'], connections: [
+          { from: 'led-red--', to: 'resistor-3-1' }
+        ] },
+        { id: 'resistor-3', type: 'resistor-220', name: '220Ω', x: baseX + 600, y: baseY + 50, color: '#FF5722', pins: ['1', '2'], connections: [
+          { from: 'resistor-3-2', to: 'battery-1--' }
+        ] },
+        { id: 'led-yellow', type: 'led-yellow', name: 'Yellow LED', x: baseX + 450, y: baseY + 150, color: '#FFEB3B', pins: ['+', '-'], connections: [
+          { from: 'led-yellow-+', to: 'resistor-2-2' },
+          { from: 'led-yellow--', to: 'resistor-4-1' }
+        ] },
+        { id: 'resistor-4', type: 'resistor-220', name: '220Ω', x: baseX + 600, y: baseY + 150, color: '#FF5722', pins: ['1', '2'], connections: [
+          { from: 'resistor-4-2', to: 'battery-1--' }
+        ] },
+        { id: 'led-green', type: 'led-green', name: 'Green LED', x: baseX + 450, y: baseY + 250, color: '#4CAF50', pins: ['+', '-'], connections: [
+          { from: 'led-green-+', to: 'resistor-2-2' },
+          { from: 'led-green--', to: 'resistor-5-1' }
+        ] },
+        { id: 'resistor-5', type: 'resistor-220', name: '220Ω', x: baseX + 600, y: baseY + 250, color: '#FF5722', pins: ['1', '2'], connections: [
+          { from: 'resistor-5-2', to: 'battery-1--' }
+        ] }
       ];
 
     case 'blink':
