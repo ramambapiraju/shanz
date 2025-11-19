@@ -27,7 +27,7 @@ const SimpleFallback: React.FC<{ component: MechanicalComponent; isSelected: boo
   if (isWheelComponent(component.type)) {
     return (
       <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
+        <cylinderGeometry args={[0.15, 0.15, 0.12, 16]} />
         <meshStandardMaterial color={color} metalness={0.3} roughness={0.7} />
       </mesh>
     );
@@ -68,13 +68,68 @@ const SimpleFallback: React.FC<{ component: MechanicalComponent; isSelected: boo
     );
   }
   
-  // Default box
+  if (isESCComponent(component.type)) {
+    return (
+      <group>
+        <mesh castShadow>
+          <boxGeometry args={[0.4, 0.08, 0.25]} />
+          <meshStandardMaterial color="#1a472a" metalness={0.1} roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 0.05, 0]} castShadow>
+          <boxGeometry args={[0.35, 0.02, 0.2]} />
+          <meshStandardMaterial color="#2ecc71" metalness={0.3} roughness={0.6} />
+        </mesh>
+      </group>
+    );
+  }
+  
+  if (isControllerComponent(component.type)) {
+    return (
+      <group>
+        <mesh castShadow>
+          <boxGeometry args={[0.5, 0.05, 0.3]} />
+          <meshStandardMaterial color="#0a3d62" metalness={0.2} roughness={0.7} />
+        </mesh>
+        {/* Pin headers */}
+        <mesh position={[-0.2, 0.03, 0]} castShadow>
+          <boxGeometry args={[0.05, 0.06, 0.25]} />
+          <meshStandardMaterial color="#333333" metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh position={[0.2, 0.03, 0]} castShadow>
+          <boxGeometry args={[0.05, 0.06, 0.25]} />
+          <meshStandardMaterial color="#333333" metalness={0.8} roughness={0.3} />
+        </mesh>
+      </group>
+    );
+  }
+  
+  if (isSensorComponent(component.type)) {
+    return (
+      <group>
+        <mesh castShadow>
+          <boxGeometry args={[0.3, 0.05, 0.2]} />
+          <meshStandardMaterial color="#e74c3c" metalness={0.2} roughness={0.7} />
+        </mesh>
+        {/* Sensor eyes/lenses */}
+        <mesh position={[-0.08, 0.03, 0.1]} castShadow>
+          <cylinderGeometry args={[0.04, 0.04, 0.03, 12]} />
+          <meshStandardMaterial color="#34495e" metalness={0.7} roughness={0.2} />
+        </mesh>
+        <mesh position={[0.08, 0.03, 0.1]} castShadow>
+          <cylinderGeometry args={[0.04, 0.04, 0.03, 12]} />
+          <meshStandardMaterial color="#34495e" metalness={0.7} roughness={0.2} />
+        </mesh>
+      </group>
+    );
+  }
+  
+  // Default box for any other component type
   return (
     <mesh castShadow>
       <boxGeometry args={[
-        component.scale?.x ?? 0.5,
-        component.scale?.y ?? 0.5,
-        component.scale?.z ?? 0.5
+        component.scale?.x ?? 0.3,
+        component.scale?.y ?? 0.3,
+        component.scale?.z ?? 0.3
       ]} />
       <meshStandardMaterial color={color} metalness={0.3} roughness={0.6} />
     </mesh>
