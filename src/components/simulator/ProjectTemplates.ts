@@ -1,6 +1,148 @@
-// Pre-built circuit templates for all 15 DIY projects (10 Basic + 5 Mid-Level)
+// Pre-built circuit templates for all projects
 
 export const PROJECT_CODES = {
+  siren: `// Musical Bell / Siren Generator
+// Using 555 timer IC for sound generation
+#define BUZZER_PIN 8
+#define BUTTON_MODE 2
+
+int mode = 0;  // 0=melody, 1=siren, 2=alarm
+unsigned long lastChange = 0;
+
+void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(BUTTON_MODE, INPUT_PULLUP);
+  Serial.begin(9600);
+  Serial.println("🎵 Musical Bell / Siren Generator");
+  Serial.println("===============================");
+  Serial.println("Press button to change modes");
+  Serial.println("Mode 0: Melody | Mode 1: Siren | Mode 2: Alarm");
+}
+
+void loop() {
+  // Check for mode button
+  if (digitalRead(BUTTON_MODE) == LOW) {
+    delay(50);
+    if (digitalRead(BUTTON_MODE) == LOW) {
+      mode = (mode + 1) % 3;
+      Serial.print("🔄 Mode changed to: ");
+      Serial.println(mode);
+      delay(300);
+    }
+  }
+  
+  // Generate sounds based on mode
+  if (mode == 0) {
+    // Melody mode - simple tune
+    int melody[] = {262, 294, 330, 349, 392, 440, 494, 523};
+    for (int i = 0; i < 8; i++) {
+      tone(BUZZER_PIN, melody[i]);
+      Serial.print("♪ Note ");
+      Serial.print(i + 1);
+      Serial.print(" - ");
+      Serial.print(melody[i]);
+      Serial.println(" Hz");
+      delay(300);
+    }
+    noTone(BUZZER_PIN);
+    delay(500);
+  } 
+  else if (mode == 1) {
+    // Siren mode - up and down sweep
+    Serial.println("🚨 SIREN SOUND");
+    for (int freq = 400; freq < 1200; freq += 10) {
+      tone(BUZZER_PIN, freq);
+      delay(5);
+    }
+    for (int freq = 1200; freq > 400; freq -= 10) {
+      tone(BUZZER_PIN, freq);
+      delay(5);
+    }
+  }
+  else if (mode == 2) {
+    // Alarm mode - rapid beeping
+    Serial.println("⏰ ALARM SOUND");
+    for (int i = 0; i < 5; i++) {
+      tone(BUZZER_PIN, 1000);
+      delay(100);
+      noTone(BUZZER_PIN);
+      delay(100);
+    }
+    delay(500);
+  }
+}`,
+
+  trafficIC: `// Traffic Light Controller with IC Logic
+// Using CD4017 Decade Counter and 555 Timer
+#define CLOCK_PIN 3      // Simulates 555 timer clock output
+#define RED_LED 11
+#define YELLOW_LED 12
+#define GREEN_LED 13
+
+int currentState = 0;
+unsigned long lastTick = 0;
+int tickInterval = 2000;  // Clock pulse interval
+
+void setup() {
+  pinMode(RED_LED, OUTPUT);
+  pinMode(YELLOW_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(CLOCK_PIN, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("🚦 Traffic Light Controller (IC Logic)");
+  Serial.println("====================================");
+  Serial.println("Using CD4017 Counter + 555 Timer simulation");
+  Serial.println("Sequence: RED → YELLOW → GREEN → YELLOW → repeat");
+}
+
+void loop() {
+  // Simulate 555 timer clock pulses
+  if (millis() - lastTick >= tickInterval) {
+    lastTick = millis();
+    
+    // Generate clock pulse
+    digitalWrite(CLOCK_PIN, HIGH);
+    delay(10);
+    digitalWrite(CLOCK_PIN, LOW);
+    
+    // CD4017 advances on clock pulse
+    currentState = (currentState + 1) % 4;
+    
+    // All LEDs off first
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(GREEN_LED, LOW);
+    
+    // Update LED states based on counter output
+    switch(currentState) {
+      case 0:
+        digitalWrite(RED_LED, HIGH);
+        Serial.println("🔴 State 0: RED LIGHT - STOP!");
+        Serial.println("CD4017 Output: Q0 HIGH");
+        break;
+      case 1:
+        digitalWrite(YELLOW_LED, HIGH);
+        Serial.println("🟡 State 1: YELLOW LIGHT - Get Ready");
+        Serial.println("CD4017 Output: Q1 HIGH");
+        break;
+      case 2:
+        digitalWrite(GREEN_LED, HIGH);
+        Serial.println("🟢 State 2: GREEN LIGHT - GO!");
+        Serial.println("CD4017 Output: Q2 HIGH");
+        break;
+      case 3:
+        digitalWrite(YELLOW_LED, HIGH);
+        Serial.println("🟡 State 3: YELLOW LIGHT - Slow Down");
+        Serial.println("CD4017 Output: Q3 HIGH");
+        break;
+    }
+    
+    Serial.print("⏱️ 555 Timer Clock Pulse | Counter State: ");
+    Serial.println(currentState);
+    Serial.println("---");
+  }
+}`,
+
   blink: `// 1. Blinking LED
 void setup() {
   pinMode(13, OUTPUT);
@@ -599,6 +741,39 @@ export const buildProjectCircuit = (projectId: string) => {
   const baseY = 50;
   
   switch (projectId) {
+    case 'siren':
+      return [
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D2', 'D8', 'GND', '5V'], connections: [
+          { from: 'arduino-1-D2', to: 'button-1-1' },
+          { from: 'button-1-2', to: 'arduino-1-GND' },
+          { from: 'arduino-1-D8', to: 'buzzer-1-+' },
+          { from: 'buzzer-1--', to: 'arduino-1-GND' }
+        ] },
+        { id: 'button-1', type: 'button', name: 'Mode Switch', x: baseX + 300, y: baseY, color: '#607D8B', pins: ['1', '2'], connections: [] },
+        { id: 'buzzer-1', type: 'buzzer', name: 'Speaker/Buzzer', x: baseX + 300, y: baseY + 150, color: '#E91E63', pins: ['+', '-'], connections: [] }
+      ];
+
+    case 'trafficIC':
+      return [
+        { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D3', 'D11', 'D12', 'D13', 'GND'], connections: [
+          { from: 'arduino-1-D11', to: 'led-red-+' },
+          { from: 'arduino-1-D12', to: 'led-yellow-+' },
+          { from: 'arduino-1-D13', to: 'led-green-+' },
+          { from: 'led-red--', to: 'resistor-1-1' },
+          { from: 'led-yellow--', to: 'resistor-2-1' },
+          { from: 'led-green--', to: 'resistor-3-1' },
+          { from: 'resistor-1-2', to: 'arduino-1-GND' },
+          { from: 'resistor-2-2', to: 'arduino-1-GND' },
+          { from: 'resistor-3-2', to: 'arduino-1-GND' }
+        ] },
+        { id: 'led-red', type: 'led-red', name: 'Red LED', x: baseX + 300, y: baseY, color: '#F44336', pins: ['+', '-'], connections: [] },
+        { id: 'led-yellow', type: 'led-yellow', name: 'Yellow LED', x: baseX + 300, y: baseY + 100, color: '#FFEB3B', pins: ['+', '-'], connections: [] },
+        { id: 'led-green', type: 'led-green', name: 'Green LED', x: baseX + 300, y: baseY + 200, color: '#4CAF50', pins: ['+', '-'], connections: [] },
+        { id: 'resistor-1', type: 'resistor-220', name: '220Ω R1', x: baseX + 450, y: baseY, color: '#FF5722', pins: ['1', '2'], connections: [] },
+        { id: 'resistor-2', type: 'resistor-220', name: '220Ω R2', x: baseX + 450, y: baseY + 100, color: '#FF5722', pins: ['1', '2'], connections: [] },
+        { id: 'resistor-3', type: 'resistor-220', name: '220Ω R3', x: baseX + 450, y: baseY + 200, color: '#FF5722', pins: ['1', '2'], connections: [] }
+      ];
+
     case 'blink':
       return [
         { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY, color: '#00979D', pins: ['D13', 'GND'], connections: [
