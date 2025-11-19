@@ -1,5 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Cpu, Lightbulb, Thermometer, Gauge, Cable, Trash2, ZapIcon, Power, Activity, Radio, Battery, Grid3x3, Antenna, Eraser } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -214,17 +216,6 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     toast.success("🗑️ Wire removed");
   };
 
-  const toggleEditWireMode = () => {
-    setEditWireMode(!editWireMode);
-    setWiringMode(false);
-    setWireFrom(null);
-    if (!editWireMode) {
-      toast.info("✂️ Edit Mode Active", {
-        description: "Click any wire to delete it"
-      });
-    }
-  };
-
   const getIcon = (type: string) => {
     const comp = COMPONENTS.find(c => c.type === type);
     return comp ? comp.icon : Cpu;
@@ -285,7 +276,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 </Button>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-4 flex-wrap items-center">
               <Button
                 variant={wiringMode ? "default" : "outline"}
                 onClick={() => {
@@ -298,14 +289,25 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 {wiringMode ? "✓ Wiring Mode" : "🔌 Connect Wires"}
               </Button>
               {circuit.some(c => c.connections?.length > 0) && (
-                <Button
-                  variant={editWireMode ? "destructive" : "outline"}
-                  onClick={toggleEditWireMode}
-                  size="lg"
-                  className={editWireMode ? "animate-pulse" : ""}
-                >
-                  {editWireMode ? "✓ Edit Mode" : "✂️ Edit Wires"}
-                </Button>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
+                  <Label htmlFor="edit-wire-mode" className="cursor-pointer text-sm font-medium">
+                    ✂️ Edit Wires
+                  </Label>
+                  <Switch
+                    id="edit-wire-mode"
+                    checked={editWireMode}
+                    onCheckedChange={(checked) => {
+                      setEditWireMode(checked);
+                      setWiringMode(false);
+                      setWireFrom(null);
+                      if (checked) {
+                        toast.info("✂️ Edit Mode Active", {
+                          description: "Click any wire to delete it"
+                        });
+                      }
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>
