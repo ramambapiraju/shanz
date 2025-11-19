@@ -1094,6 +1094,63 @@ export const MODEL_REGISTRY: Record<ComponentType, ComponentModelConfig> = {
     generator: generateUltrasonicSensor,
     defaultScale: [1, 1, 1],
   },
+  ir_sensor: {
+    type: "procedural",
+    generator: (scale) => {
+      const group = new THREE.Group();
+      
+      // Main PCB board
+      const boardGeometry = new THREE.BoxGeometry(0.3, 0.05, 0.2);
+      const boardMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a472a,
+        metalness: 0.1,
+        roughness: 0.8,
+      });
+      const board = new THREE.Mesh(boardGeometry, boardMaterial);
+      group.add(board);
+      
+      // IR LED (emitter)
+      const ledGeometry = new THREE.CylinderGeometry(0.025, 0.025, 0.04, 12);
+      const ledMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0000ff,
+        metalness: 0.3,
+        roughness: 0.4,
+        emissive: 0x0000ff,
+        emissiveIntensity: 0.3,
+      });
+      const led = new THREE.Mesh(ledGeometry, ledMaterial);
+      led.rotation.x = Math.PI / 2;
+      led.position.set(-0.08, 0.03, 0.1);
+      group.add(led);
+      
+      // IR Receiver (photodiode)
+      const receiverGeometry = new THREE.CylinderGeometry(0.025, 0.025, 0.04, 12);
+      const receiverMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a,
+        metalness: 0.7,
+        roughness: 0.3,
+      });
+      const receiver = new THREE.Mesh(receiverGeometry, receiverMaterial);
+      receiver.rotation.x = Math.PI / 2;
+      receiver.position.set(0.08, 0.03, 0.1);
+      group.add(receiver);
+      
+      // Potentiometer for sensitivity adjustment
+      const potGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.015, 16);
+      const potMaterial = new THREE.MeshStandardMaterial({
+        color: 0x4169e1,
+        metalness: 0.2,
+        roughness: 0.6,
+      });
+      const pot = new THREE.Mesh(potGeometry, potMaterial);
+      pot.position.set(0, 0.03, -0.05);
+      group.add(pot);
+      
+      group.scale.set(...scale);
+      return group;
+    },
+    defaultScale: [1, 1, 1],
+  },
   gyro_mpu6050: {
     type: "procedural",
     generator: generateGyroSensor,

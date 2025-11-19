@@ -33,6 +33,7 @@ export type ComponentType =
   | "plastic_body"
   // Sensors
   | "ultrasonic_sensor"
+  | "ir_sensor"
   | "gyro_mpu6050"
   | "gps_module"
   | "camera_module";
@@ -423,6 +424,21 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
       updateRate: 40,
       voltage: 5,
       current: 0.015,
+    },
+  },
+  ir_sensor: {
+    type: "ir_sensor",
+    name: "IR Obstacle Sensor",
+    scale: { x: 0.5, y: 0.3, z: 0.4 },
+    color: "#FF1744",
+    properties: {
+      type: "Proximity",
+      range: 0.8,
+      accuracy: 0.05,
+      updateRate: 50,
+      voltage: 5,
+      current: 0.02,
+      detectionAngle: 15,
     },
   },
   gyro_mpu6050: {

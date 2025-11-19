@@ -46,5 +46,5 @@ export const isChassisComponent = (type: ComponentType): boolean => {
 };
 
 export const isSensorComponent = (type: ComponentType): boolean => {
-  return ["ultrasonic_sensor", "gyro_mpu6050", "gps_module", "camera_module"].includes(type);
+  return ["ultrasonic_sensor", "ir_sensor", "gyro_mpu6050", "gps_module", "camera_module"].includes(type);
 };
