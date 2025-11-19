@@ -71,24 +71,12 @@ const COMPONENTS = [
 
 const PROJECT_TEMPLATES = [
   { id: "blank", name: "Blank Canvas", description: "Start from scratch" },
-  { id: "siren", name: "🎵 Musical Bell/Siren (IC)", description: "555 Timer sound generator" },
-  { id: "trafficIC", name: "🚦 Traffic Light (IC)", description: "CD4017 + 555 timer logic" },
-  { id: "blink", name: "1. Blinking LED 💡", description: "Learn basic LED control" },
-  { id: "traffic", name: "2. Traffic Light 🚦", description: "3 LEDs in sequence" },
-  { id: "nightlight", name: "3. Night Light 🌙", description: "Auto light with LDR" },
-  { id: "alarm", name: "4. Buzzer Alarm 🔊", description: "Sound alert system" },
-  { id: "temperature", name: "5. Temperature Monitor 🌡️", description: "Read DHT11 sensor" },
-  { id: "motion", name: "6. Motion Detector 👋", description: "PIR sensor light" },
-  { id: "rgb", name: "7. RGB Color Mixer 🌈", description: "Mix light colors" },
-  { id: "counter", name: "8. Button Counter 🔘", description: "Count presses" },
-  { id: "distance", name: "9. Distance Alert 📡", description: "Ultrasonic warning" },
-  { id: "fan", name: "10. Fan Controller ⚙️", description: "Variable speed control" },
-  // MID-LEVEL PROJECTS
-  { id: "smartLighting", name: "11. Smart Lighting 💡⭐", description: "LDR + PIR combo system" },
-  { id: "parkingSensor", name: "12. Parking Sensor 🚗", description: "3-zone distance alert" },
-  { id: "thermostat", name: "13. Smart Thermostat 🌡️⭐", description: "Auto temperature control" },
-  { id: "securitySystem", name: "14. Security System 🔒", description: "Motion alarm with arming" },
-  { id: "musicPlayer", name: "15. Music Player 🎵", description: "Multi-song buzzer player" },
+  { id: "blink", name: "1. LED Blink", description: "Simple LED blinking" },
+  { id: "button", name: "2. Button + LED", description: "Button controls LED" },
+  { id: "traffic", name: "3. Traffic Light", description: "Automated traffic signal" },
+  { id: "lightSensor", name: "4. Light Sensor", description: "Light-activated LED" },
+  { id: "temperature", name: "5. Temperature Monitor", description: "DHT11 sensor readings" },
+  { id: "ultrasonic", name: "6. Distance Alert", description: "Ultrasonic sensor with buzzer" },
 ];
 
 interface CircuitDesignerExtendedProps extends CircuitDesignerProps {
@@ -417,8 +405,8 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                          >
                            <div
                             id={component.id}
-                            className={`absolute transition-all duration-300 rounded-xl p-3
-                              ${(component.type === 'switch' || component.type === 'button') && !isRunning && !editWireMode && !wiringMode ? 'cursor-pointer hover:scale-110' : 'cursor-move'}
+                             className={`absolute transition-all duration-300 rounded-xl p-3
+                              ${(component.type === 'switch' || component.type === 'button') && !editWireMode && !wiringMode ? 'cursor-pointer hover:scale-110' : 'cursor-move'}
                               ${isRunning && isActive ? 'scale-110' : 'hover:scale-105'}
                               ${component.type === 'arduino' ? 'arduino-board' :
                                 component.type === 'breadboard' ? 'breadboard-surface' :
@@ -445,7 +433,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                               border: component.type === 'breadboard' ? '1px solid #ccc' : undefined
                             }}
                             onClick={(e) => {
-                              if ((component.type === 'switch' || component.type === 'button') && !isRunning && !editWireMode && !wiringMode) {
+                              if ((component.type === 'switch' || component.type === 'button') && !editWireMode && !wiringMode) {
                                 e.stopPropagation();
                                 toggleComponentState(component.id);
                               }
