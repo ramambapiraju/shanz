@@ -429,9 +429,17 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                 component.type.includes('led') ? 'led-dome' + (isActive ? ' led-glow-active' : '') :
                                 'component-3d'
                               }`}
-                             style={{ 
-                              backgroundColor: isLED && isActive ? `${component.color}` : undefined,
-                              boxShadow: isLED && isActive ? `0 0 30px ${component.color}, 0 0 60px ${component.color}80, 0 8px 20px rgba(0,0,0,0.3)` : undefined,
+                            style={{ 
+                              backgroundColor: isLED && isActive 
+                                ? (component.type === 'led-rgb' && state.r !== undefined 
+                                  ? `rgb(${state.r}, ${state.g}, ${state.b})` 
+                                  : component.color)
+                                : undefined,
+                              boxShadow: isLED && isActive 
+                                ? (component.type === 'led-rgb' && state.r !== undefined
+                                  ? `0 0 30px rgb(${state.r}, ${state.g}, ${state.b}), 0 0 60px rgba(${state.r}, ${state.g}, ${state.b}, 0.5), 0 8px 20px rgba(0,0,0,0.3)`
+                                  : `0 0 30px ${component.color}, 0 0 60px ${component.color}80, 0 8px 20px rgba(0,0,0,0.3)`)
+                                : undefined,
                               border: component.type === 'breadboard' ? '1px solid #ccc' : undefined
                             }}
                             onClick={(e) => {
@@ -452,13 +460,17 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                   <div 
                                     className="absolute inset-0 rounded-full led-dome"
                                     style={{ 
-                                      backgroundColor: component.color,
+                                      backgroundColor: component.type === 'led-rgb' && state.r !== undefined
+                                        ? `rgb(${state.r}, ${state.g}, ${state.b})`
+                                        : component.color,
                                       filter: 'brightness(1.5)',
-                                      boxShadow: `0 0 10px ${component.color}, inset 0 -2px 4px rgba(0,0,0,0.3)`
+                                      boxShadow: component.type === 'led-rgb' && state.r !== undefined
+                                        ? `0 0 10px rgb(${state.r}, ${state.g}, ${state.b}), inset 0 -2px 4px rgba(0,0,0,0.3)`
+                                        : `0 0 10px ${component.color}, inset 0 -2px 4px rgba(0,0,0,0.3)`
                                     }}
                                   />
                                   <Icon 
-                                    className="absolute inset-0 h-5 w-5" 
+                                    className="absolute inset-0 h-5 w-5"
                                     style={{ 
                                       color: '#fff',
                                       filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.8))'
