@@ -39,6 +39,13 @@ interface SimulationEngineProps {
   onUpdateComponents: (components: MechanicalComponent[]) => void;
   onSimulationStateChange?: (time: number, isRunning: boolean) => void;
   rcControls?: RCControls;
+  settings?: {
+    throttleSensitivity: number;
+    steeringSensitivity: number;
+    wheelSizeMultiplier: number;
+    maxSpeed: number;
+    acceleration: number;
+  };
 }
 
 const SimulationEngine: React.FC<SimulationEngineProps> = ({
@@ -46,6 +53,13 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
   onUpdateComponents,
   onSimulationStateChange,
   rcControls,
+  settings = {
+    throttleSensitivity: 1.0,
+    steeringSensitivity: 1.0,
+    wheelSizeMultiplier: 1.0,
+    maxSpeed: 10,
+    acceleration: 5,
+  },
 }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -100,12 +114,12 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     const updateControls = () => {
       // Use RC controls if available, otherwise use keyboard
       if (rcControls) {
-        setThrottle(Math.max(0, Math.min(1, (rcControls.throttle + 1) / 2))); // Map -1,1 to 0,1
-        setSteering(rcControls.steering || rcControls.yaw);
+        setThrottle(Math.max(0, Math.min(1, (rcControls.throttle + 1) / 2 * settings.throttleSensitivity))); // Map -1,1 to 0,1
+        setSteering((rcControls.steering || rcControls.yaw) * settings.steeringSensitivity);
       } else {
         // Update throttle based on keyboard
         if (keyboardControls.throttleUp || keyboardControls.forward) {
-          setThrottle((prev) => Math.min(1, prev + 0.02));
+          setThrottle((prev) => Math.min(1, prev + 0.02 * settings.throttleSensitivity));
         }
         if (keyboardControls.throttleDown || keyboardControls.backward) {
           setThrottle((prev) => Math.max(0, prev - 0.02));
