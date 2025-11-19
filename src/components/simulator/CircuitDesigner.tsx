@@ -93,9 +93,11 @@ interface CircuitDesignerExtendedProps extends CircuitDesignerProps {
 
 export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentStates, onTemplateChange }: CircuitDesignerExtendedProps) => {
   const [wiringMode, setWiringMode] = useState(false);
+  const [editWireMode, setEditWireMode] = useState(false);
   const [wireFrom, setWireFrom] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("blank");
+  const [hoveredWire, setHoveredWire] = useState<string | null>(null);
   const updateXarrow = useXarrow();
 
   const loadTemplate = (templateId: string) => {
@@ -197,7 +199,8 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     }
   };
 
-  const removeWire = (componentId: string, connectionIndex: number) => {
+  const removeWire = (componentId: string, connectionIndex: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const updatedCircuit = circuit.map(c => {
       if (c.id === componentId) {
         return {
@@ -209,6 +212,17 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     });
     setCircuit(updatedCircuit);
     toast.success("🗑️ Wire removed");
+  };
+
+  const toggleEditWireMode = () => {
+    setEditWireMode(!editWireMode);
+    setWiringMode(false);
+    setWireFrom(null);
+    if (!editWireMode) {
+      toast.info("✂️ Edit Mode Active", {
+        description: "Click any wire to delete it"
+      });
+    }
   };
 
   const getIcon = (type: string) => {
@@ -238,7 +252,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 )}
               </div>
               <CardDescription className="mb-3">
-                Build circuits with or without microcontrollers! Click wires to edit/delete them. Edit anytime, even during simulation.
+                Build circuits with or without microcontrollers! Use Edit Wires mode to delete connections. Edit anytime, even during simulation.
               </CardDescription>
               <select 
                 className="w-full max-w-md p-2.5 rounded-lg border-2 bg-card text-sm font-medium hover:border-primary transition-colors shadow-sm"
@@ -276,6 +290,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 variant={wiringMode ? "default" : "outline"}
                 onClick={() => {
                   setWiringMode(!wiringMode);
+                  setEditWireMode(false);
                   setWireFrom(null);
                 }}
                 size="lg"
@@ -284,13 +299,12 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
               </Button>
               {circuit.some(c => c.connections?.length > 0) && (
                 <Button
-                  variant="outline"
-                  onClick={() => {
-                    toast.info("💡 Click on any wire to delete it");
-                  }}
+                  variant={editWireMode ? "destructive" : "outline"}
+                  onClick={toggleEditWireMode}
                   size="lg"
+                  className={editWireMode ? "animate-pulse" : ""}
                 >
-                  ℹ️ Edit Wires
+                  {editWireMode ? "✓ Edit Mode" : "✂️ Edit Wires"}
                 </Button>
               )}
             </div>
@@ -379,7 +393,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                             setCircuit(updatedCircuit);
                             updateXarrow();
                           }}
-                          disabled={wiringMode}
+                          disabled={wiringMode || editWireMode}
                         >
                            <div
                             id={component.id}
@@ -505,24 +519,41 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                       component.connections.map((conn, idx) => {
                         const state = getComponentState(component.id);
                         const isActive = state.active;
+                        const wireKey = `${component.id}-${idx}`;
+                        const isHovered = hoveredWire === wireKey;
+                        
                         return (
-                          <g key={`${component.id}-${idx}`} onClick={() => removeWire(component.id, idx)} style={{ cursor: 'pointer' }}>
-                            <Xarrow
-                              start={conn.from}
-                              end={conn.to}
-                              color={isActive ? component.color : '#666'}
-                              strokeWidth={isActive ? 4 : 2}
-                              headSize={6}
-                              showHead={false}
-                              dashness={isActive ? { strokeLen: 10, nonStrokeLen: 10, animation: 1 } : false}
-                              animateDrawing={isActive ? 0.5 : false}
-                              passProps={{
-                                onClick: () => removeWire(component.id, idx),
-                                style: { cursor: 'pointer' },
-                                className: 'hover:opacity-50 transition-opacity'
-                              }}
-                            />
-                          </g>
+                          <Xarrow
+                            key={wireKey}
+                            start={conn.from}
+                            end={conn.to}
+                            color={
+                              editWireMode && isHovered ? '#ef4444' : 
+                              editWireMode ? '#fbbf24' :
+                              isActive ? component.color : '#666'
+                            }
+                            strokeWidth={
+                              editWireMode && isHovered ? 6 : 
+                              editWireMode ? 3 :
+                              isActive ? 4 : 2
+                            }
+                            headSize={6}
+                            showHead={false}
+                            dashness={
+                              editWireMode ? false :
+                              isActive ? { strokeLen: 10, nonStrokeLen: 10, animation: 1 } : false
+                            }
+                            animateDrawing={isActive && !editWireMode ? 0.5 : false}
+                            passProps={{
+                              onClick: (e: React.MouseEvent) => editWireMode && removeWire(component.id, idx, e),
+                              onMouseEnter: () => editWireMode && setHoveredWire(wireKey),
+                              onMouseLeave: () => editWireMode && setHoveredWire(null),
+                              style: { 
+                                cursor: editWireMode ? 'pointer' : 'default',
+                                transition: 'all 0.2s ease',
+                              },
+                            }}
+                          />
                         );
                       })
                     )}
