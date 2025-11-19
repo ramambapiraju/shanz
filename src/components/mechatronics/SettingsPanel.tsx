@@ -11,6 +11,7 @@ export interface SimulationSettings {
   wheelSizeMultiplier: number;
   maxSpeed: number;
   acceleration: number;
+  irSensorSensitivity: number;
 }
 
 interface SettingsPanelProps {
@@ -24,6 +25,7 @@ const DEFAULT_SETTINGS: SimulationSettings = {
   wheelSizeMultiplier: 1.0,
   maxSpeed: 10,
   acceleration: 5,
+  irSensorSensitivity: 0.8,
 };
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onSettingsChange }) => {
@@ -123,6 +125,21 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onSettingsChang
               min={2}
               max={10}
               step={0.5}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">
+              IR Sensor Range: {settings.irSensorSensitivity.toFixed(2)} m
+            </Label>
+            <Slider
+              value={[settings.irSensorSensitivity]}
+              onValueChange={(value) =>
+                onSettingsChange({ ...settings, irSensorSensitivity: value[0] })
+              }
+              min={0.2}
+              max={2.0}
+              step={0.1}
             />
           </div>
         </CardContent>
