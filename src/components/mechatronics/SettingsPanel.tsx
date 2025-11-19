@@ -19,7 +19,7 @@ interface SettingsPanelProps {
 }
 
 const DEFAULT_SETTINGS: SimulationSettings = {
-  throttleSensitivity: 1.0,
+  throttleSensitivity: 0.3,
   steeringSensitivity: 1.0,
   wheelSizeMultiplier: 1.0,
   maxSpeed: 10,
@@ -60,7 +60,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onSettingsChang
               onValueChange={(value) =>
                 onSettingsChange({ ...settings, throttleSensitivity: value[0] })
               }
-              min={0.5}
+              min={0.1}
               max={2.0}
               step={0.1}
             />
