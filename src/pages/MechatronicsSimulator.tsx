@@ -15,6 +15,7 @@ import { CodePanel } from "@/components/mechatronics/CodePanel";
 import { RCTransmitterUI, RCControls } from "@/components/mechatronics/RCTransmitterUI";
 import { DamageSystem, ComponentDamage } from "@/components/mechatronics/DamageSystem";
 import { MechanicalComponent, createComponent, ComponentType } from "@/components/mechatronics/MechanicalComponent";
+import SettingsPanel, { SimulationSettings, DEFAULT_SETTINGS } from "@/components/mechatronics/SettingsPanel";
 import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3D";
 import { validateProject } from "@/utils/projectValidator";
 import { getProjectCode } from "@/data/projectCode";
@@ -51,6 +52,7 @@ const MechatronicsSimulator = () => {
       warnings: [],
     }));
   });
+  const [simulationSettings, setSimulationSettings] = useState<SimulationSettings>(DEFAULT_SETTINGS);
   
   useEffect(() => {
     // Show welcome message with instructions
@@ -208,11 +210,16 @@ const MechatronicsSimulator = () => {
             onUpdateComponent={handleUpdateComponent}
             onDeleteComponent={handleDeleteComponent}
           />
+          <SettingsPanel
+            settings={simulationSettings}
+            onSettingsChange={setSimulationSettings}
+          />
           <SimulationEngine
             components={components}
             onUpdateComponents={setComponents}
             onSimulationStateChange={handleSimulationStateChange}
             rcControls={rcControls}
+            settings={simulationSettings}
           />
           <RCTransmitterUI
             onControlChange={setRCControls}
