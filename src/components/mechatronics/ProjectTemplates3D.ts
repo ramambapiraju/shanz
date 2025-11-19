@@ -34,11 +34,11 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: -0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: 0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       
-      // Wheels
+      // Wheels (all uniform size)
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       
       // Electronics
       { ...createComponent("arduino_uno", { x: 0, y: 0.12, z: 0 }), scale: { x: 0.5, y: 0.3, z: 0.6 } },
@@ -69,11 +69,11 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: -0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: 0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       
-      // Wheels
+      // Wheels (all uniform size)
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       
       // Front proximity sensor
       { ...createComponent("ultrasonic_sensor", { x: 0.45, y: 0.08, z: 0 }), scale: { x: 0.4, y: 0.3, z: 0.4 } },
@@ -107,11 +107,11 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: -0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: 0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       
-      // Wheels
+      // Wheels (all uniform size)
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       
       // IR sensor at front for obstacle detection
       { ...createComponent("ir_sensor", { x: 0.5, y: 0.08, z: 0 }), scale: { x: 0.4, y: 0.3, z: 0.4 } },
@@ -145,11 +145,11 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: -0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       { ...createComponent("dc_motor_775", { x: -0.3, y: 0.05, z: 0.2 }), scale: { x: 0.5, y: 0.5, z: 0.6 } },
       
-      // Wheels
+      // Wheels (all uniform size)
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       { ...createComponent("rubber_wheel_100mm", { x: -0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
-      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.6, y: 0.6, z: 0.6 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: -0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
+      { ...createComponent("rubber_wheel_100mm", { x: 0.4, y: -0.02, z: 0.25 }), scale: { x: 0.8, y: 0.8, z: 0.8 } },
       
       // Front sensor for collision detection
       { ...createComponent("ultrasonic_sensor", { x: 0.45, y: 0.08, z: 0 }), scale: { x: 0.4, y: 0.3, z: 0.4 } },

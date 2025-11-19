@@ -204,7 +204,419 @@ void loop() {
   
   Serial.println("---");
   delay(500);
-}`
+}`,
+
+  // ============================================
+  // ARDUINO-LESS CIRCUITS (14 simple circuits)
+  // ============================================
+  
+  // Circuit 1: Basic LED with Battery
+  basicLED: `// 💡 Circuit 1: Basic LED with Battery
+// Simple circuit - LED, resistor, and battery (No Arduino!)
+// This is the most fundamental circuit
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → LED (+) → Resistor → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - LED (any color)
+   - 220Ω Resistor
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("💡 Circuit 1: Basic LED");
+  Serial.println("No Arduino needed - just battery power!");
+  Serial.println("Battery → LED → Resistor → Battery");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("✅ LED is ON (powered by battery)");
+  delay(2000);
+}`,
+
+  // Circuit 2: Series LEDs
+  seriesLEDs: `// 🔗 Circuit 2: LEDs in Series
+// Multiple LEDs connected one after another
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → LED1 → LED2 → LED3 → Resistor → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - 3x LEDs (same color)
+   - 330Ω Resistor
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🔗 Circuit 2: Series LEDs");
+  Serial.println("3 LEDs in series share the same current");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("✅ All 3 LEDs glowing (dimmer than single LED)");
+  delay(2000);
+}`,
+
+  // Circuit 3: Parallel LEDs
+  parallelLEDs: `// ⚡ Circuit 3: LEDs in Parallel
+// Multiple LEDs each with their own path
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → [LED1+Resistor1]
+              → [LED2+Resistor2]
+              → [LED3+Resistor3] → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - 3x LEDs (different colors)
+   - 3x 220Ω Resistors
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("⚡ Circuit 3: Parallel LEDs");
+  Serial.println("Each LED has independent brightness");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("✅ Red, Green, Blue LEDs all bright!");
+  delay(2000);
+}`,
+
+  // Circuit 4: LED with Switch
+  ledSwitch: `// 🔘 Circuit 4: LED with Switch
+// Control LED on/off with a switch
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Switch → LED → Resistor → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - Push Button Switch
+   - LED
+   - 220Ω Resistor
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🔘 Circuit 4: LED with Switch");
+  Serial.println("Press button to light LED");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("💡 Press switch to turn LED ON");
+  delay(1000);
+  Serial.println("⚫ Release switch to turn LED OFF");
+  delay(1000);
+}`,
+
+  // Circuit 5: Two LEDs with Two Switches
+  dualLEDSwitch: `// 🔘🔘 Circuit 5: Dual LED Control
+// Two independent LED circuits
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Switch1 → LED1 → Resistor1 → Battery (-)
+   Battery (+) → Switch2 → LED2 → Resistor2 → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - 2x Push Buttons
+   - 2x LEDs (different colors)
+   - 2x 220Ω Resistors
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🔘🔘 Circuit 5: Dual LED Control");
+  Serial.println("Each switch controls one LED");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🔴 Switch 1: Red LED");
+  Serial.println("🔵 Switch 2: Blue LED");
+  delay(2000);
+}`,
+
+  // Circuit 6: RGB LED Circuit
+  rgbLED: `// 🌈 Circuit 6: RGB LED Circuit
+// Single LED that can show different colors
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → R pin → 220Ω → Battery (-)
+   Battery (+) → G pin → 220Ω → Battery (-)
+   Battery (+) → B pin → 220Ω → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - RGB LED (common cathode)
+   - 3x 220Ω Resistors
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🌈 Circuit 6: RGB LED");
+  Serial.println("Mix Red, Green, Blue for any color!");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🔴 Red ON → Red light");
+  delay(1000);
+  Serial.println("🟢 Green ON → Green light");
+  delay(1000);
+  Serial.println("🔵 Blue ON → Blue light");
+  delay(1000);
+  Serial.println("🟣 Red+Blue ON → Purple light");
+  delay(1000);
+}`,
+
+  // Circuit 7: Buzzer with Button
+  buzzerButton: `// 🔔 Circuit 7: Buzzer with Button
+// Make sound when button is pressed
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Switch → Buzzer (+) → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - Push Button
+   - Buzzer (piezo)
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🔔 Circuit 7: Buzzer with Button");
+  Serial.println("Press to hear sound!");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🔘 Press button...");
+  delay(1000);
+  Serial.println("🔊 BEEP! Buzzer sounds!");
+  delay(500);
+}`,
+
+  // Circuit 8: Motor with Switch
+  motorSwitch: `// ⚙️ Circuit 8: DC Motor Control
+// Turn motor on/off with switch
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Switch → Motor (+) → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - Push Button
+   - Small DC Motor
+   - Diode (protection)
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("⚙️ Circuit 8: Motor Control");
+  Serial.println("Switch controls motor on/off");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🔘 Switch OFF → Motor STOPPED");
+  delay(1500);
+  Serial.println("🔘 Switch ON → Motor SPINNING ⚙️");
+  delay(1500);
+}`,
+
+  // Circuit 9: Simple Alarm
+  simpleAlarm: `// 🚨 Circuit 9: Simple Alarm
+// Button-activated alarm buzzer
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Button → Buzzer → Battery (-)
+   Parallel: Battery (+) → Button → LED+Resistor → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - Push Button
+   - Buzzer
+   - Red LED
+   - 220Ω Resistor
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🚨 Circuit 9: Simple Alarm");
+  Serial.println("Button triggers alarm!");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("⚫ System armed...");
+  delay(1500);
+  Serial.println("🚨 ALARM! 🔔 BEEP + 🔴 RED LED");
+  delay(2000);
+}`,
+
+  // Circuit 10: LED Night Light with LDR
+  nightLight: `// 🌙 Circuit 10: Automatic Night Light
+// LED turns on in darkness (uses LDR)
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → LDR → Base of Transistor
+   Battery (+) → Collector → LED+Resistor → Emitter → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - LDR (Light Dependent Resistor)
+   - NPN Transistor (2N2222)
+   - LED
+   - 220Ω Resistor
+   - 10kΩ Resistor
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🌙 Circuit 10: Automatic Night Light");
+  Serial.println("LDR senses darkness, LED turns ON");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("☀️ Bright → LDR low resistance → LED OFF");
+  delay(2000);
+  Serial.println("🌙 Dark → LDR high resistance → LED ON 💡");
+  delay(2000);
+}`,
+
+  // Circuit 11: Capacitor Charge/Discharge
+  capacitorDemo: `// ⚡ Circuit 11: Capacitor Demo
+// Watch capacitor charge and discharge
+
+/* CIRCUIT DIAGRAM:
+   Charge: Battery (+) → Resistor → Capacitor → Battery (-)
+   Discharge: Capacitor → LED+Resistor → Capacitor (-)
+   
+   Components:
+   - 9V Battery
+   - 470µF Capacitor
+   - 1kΩ Resistor
+   - LED
+   - 220Ω Resistor
+   - SPDT Switch
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("⚡ Circuit 11: Capacitor Demo");
+  Serial.println("See charge and discharge in action");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("⬆️ CHARGING capacitor... (LED OFF)");
+  delay(3000);
+  Serial.println("⬇️ DISCHARGING capacitor... (LED fades) 💡");
+  delay(3000);
+}`,
+
+  // Circuit 12: LED Dimmer with Potentiometer
+  ledDimmer: `// 🎚️ Circuit 12: LED Dimmer
+// Adjust LED brightness with potentiometer
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Potentiometer → LED → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - 10kΩ Potentiometer
+   - LED
+   - 220Ω Resistor (in series with LED)
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🎚️ Circuit 12: LED Dimmer");
+  Serial.println("Turn potentiometer to adjust brightness");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🔅 Low brightness (pot at min)");
+  delay(1500);
+  Serial.println("💡 Medium brightness (pot at middle)");
+  delay(1500);
+  Serial.println("🔆 High brightness (pot at max)");
+  delay(1500);
+}`,
+
+  // Circuit 13: Dual LED Flasher
+  dualFlasher: `// ✨ Circuit 13: Alternating LED Flasher
+// Two LEDs blink alternately (using capacitors)
+
+/* CIRCUIT DIAGRAM:
+   Astable multivibrator circuit with 2 transistors
+   Battery → RC network → LEDs flash alternately
+   
+   Components:
+   - 9V Battery
+   - 2x NPN Transistors (2N2222)
+   - 2x LEDs
+   - 2x 220Ω Resistors (for LEDs)
+   - 2x 10kΩ Resistors
+   - 2x 100µF Capacitors
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("✨ Circuit 13: Dual LED Flasher");
+  Serial.println("Transistors create alternating blink");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🔴 LED1 ON → LED2 OFF");
+  delay(800);
+  Serial.println("⚫ LED1 OFF → LED2 ON 🔵");
+  delay(800);
+}`,
+
+  // Circuit 14: Simple Doorbell
+  doorbell: `// 🔔 Circuit 14: Simple Doorbell
+// Press button to ring bell
+
+/* CIRCUIT DIAGRAM:
+   Battery (+) → Button → Buzzer → Battery (-)
+   Parallel: Battery (+) → Button → LED+Resistor → Battery (-)
+   
+   Components:
+   - 9V Battery
+   - Push Button (doorbell button)
+   - Buzzer (or small speaker)
+   - LED (indicator)
+   - 220Ω Resistor
+*/
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("🔔 Circuit 14: Simple Doorbell");
+  Serial.println("Press button to ring!");
+  Serial.println("================================");
+}
+
+void loop() {
+  Serial.println("🚪 Waiting at door...");
+  delay(2000);
+  Serial.println("🔘 DING DONG! 🔔 + LED ON 💡");
+  delay(1000);
+  Serial.println("⚫ Bell stops, LED OFF");
+  delay(2000);
+}`,
 };
 
 // ============================================
@@ -219,7 +631,22 @@ export function buildProjectCircuit(projectKey: string): any[] {
     traffic: buildTrafficCircuit,
     lightSensor: buildLightSensorCircuit,
     temperature: buildTemperatureCircuit,
-    ultrasonic: buildUltrasonicCircuit
+    ultrasonic: buildUltrasonicCircuit,
+    // Arduino-less circuits
+    basicLED: buildBasicLEDCircuit,
+    seriesLEDs: buildSeriesLEDsCircuit,
+    parallelLEDs: buildParallelLEDsCircuit,
+    ledSwitch: buildLEDSwitchCircuit,
+    dualLEDSwitch: buildDualLEDSwitchCircuit,
+    rgbLED: buildRGBLEDCircuit,
+    buzzerButton: buildBuzzerButtonCircuit,
+    motorSwitch: buildMotorSwitchCircuit,
+    simpleAlarm: buildSimpleAlarmCircuit,
+    nightLight: buildNightLightCircuit,
+    capacitorDemo: buildCapacitorDemoCircuit,
+    ledDimmer: buildLEDDimmerCircuit,
+    dualFlasher: buildDualFlasherCircuit,
+    doorbell: buildDoorbellCircuit,
   };
 
   const buildFunction = circuits[projectKey];
