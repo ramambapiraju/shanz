@@ -104,6 +104,11 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     setCircuit(prebuiltCircuit);
     setSelectedTemplate(templateId);
     
+    // Load corresponding code if callback provided
+    if (onTemplateChange && PROJECT_CODES[templateId as keyof typeof PROJECT_CODES]) {
+      onTemplateChange(PROJECT_CODES[templateId as keyof typeof PROJECT_CODES], templateId);
+    }
+    
     const template = PROJECT_TEMPLATES.find(t => t.id === templateId);
     toast.success(`${template?.name} loaded!`, {
       description: "✨ Circuit built! Click Run to start simulation"
@@ -111,14 +116,8 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
   };
 
   useEffect(() => {
-    if (selectedTemplate !== "blank") {
-      loadTemplate(selectedTemplate);
-      // Load corresponding code if callback provided
-      if (onTemplateChange && PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES]) {
-        onTemplateChange(PROJECT_CODES[selectedTemplate as keyof typeof PROJECT_CODES], selectedTemplate);
-      }
-    }
-  }, [selectedTemplate]);
+    // Don't auto-load on mount, only when user changes selection
+  }, []);
   
   const categories = ["All", ...Array.from(new Set(COMPONENTS.map(c => c.category)))];
   const filteredComponents = selectedCategory === "All" 
@@ -255,9 +254,12 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 className="w-full max-w-md p-2.5 rounded-lg border-2 bg-card text-sm font-medium hover:border-primary transition-colors shadow-sm"
                 value={selectedTemplate}
                 onChange={(e) => {
-                  setSelectedTemplate(e.target.value);
-                  if (onTemplateChange && e.target.value !== "blank") {
-                    // Template code will be loaded in parent
+                  const templateId = e.target.value;
+                  setSelectedTemplate(templateId);
+                  if (templateId !== "blank") {
+                    loadTemplate(templateId);
+                  } else {
+                    clearCircuit();
                   }
                 }}
               >
