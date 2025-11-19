@@ -238,7 +238,7 @@ function buildBlinkCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"],
       connections: [
-        { from: "arduino-1", to: "led-1" }
+        { from: "arduino-1-D13", to: "led-1-+" }
       ]
     },
     {
@@ -250,7 +250,7 @@ function buildBlinkCircuit(): any[] {
       color: "#2196F3",
       pins: ["+", "-"],
       connections: [
-        { from: "led-1", to: "resistor-1" }
+        { from: "led-1--", to: "resistor-1-1" }
       ]
     },
     {
@@ -262,7 +262,7 @@ function buildBlinkCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-1", to: "arduino-1" }
+        { from: "resistor-1-2", to: "arduino-1-GND" }
       ]
     }
   ];
@@ -280,8 +280,8 @@ function buildButtonCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"],
       connections: [
-        { from: "arduino-1", to: "button-1" },
-        { from: "arduino-1", to: "led-1" }
+        { from: "arduino-1-D2", to: "button-1-1" },
+        { from: "arduino-1-D13", to: "led-1-+" }
       ]
     },
     {
@@ -293,7 +293,7 @@ function buildButtonCircuit(): any[] {
       color: "#607D8B",
       pins: ["1", "2"],
       connections: [
-        { from: "button-1", to: "arduino-1" }
+        { from: "button-1-2", to: "arduino-1-GND" }
       ]
     },
     {
@@ -305,7 +305,7 @@ function buildButtonCircuit(): any[] {
       color: "#4CAF50",
       pins: ["+", "-"],
       connections: [
-        { from: "led-1", to: "resistor-1" }
+        { from: "led-1--", to: "resistor-1-1" }
       ]
     },
     {
@@ -317,7 +317,7 @@ function buildButtonCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-1", to: "arduino-1" }
+        { from: "resistor-1-2", to: "arduino-1-GND" }
       ]
     }
   ];
@@ -335,9 +335,9 @@ function buildTrafficCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"],
       connections: [
-        { from: "arduino-1", to: "led-red" },
-        { from: "arduino-1", to: "led-yellow" },
-        { from: "arduino-1", to: "led-green" }
+        { from: "arduino-1-D11", to: "led-red-+" },
+        { from: "arduino-1-D12", to: "led-yellow-+" },
+        { from: "arduino-1-D13", to: "led-green-+" }
       ]
     },
     {
@@ -349,7 +349,7 @@ function buildTrafficCircuit(): any[] {
       color: "#F44336",
       pins: ["+", "-"],
       connections: [
-        { from: "led-red", to: "resistor-red" }
+        { from: "led-red--", to: "resistor-red-1" }
       ]
     },
     {
@@ -361,7 +361,7 @@ function buildTrafficCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-red", to: "arduino-1" }
+        { from: "resistor-red-2", to: "arduino-1-GND" }
       ]
     },
     {
@@ -373,7 +373,7 @@ function buildTrafficCircuit(): any[] {
       color: "#FFEB3B",
       pins: ["+", "-"],
       connections: [
-        { from: "led-yellow", to: "resistor-yellow" }
+        { from: "led-yellow--", to: "resistor-yellow-1" }
       ]
     },
     {
@@ -385,7 +385,7 @@ function buildTrafficCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-yellow", to: "arduino-1" }
+        { from: "resistor-yellow-2", to: "arduino-1-GND" }
       ]
     },
     {
@@ -397,7 +397,7 @@ function buildTrafficCircuit(): any[] {
       color: "#4CAF50",
       pins: ["+", "-"],
       connections: [
-        { from: "led-green", to: "resistor-green" }
+        { from: "led-green--", to: "resistor-green-1" }
       ]
     },
     {
@@ -409,7 +409,7 @@ function buildTrafficCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-green", to: "arduino-1" }
+        { from: "resistor-green-2", to: "arduino-1-GND" }
       ]
     }
   ];
@@ -427,8 +427,8 @@ function buildLightSensorCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V", "A0"],
       connections: [
-        { from: "arduino-1", to: "ldr-1" },
-        { from: "arduino-1", to: "led-1" }
+        { from: "arduino-1-5V", to: "ldr-1-1" },
+        { from: "arduino-1-D13", to: "led-1-+" }
       ]
     },
     {
@@ -440,8 +440,8 @@ function buildLightSensorCircuit(): any[] {
       color: "#FFC107",
       pins: ["1", "2"],
       connections: [
-        { from: "ldr-1", to: "arduino-1" },
-        { from: "ldr-1", to: "resistor-10k" }
+        { from: "ldr-1-2", to: "arduino-1-A0" },
+        { from: "ldr-1-2", to: "resistor-10k-1" }
       ]
     },
     {
@@ -453,7 +453,7 @@ function buildLightSensorCircuit(): any[] {
       color: "#9E9E9E",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-10k", to: "arduino-1" }
+        { from: "resistor-10k-2", to: "arduino-1-GND" }
       ]
     },
     {
@@ -465,7 +465,7 @@ function buildLightSensorCircuit(): any[] {
       color: "#2196F3",
       pins: ["+", "-"],
       connections: [
-        { from: "led-1", to: "resistor-220" }
+        { from: "led-1--", to: "resistor-220-1" }
       ]
     },
     {
@@ -477,7 +477,7 @@ function buildLightSensorCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-220", to: "arduino-1" }
+        { from: "resistor-220-2", to: "arduino-1-GND" }
       ]
     }
   ];
@@ -495,8 +495,9 @@ function buildTemperatureCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"],
       connections: [
-        { from: "arduino-1", to: "dht11-1" },
-        { from: "arduino-1", to: "led-1" }
+        { from: "arduino-1-5V", to: "dht11-1-VCC" },
+        { from: "arduino-1-D2", to: "dht11-1-DATA" },
+        { from: "arduino-1-D13", to: "led-1-+" }
       ]
     },
     {
@@ -508,7 +509,7 @@ function buildTemperatureCircuit(): any[] {
       color: "#FF5722",
       pins: ["VCC", "DATA", "GND"],
       connections: [
-        { from: "dht11-1", to: "arduino-1" }
+        { from: "dht11-1-GND", to: "arduino-1-GND" }
       ]
     },
     {
@@ -520,7 +521,7 @@ function buildTemperatureCircuit(): any[] {
       color: "#F44336",
       pins: ["+", "-"],
       connections: [
-        { from: "led-1", to: "resistor-1" }
+        { from: "led-1--", to: "resistor-1-1" }
       ]
     },
     {
@@ -532,7 +533,7 @@ function buildTemperatureCircuit(): any[] {
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-1", to: "arduino-1" }
+        { from: "resistor-1-2", to: "arduino-1-GND" }
       ]
     }
   ];
@@ -550,8 +551,10 @@ function buildUltrasonicCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"],
       connections: [
-        { from: "arduino-1", to: "ultrasonic-1" },
-        { from: "arduino-1", to: "buzzer-1" }
+        { from: "arduino-1-5V", to: "ultrasonic-1-VCC" },
+        { from: "arduino-1-D9", to: "ultrasonic-1-TRIG" },
+        { from: "arduino-1-D10", to: "ultrasonic-1-ECHO" },
+        { from: "arduino-1-D8", to: "buzzer-1-+" }
       ]
     },
     {
@@ -563,7 +566,7 @@ function buildUltrasonicCircuit(): any[] {
       color: "#4CAF50",
       pins: ["VCC", "TRIG", "ECHO", "GND"],
       connections: [
-        { from: "ultrasonic-1", to: "arduino-1" }
+        { from: "ultrasonic-1-GND", to: "arduino-1-GND" }
       ]
     },
     {
@@ -575,7 +578,7 @@ function buildUltrasonicCircuit(): any[] {
       color: "#E91E63",
       pins: ["+", "-"],
       connections: [
-        { from: "buzzer-1", to: "arduino-1" }
+        { from: "buzzer-1--", to: "arduino-1-GND" }
       ]
     }
   ];
