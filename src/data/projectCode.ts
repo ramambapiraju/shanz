@@ -196,18 +196,36 @@ void stopMotors() {
 }`,
 
   backoff_bot: `/*
- * Back Off Bot - Obstacle Avoidance Robot
- * Moves away from obstacles and finds clear paths
+ * Back Off Bot - IR Sensor Obstacle Avoidance
+ * Reverses when IR sensor detects obstacle ahead
  * 
  * Hardware:
  * - Arduino Uno
- * - 2x DC Motors
- * - 3x Ultrasonic Sensors (Front, Left, Right)
- * - L298N Motor Driver
+ * - 2x DC Motors (775)
+ * - 4x Wheels (100mm)
+ * - IR Obstacle Sensor
+ * - L298N Motor Driver / ESC
  * - LiPo Battery
+ * 
+ * Circuit Connections:
+ * IR Sensor:
+ *   - VCC -> 5V
+ *   - GND -> GND
+ *   - OUT -> Digital Pin 8
+ * 
+ * Motor Driver (L298N):
+ *   - IN1 (Left Motor) -> Pin 6
+ *   - IN2 (Left Motor) -> Pin 7
+ *   - ENA (Left PWM) -> Pin 5
+ *   - IN3 (Right Motor) -> Pin 10
+ *   - IN4 (Right Motor) -> Pin 11
+ *   - ENB (Right PWM) -> Pin 9
+ *   - 12V -> Battery+
+ *   - GND -> Battery-
+ *   - 5V -> Arduino 5V (if jumper removed)
  */
 
-// Motor pins
+// Motor pin definitions
 #define MOTOR_LEFT_PWM 5
 #define MOTOR_LEFT_DIR1 6
 #define MOTOR_LEFT_DIR2 7
@@ -215,21 +233,16 @@ void stopMotors() {
 #define MOTOR_RIGHT_DIR1 10
 #define MOTOR_RIGHT_DIR2 11
 
-// Sensor pins
-#define TRIG_FRONT 12
-#define ECHO_FRONT 13
-#define TRIG_LEFT A0
-#define ECHO_LEFT A1
-#define TRIG_RIGHT A2
-#define ECHO_RIGHT A3
+// IR Sensor pin
+#define IR_SENSOR 8
 
-#define SAFE_DISTANCE 30  // Safe distance in cm
-#define SPEED 200
+#define SPEED 200  // Motor speed (0-255)
+#define REVERSE_TIME 800  // Time to reverse (ms)
 
 void setup() {
   Serial.begin(9600);
   
-  // Motor pins
+  // Initialize motor pins
   pinMode(MOTOR_LEFT_PWM, OUTPUT);
   pinMode(MOTOR_LEFT_DIR1, OUTPUT);
   pinMode(MOTOR_LEFT_DIR2, OUTPUT);
@@ -237,65 +250,48 @@ void setup() {
   pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
   pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
   
-  // Sensor pins
-  pinMode(TRIG_FRONT, OUTPUT);
-  pinMode(ECHO_FRONT, INPUT);
-  pinMode(TRIG_LEFT, OUTPUT);
-  pinMode(ECHO_LEFT, INPUT);
-  pinMode(TRIG_RIGHT, OUTPUT);
-  pinMode(ECHO_RIGHT, INPUT);
+  // Initialize IR sensor pin
+  pinMode(IR_SENSOR, INPUT);
   
-  Serial.println("Back Off Bot - Obstacle Avoidance Active!");
+  Serial.println("Back Off Bot - IR Obstacle Detection Active!");
+  Serial.println("Car will reverse when obstacle detected");
 }
 
 void loop() {
-  float frontDist = getDistance(TRIG_FRONT, ECHO_FRONT);
-  float leftDist = getDistance(TRIG_LEFT, ECHO_LEFT);
-  float rightDist = getDistance(TRIG_RIGHT, ECHO_RIGHT);
+  // Read IR sensor (LOW = obstacle detected, HIGH = clear)
+  int obstacleDetected = digitalRead(IR_SENSOR);
   
-  Serial.print("F: "); Serial.print(frontDist);
-  Serial.print(" L: "); Serial.print(leftDist);
-  Serial.print(" R: "); Serial.println(rightDist);
-  
-  if (frontDist < SAFE_DISTANCE) {
-    // Obstacle ahead - back up and turn
-    Serial.println("Obstacle! Avoiding...");
-    moveBackward();
-    delay(500);
+  if (obstacleDetected == LOW) {
+    // Obstacle detected within range (typically 2-30cm)
+    Serial.println("⚠️  OBSTACLE DETECTED! Reversing...");
     
-    // Turn toward clearer path
-    if (leftDist > rightDist) {
-      turnLeft();
-      Serial.println("Turning left");
-    } else {
-      turnRight();
-      Serial.println("Turning right");
-    }
-    delay(500);
+    // Stop first
+    stopMotors();
+    delay(200);
+    
+    // Move backward
+    moveBackward();
+    delay(REVERSE_TIME);
+    
+    // Stop again
+    stopMotors();
+    delay(300);
+    
+    Serial.println("✓ Safe distance reached");
   } else {
-    // Path is clear - move forward
+    // No obstacle - move forward slowly
+    Serial.println("→ Path clear - Moving forward");
     moveForward();
-    Serial.println("Path clear");
   }
   
-  delay(100);
-}
-
-float getDistance(int trigPin, int echoPin) {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  
-  long duration = pulseIn(echoPin, HIGH);
-  return duration * 0.034 / 2;
+  delay(100);  // Small delay for stability
 }
 
 void moveForward() {
   digitalWrite(MOTOR_LEFT_DIR1, HIGH);
   digitalWrite(MOTOR_LEFT_DIR2, LOW);
   analogWrite(MOTOR_LEFT_PWM, SPEED);
+  
   digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
   digitalWrite(MOTOR_RIGHT_DIR2, LOW);
   analogWrite(MOTOR_RIGHT_PWM, SPEED);
@@ -305,27 +301,15 @@ void moveBackward() {
   digitalWrite(MOTOR_LEFT_DIR1, LOW);
   digitalWrite(MOTOR_LEFT_DIR2, HIGH);
   analogWrite(MOTOR_LEFT_PWM, SPEED);
+  
   digitalWrite(MOTOR_RIGHT_DIR1, LOW);
   digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
   analogWrite(MOTOR_RIGHT_PWM, SPEED);
 }
 
-void turnLeft() {
-  digitalWrite(MOTOR_LEFT_DIR1, LOW);
-  digitalWrite(MOTOR_LEFT_DIR2, HIGH);
-  analogWrite(MOTOR_LEFT_PWM, SPEED);
-  digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
-  digitalWrite(MOTOR_RIGHT_DIR2, LOW);
-  analogWrite(MOTOR_RIGHT_PWM, SPEED);
-}
-
-void turnRight() {
-  digitalWrite(MOTOR_LEFT_DIR1, HIGH);
-  digitalWrite(MOTOR_LEFT_DIR2, LOW);
-  analogWrite(MOTOR_LEFT_PWM, SPEED);
-  digitalWrite(MOTOR_RIGHT_DIR1, LOW);
-  digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
-  analogWrite(MOTOR_RIGHT_PWM, SPEED);
+void stopMotors() {
+  analogWrite(MOTOR_LEFT_PWM, 0);
+  analogWrite(MOTOR_RIGHT_PWM, 0);
 }`,
 
   traffic_bot: `/*

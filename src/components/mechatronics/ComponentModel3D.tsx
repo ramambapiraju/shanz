@@ -27,7 +27,7 @@ const SimpleFallback: React.FC<{ component: MechanicalComponent; isSelected: boo
   if (isWheelComponent(component.type)) {
     return (
       <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.15, 0.15, 0.12, 16]} />
+        <cylinderGeometry args={[0.1, 0.1, 0.08, 16]} />
         <meshStandardMaterial color={color} metalness={0.3} roughness={0.7} />
       </mesh>
     );

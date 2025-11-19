@@ -106,6 +106,10 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
   const [totalCurrent, setTotalCurrent] = useState(0);
   const [efficiency, setEfficiency] = useState(100);
   const [powerConsumption, setPowerConsumption] = useState(0);
+  
+  // Obstacle detection state for IR sensors
+  const [obstacleDetected, setObstacleDetected] = useState(false);
+  const [obstacleDistance, setObstacleDistance] = useState(5); // meters
 
   // Handle keyboard controls - update continuously
   useEffect(() => {
@@ -166,6 +170,28 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
       const hasWheels = components.some(c => isWheelComponent(c.type));
       const hasPropellers = components.some(c => isPropellerComponent(c.type));
       
+      // Check for IR sensors and obstacle detection
+      const hasIRSensor = components.some(c => c.type === 'ir_sensor');
+      let effectiveThrottle = throttle;
+      
+      if (hasIRSensor) {
+        // Simulate obstacle at position z = 3 meters ahead
+        const obstaclePosition = 3.0;
+        const carPosition = rigidBody.position.z;
+        const distanceToObstacle = obstaclePosition - carPosition;
+        
+        setObstacleDistance(Math.max(0, distanceToObstacle));
+        
+        // IR sensor range is typically 0.8m
+        if (distanceToObstacle < 0.8 && distanceToObstacle > 0) {
+          setObstacleDetected(true);
+          // Reverse the car when obstacle detected
+          effectiveThrottle = -0.5; // Reverse at half speed
+        } else {
+          setObstacleDetected(false);
+        }
+      }
+      
       components.forEach((comp) => {
         if (isPropellerComponent(comp.type)) {
           const thrust = calculatePropellerThrust({
@@ -193,12 +219,12 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         }
 
         if (isMotorComponent(comp.type)) {
-          const current = (comp.properties.voltage / comp.properties.resistance) * throttle;
+          const current = (comp.properties.voltage / comp.properties.resistance) * Math.abs(effectiveThrottle);
           totalCurrent += current;
           
           // For wheeled vehicles, apply forward/backward force
-          if (hasWheels && throttle > 0) {
-            const motorForce = throttle * 15; // N
+          if (hasWheels && Math.abs(effectiveThrottle) > 0) {
+            const motorForce = effectiveThrottle * 15; // N (negative for reverse)
             forces.push({
               vector: { x: 0, y: 0, z: motorForce },
               point: comp.position,
@@ -480,6 +506,22 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
           <div>
             <Label className="text-sm">Current Draw: {battery.dischargeCurrent.toFixed(2)}A</Label>
           </div>
+
+          {components.some(c => c.type === 'ir_sensor') && (
+            <div>
+              <Label className="text-sm flex items-center gap-2">
+                IR Sensor: 
+                {obstacleDetected ? (
+                  <Badge variant="destructive" className="text-xs">OBSTACLE!</Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-xs">Clear</Badge>
+                )}
+              </Label>
+              <div className="text-xs text-muted-foreground mt-1">
+                Distance: {obstacleDistance.toFixed(2)} m
+              </div>
+            </div>
+          )}
 
           <div>
             <Label className="text-sm">Position</Label>

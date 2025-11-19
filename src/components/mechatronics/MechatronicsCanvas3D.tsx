@@ -146,6 +146,18 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           />
         </mesh>
         
+        {/* Obstacle for IR sensor detection (only shown if IR sensor present) */}
+        {components.some(c => c.type === 'ir_sensor') && (
+          <mesh position={[0, 0.3, 3]} castShadow receiveShadow>
+            <boxGeometry args={[1.5, 0.6, 0.5]} />
+            <meshStandardMaterial 
+              color="#ff4444" 
+              roughness={0.7}
+              metalness={0.2}
+            />
+          </mesh>
+        )}
+        
         {/* FPV Camera */}
         <FPVCamera
           vehiclePosition={vehiclePosition}
