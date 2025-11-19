@@ -165,6 +165,22 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     setCircuit(circuit.filter((c) => c.id !== id));
   };
 
+  const toggleComponentState = (id: string) => {
+    if (isRunning || editWireMode || wiringMode) return;
+    
+    const updatedCircuit = circuit.map(c => {
+      if (c.id === id && (c.type === 'switch' || c.type === 'button')) {
+        const newState = !c.state?.active;
+        toast.success(newState ? "✓ Activated" : "○ Deactivated", {
+          description: c.name
+        });
+        return { ...c, state: { ...c.state, active: newState } };
+      }
+      return c;
+    });
+    setCircuit(updatedCircuit);
+  };
+
   const clearCircuit = () => {
     setCircuit([]);
     setSelectedTemplate("blank");
@@ -395,11 +411,12 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                             setCircuit(updatedCircuit);
                             updateXarrow();
                           }}
-                          disabled={wiringMode || editWireMode}
-                        >
+                           disabled={wiringMode || editWireMode}
+                         >
                            <div
                             id={component.id}
-                            className={`absolute cursor-move transition-all duration-300 rounded-xl p-3
+                            className={`absolute transition-all duration-300 rounded-xl p-3
+                              ${(component.type === 'switch' || component.type === 'button') && !isRunning && !editWireMode && !wiringMode ? 'cursor-pointer hover:scale-110' : 'cursor-move'}
                               ${isRunning && isActive ? 'scale-110' : 'hover:scale-105'}
                               ${component.type === 'arduino' ? 'arduino-board' :
                                 component.type === 'breadboard' ? 'breadboard-surface' :
@@ -412,10 +429,16 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                                 component.type.includes('led') ? 'led-dome' + (isActive ? ' led-glow-active' : '') :
                                 'component-3d'
                               }`}
-                            style={{ 
+                             style={{ 
                               backgroundColor: isLED && isActive ? `${component.color}` : undefined,
                               boxShadow: isLED && isActive ? `0 0 30px ${component.color}, 0 0 60px ${component.color}80, 0 8px 20px rgba(0,0,0,0.3)` : undefined,
                               border: component.type === 'breadboard' ? '1px solid #ccc' : undefined
+                            }}
+                            onClick={(e) => {
+                              if ((component.type === 'switch' || component.type === 'button') && !isRunning && !editWireMode && !wiringMode) {
+                                e.stopPropagation();
+                                toggleComponentState(component.id);
+                              }
                             }}
                           >
                             <div className="flex items-center gap-2 mb-2 pb-2 border-b" style={{
