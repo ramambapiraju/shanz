@@ -175,6 +175,9 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
     const pinId = `${componentId}-${pin}`;
     if (!wireFrom) {
       setWireFrom(pinId);
+      toast.info("📍 Pin selected", {
+        description: "Click another pin to connect"
+      });
     } else {
       if (wireFrom !== pinId) {
         const updatedCircuit = circuit.map(c => {
@@ -187,10 +190,25 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
           return c;
         });
         setCircuit(updatedCircuit);
+        toast.success("🔌 Wire connected!");
       }
       setWireFrom(null);
       setWiringMode(false);
     }
+  };
+
+  const removeWire = (componentId: string, connectionIndex: number) => {
+    const updatedCircuit = circuit.map(c => {
+      if (c.id === componentId) {
+        return {
+          ...c,
+          connections: c.connections.filter((_, idx) => idx !== connectionIndex)
+        };
+      }
+      return c;
+    });
+    setCircuit(updatedCircuit);
+    toast.success("🗑️ Wire removed");
   };
 
   const getIcon = (type: string) => {
@@ -220,7 +238,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 )}
               </div>
               <CardDescription className="mb-3">
-                Build one of 15 DIY projects (including 5 advanced) or create your own! Edit anytime, even during simulation.
+                Build circuits with or without microcontrollers! Click wires to edit/delete them. Edit anytime, even during simulation.
               </CardDescription>
               <select 
                 className="w-full max-w-md p-2.5 rounded-lg border-2 bg-card text-sm font-medium hover:border-primary transition-colors shadow-sm"
@@ -253,16 +271,29 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                 </Button>
               </div>
             </div>
-            <Button
-              variant={wiringMode ? "default" : "outline"}
-              onClick={() => {
-                setWiringMode(!wiringMode);
-                setWireFrom(null);
-              }}
-              size="lg"
-            >
-              {wiringMode ? "✓ Wiring Mode" : "🔌 Connect Wires"}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant={wiringMode ? "default" : "outline"}
+                onClick={() => {
+                  setWiringMode(!wiringMode);
+                  setWireFrom(null);
+                }}
+                size="lg"
+              >
+                {wiringMode ? "✓ Wiring Mode" : "🔌 Connect Wires"}
+              </Button>
+              {circuit.some(c => c.connections?.length > 0) && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    toast.info("💡 Click on any wire to delete it");
+                  }}
+                  size="lg"
+                >
+                  ℹ️ Edit Wires
+                </Button>
+              )}
+            </div>
           </div>
           <div className="flex gap-2 flex-wrap">
             {categories.map((cat) => (
@@ -475,17 +506,23 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                         const state = getComponentState(component.id);
                         const isActive = state.active;
                         return (
-                          <Xarrow
-                            key={`${component.id}-${idx}`}
-                            start={conn.from}
-                            end={conn.to}
-                            color={isActive ? component.color : '#666'}
-                            strokeWidth={isActive ? 4 : 2}
-                            headSize={6}
-                            showHead={false}
-                            dashness={isActive ? { strokeLen: 10, nonStrokeLen: 10, animation: 1 } : false}
-                            animateDrawing={isActive ? 0.5 : false}
-                          />
+                          <g key={`${component.id}-${idx}`} onClick={() => removeWire(component.id, idx)} style={{ cursor: 'pointer' }}>
+                            <Xarrow
+                              start={conn.from}
+                              end={conn.to}
+                              color={isActive ? component.color : '#666'}
+                              strokeWidth={isActive ? 4 : 2}
+                              headSize={6}
+                              showHead={false}
+                              dashness={isActive ? { strokeLen: 10, nonStrokeLen: 10, animation: 1 } : false}
+                              animateDrawing={isActive ? 0.5 : false}
+                              passProps={{
+                                onClick: () => removeWire(component.id, idx),
+                                style: { cursor: 'pointer' },
+                                className: 'hover:opacity-50 transition-opacity'
+                              }}
+                            />
+                          </g>
                         );
                       })
                     )}

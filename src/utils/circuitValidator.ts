@@ -15,14 +15,14 @@ export interface CircuitComponent {
 export function validateCircuit(circuit: CircuitComponent[]): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  // Check 1: Must have an Arduino
+  // Check 1: Microcontroller recommendation (not required)
   const hasArduino = circuit.some(c => c.type === 'arduino');
-  if (!hasArduino && circuit.length > 0) {
+  if (!hasArduino && circuit.length > 2) {
     errors.push({
       id: 'no-arduino',
-      severity: 'critical',
-      title: '❌ No Microcontroller',
-      message: 'Your circuit needs an Arduino board to function. Add an Arduino to your circuit.',
+      severity: 'warning',
+      title: '💡 Microcontroller Recommended',
+      message: 'Most electronic projects use an Arduino or similar microcontroller for control logic. Consider adding one for programmable functionality.',
     });
   }
 
