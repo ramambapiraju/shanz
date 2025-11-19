@@ -694,14 +694,14 @@ export const buildProjectCircuit = (projectId: string) => {
       return [
         { id: 'arduino-1', type: 'arduino', name: 'Arduino Uno', x: baseX, y: baseY + 50, color: '#00979D', pins: ['D9', 'D10', 'D11', 'GND'], connections: [
           { from: 'arduino-1-D9', to: 'resistor-1-1' },
-          { from: 'resistor-1-2', to: 'rgb-led-R' },
+          { from: 'resistor-1-2', to: 'led-rgb-1-R' },
           { from: 'arduino-1-D10', to: 'resistor-2-1' },
-          { from: 'resistor-2-2', to: 'rgb-led-G' },
+          { from: 'resistor-2-2', to: 'led-rgb-1-G' },
           { from: 'arduino-1-D11', to: 'resistor-3-1' },
-          { from: 'resistor-3-2', to: 'rgb-led-B' },
-          { from: 'rgb-led-GND', to: 'arduino-1-GND' }
+          { from: 'resistor-3-2', to: 'led-rgb-1-B' },
+          { from: 'led-rgb-1-GND', to: 'arduino-1-GND' }
         ] },
-        { id: 'rgb-led', type: 'led-rgb', name: 'RGB LED', x: baseX + 300, y: baseY + 50, color: '#9C27B0', pins: ['R', 'G', 'B', 'GND'], connections: [] },
+        { id: 'led-rgb-1', type: 'led-rgb', name: 'RGB LED', x: baseX + 300, y: baseY + 50, color: '#9C27B0', pins: ['R', 'G', 'B', 'GND'], connections: [], state: { active: false, value: 0, r: 0, g: 0, b: 0 } },
         { id: 'resistor-1', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY, color: '#FF5722', pins: ['1', '2'], connections: [] },
         { id: 'resistor-2', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 100, color: '#FF5722', pins: ['1', '2'], connections: [] },
         { id: 'resistor-3', type: 'resistor-220', name: '220Ω', x: baseX + 450, y: baseY + 200, color: '#FF5722', pins: ['1', '2'], connections: [] }
