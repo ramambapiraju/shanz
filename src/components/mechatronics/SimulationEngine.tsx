@@ -45,6 +45,7 @@ interface SimulationEngineProps {
     wheelSizeMultiplier: number;
     maxSpeed: number;
     acceleration: number;
+    irSensorSensitivity: number;
   };
 }
 
@@ -59,6 +60,7 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     wheelSizeMultiplier: 1.0,
     maxSpeed: 10,
     acceleration: 5,
+    irSensorSensitivity: 0.8,
   },
 }) => {
   const [isRunning, setIsRunning] = useState(false);
@@ -182,8 +184,9 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         
         setObstacleDistance(Math.max(0, distanceToObstacle));
         
-        // IR sensor range is typically 0.8m
-        if (distanceToObstacle < 0.8 && distanceToObstacle > 0) {
+        // Use adjustable IR sensor range from settings
+        const irRange = settings.irSensorSensitivity;
+        if (distanceToObstacle < irRange && distanceToObstacle > 0) {
           setObstacleDetected(true);
           // Reverse the car when obstacle detected
           effectiveThrottle = -0.5; // Reverse at half speed
