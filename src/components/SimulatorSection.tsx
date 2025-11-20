@@ -25,7 +25,7 @@ export const SimulatorSection = () => {
             </div>
 
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              AI-Powered Mechatronics Simulator
+              AI-Powered Electronics Simulator
             </h2>
 
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">

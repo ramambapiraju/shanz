@@ -28,7 +28,7 @@ export const HeroSection = () => {
           <div className="inline-flex items-center gap-2 bg-secondary/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8 animate-fade-in border border-secondary/30">
             <Sparkles className="h-4 w-4 text-secondary-foreground" />
             <span className="text-sm font-medium text-secondary-foreground">
-              3rd Prize Winner - ASME IMECE 2025 Pitchathon
+              Winner - ASME IMECE 2025 Pitchathon
             </span>
           </div>
 
