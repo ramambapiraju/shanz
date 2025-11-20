@@ -665,31 +665,31 @@ function buildBlinkCircuit(): any[] {
       color: "#00979D",
       pins: ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "GND", "5V"],
       connections: [
-        { from: "arduino-1-D13", to: "led-1-+" }
-      ]
-    },
-    {
-      id: "led-1",
-      type: "led-blue",
-      name: "Blue LED",
-      x: 400,
-      y: 200,
-      color: "#2196F3",
-      pins: ["+", "-"],
-      connections: [
-        { from: "led-1--", to: "resistor-1-1" }
+        { from: "arduino-1-D13", to: "resistor-1-1" }
       ]
     },
     {
       id: "resistor-1",
       type: "resistor-220",
       name: "220Ω Resistor",
-      x: 550,
+      x: 300,
       y: 200,
       color: "#FF5722",
       pins: ["1", "2"],
       connections: [
-        { from: "resistor-1-2", to: "arduino-1-GND" }
+        { from: "resistor-1-2", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-blue",
+      name: "Blue LED",
+      x: 500,
+      y: 200,
+      color: "#2196F3",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "arduino-1-GND" }
       ]
     }
   ];
