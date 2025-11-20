@@ -227,11 +227,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
   };
   
   const getComponentState = (componentId: string) => {
-    const state = componentStates?.get(componentId) || { active: false, value: 0 };
-    if (componentId.includes('led')) {
-      console.log(`Getting state for ${componentId}:`, state);
-    }
-    return state;
+    return componentStates?.get(componentId) || { active: false, value: 0 };
   };
 
   return (
@@ -395,7 +391,7 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                       const isActive = state.active;
                       
                       return (
-                        <Draggable
+                         <Draggable
                           key={component.id}
                           defaultPosition={{ x: component.x, y: component.y }}
                           position={undefined}
@@ -407,8 +403,8 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
                             setCircuit(updatedCircuit);
                             updateXarrow();
                           }}
-                           disabled={wiringMode || editWireMode}
-                         >
+                          disabled={wiringMode || editWireMode || isRunning}
+                        >
                            <div
                             id={component.id}
                              className={`absolute transition-all duration-300 rounded-xl p-3

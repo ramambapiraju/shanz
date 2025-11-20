@@ -279,11 +279,8 @@ export default function Simulator() {
 
         // BASIC PROJECTS
         case 'blink':
-          const blinkLEDs = circuit.filter(c => c.type.includes('led'));
-          console.log('Blink simulation - Found LEDs:', blinkLEDs.map(l => l.id));
-          blinkLEDs.forEach(led => {
+          circuit.filter(c => c.type.includes('led')).forEach(led => {
             const isOn = cycleCount % 2 === 0;
-            console.log(`Setting LED ${led.id} to ${isOn ? 'ON' : 'OFF'}`);
             newStates.set(led.id, { active: isOn, value: isOn ? 255 : 0 });
             if (cycleCount % 2 === 0) {
               newOutput.push(`[${timestamp}] 💡 LED ON - Brightness: 100%`);
@@ -291,7 +288,6 @@ export default function Simulator() {
               newOutput.push(`[${timestamp}] 🌑 LED OFF`);
             }
           });
-          console.log('New states after blink:', Array.from(newStates.entries()));
           break;
 
         case 'traffic':
