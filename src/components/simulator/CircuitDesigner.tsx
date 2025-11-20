@@ -227,7 +227,11 @@ export const CircuitDesigner = ({ circuit, setCircuit, isRunning, componentState
   };
   
   const getComponentState = (componentId: string) => {
-    return componentStates?.get(componentId) || { active: false, value: 0 };
+    const state = componentStates?.get(componentId) || { active: false, value: 0 };
+    if (componentId.includes('led')) {
+      console.log(`Getting state for ${componentId}:`, state);
+    }
+    return state;
   };
 
   return (
