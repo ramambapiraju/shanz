@@ -1010,3 +1010,893 @@ function buildUltrasonicCircuit(): any[] {
     }
   ];
 }
+
+// ============================================
+// ARDUINO-LESS CIRCUITS (14 Projects)
+// ============================================
+
+// PROJECT 7: Basic LED Circuit
+function buildBasicLEDCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 200,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED",
+      x: 300,
+      y: 200,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 500,
+      y: 200,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 8: Series LEDs Circuit
+function buildSeriesLEDsCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED 1",
+      x: 250,
+      y: 200,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "led-2-+" }
+      ]
+    },
+    {
+      id: "led-2",
+      type: "led-green",
+      name: "Green LED 2",
+      x: 400,
+      y: 200,
+      color: "#4CAF50",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-2--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 550,
+      y: 250,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 9: Parallel LEDs Circuit
+function buildParallelLEDsCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "led-1-+" },
+        { from: "battery-1-+", to: "led-2-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED 1",
+      x: 350,
+      y: 150,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor 1",
+      x: 500,
+      y: 150,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-2",
+      type: "led-green",
+      name: "Green LED 2",
+      x: 350,
+      y: 350,
+      color: "#4CAF50",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-2--", to: "resistor-2-1" }
+      ]
+    },
+    {
+      id: "resistor-2",
+      type: "resistor-220",
+      name: "220Ω Resistor 2",
+      x: 500,
+      y: 350,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-2-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 10: LED with Switch Circuit
+function buildLEDSwitchCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Switch",
+      x: 250,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-yellow",
+      name: "Yellow LED",
+      x: 400,
+      y: 250,
+      color: "#FFC107",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 550,
+      y: 250,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 11: Dual LED Switch Circuit
+function buildDualLEDSwitchCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 300,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" },
+        { from: "battery-1-+", to: "button-2-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Switch 1",
+      x: 250,
+      y: 150,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED",
+      x: 400,
+      y: 150,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor 1",
+      x: 550,
+      y: 150,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "button-2",
+      type: "button",
+      name: "Switch 2",
+      x: 250,
+      y: 400,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-2-2", to: "led-2-+" }
+      ]
+    },
+    {
+      id: "led-2",
+      type: "led-green",
+      name: "Green LED",
+      x: 400,
+      y: 400,
+      color: "#4CAF50",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-2--", to: "resistor-2-1" }
+      ]
+    },
+    {
+      id: "resistor-2",
+      type: "resistor-220",
+      name: "220Ω Resistor 2",
+      x: 550,
+      y: 400,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-2-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 12: RGB LED Circuit
+function buildRGBLEDCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 300,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "led-1-+" },
+        { from: "battery-1-+", to: "led-2-+" },
+        { from: "battery-1-+", to: "led-3-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED",
+      x: 350,
+      y: 150,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor R",
+      x: 500,
+      y: 150,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-2",
+      type: "led-green",
+      name: "Green LED",
+      x: 350,
+      y: 300,
+      color: "#4CAF50",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-2--", to: "resistor-2-1" }
+      ]
+    },
+    {
+      id: "resistor-2",
+      type: "resistor-220",
+      name: "220Ω Resistor G",
+      x: 500,
+      y: 300,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-2-2", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-3",
+      type: "led-blue",
+      name: "Blue LED",
+      x: 350,
+      y: 450,
+      color: "#2196F3",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-3--", to: "resistor-3-1" }
+      ]
+    },
+    {
+      id: "resistor-3",
+      type: "resistor-220",
+      name: "220Ω Resistor B",
+      x: 500,
+      y: 450,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-3-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 13: Buzzer with Button Circuit
+function buildBuzzerButtonCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Push Button",
+      x: 300,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "buzzer-1-+" }
+      ]
+    },
+    {
+      id: "buzzer-1",
+      type: "buzzer",
+      name: "Piezo Buzzer",
+      x: 500,
+      y: 250,
+      color: "#E91E63",
+      pins: ["+", "-"],
+      connections: [
+        { from: "buzzer-1--", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 14: Motor with Switch Circuit
+function buildMotorSwitchCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Switch",
+      x: 300,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "motor-1-+" }
+      ]
+    },
+    {
+      id: "motor-1",
+      type: "motor",
+      name: "DC Motor",
+      x: 500,
+      y: 250,
+      color: "#9C27B0",
+      pins: ["+", "-"],
+      connections: [
+        { from: "motor-1--", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 15: Simple Alarm Circuit
+function buildSimpleAlarmCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 300,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Trigger Switch",
+      x: 250,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "led-1-+" },
+        { from: "button-1-2", to: "buzzer-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED",
+      x: 400,
+      y: 150,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 550,
+      y: 150,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "buzzer-1",
+      type: "buzzer",
+      name: "Piezo Buzzer",
+      x: 450,
+      y: 350,
+      color: "#E91E63",
+      pins: ["+", "-"],
+      connections: [
+        { from: "buzzer-1--", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 16: Night Light Circuit (LDR)
+function buildNightLightCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "ldr-1-1" }
+      ]
+    },
+    {
+      id: "ldr-1",
+      type: "ldr",
+      name: "LDR Sensor",
+      x: 250,
+      y: 200,
+      color: "#795548",
+      pins: ["1", "2"],
+      connections: [
+        { from: "ldr-1-2", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-white",
+      name: "White LED",
+      x: 400,
+      y: 250,
+      color: "#FFFFFF",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 550,
+      y: 250,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 17: Capacitor Demo Circuit
+function buildCapacitorDemoCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Switch",
+      x: 250,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "capacitor-1-+" }
+      ]
+    },
+    {
+      id: "capacitor-1",
+      type: "capacitor",
+      name: "1000µF Capacitor",
+      x: 400,
+      y: 250,
+      color: "#3F51B5",
+      pins: ["+", "-"],
+      connections: [
+        { from: "capacitor-1-+", to: "led-1-+" },
+        { from: "capacitor-1--", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-blue",
+      name: "Blue LED",
+      x: 400,
+      y: 150,
+      color: "#2196F3",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 550,
+      y: 200,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 18: LED Dimmer Circuit (Potentiometer)
+function buildLEDDimmerCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "potentiometer-1-1" }
+      ]
+    },
+    {
+      id: "potentiometer-1",
+      type: "potentiometer",
+      name: "10kΩ Pot",
+      x: 300,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2", "3"],
+      connections: [
+        { from: "potentiometer-1-2", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-white",
+      name: "White LED",
+      x: 450,
+      y: 250,
+      color: "#FFFFFF",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 600,
+      y: 250,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 19: Dual Flasher Circuit
+function buildDualFlasherCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 300,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "capacitor-1-+" },
+        { from: "battery-1-+", to: "capacitor-2-+" }
+      ]
+    },
+    {
+      id: "capacitor-1",
+      type: "capacitor",
+      name: "100µF Cap 1",
+      x: 250,
+      y: 150,
+      color: "#3F51B5",
+      pins: ["+", "-"],
+      connections: [
+        { from: "capacitor-1-+", to: "led-1-+" },
+        { from: "capacitor-1--", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-red",
+      name: "Red LED",
+      x: 400,
+      y: 150,
+      color: "#F44336",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor 1",
+      x: 550,
+      y: 150,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "capacitor-2",
+      type: "capacitor",
+      name: "100µF Cap 2",
+      x: 250,
+      y: 400,
+      color: "#3F51B5",
+      pins: ["+", "-"],
+      connections: [
+        { from: "capacitor-2-+", to: "led-2-+" },
+        { from: "capacitor-2--", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-2",
+      type: "led-green",
+      name: "Green LED",
+      x: 400,
+      y: 400,
+      color: "#4CAF50",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-2--", to: "resistor-2-1" }
+      ]
+    },
+    {
+      id: "resistor-2",
+      type: "resistor-220",
+      name: "220Ω Resistor 2",
+      x: 550,
+      y: 400,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-2-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
+
+// PROJECT 20: Doorbell Circuit
+function buildDoorbellCircuit(): any[] {
+  return [
+    {
+      id: "battery-1",
+      type: "battery",
+      name: "9V Battery",
+      x: 100,
+      y: 250,
+      color: "#FF9800",
+      pins: ["+", "-"],
+      connections: [
+        { from: "battery-1-+", to: "button-1-1" }
+      ]
+    },
+    {
+      id: "button-1",
+      type: "button",
+      name: "Doorbell Button",
+      x: 250,
+      y: 200,
+      color: "#607D8B",
+      pins: ["1", "2"],
+      connections: [
+        { from: "button-1-2", to: "buzzer-1-+" },
+        { from: "button-1-2", to: "led-1-+" }
+      ]
+    },
+    {
+      id: "buzzer-1",
+      type: "buzzer",
+      name: "Piezo Buzzer",
+      x: 450,
+      y: 150,
+      color: "#E91E63",
+      pins: ["+", "-"],
+      connections: [
+        { from: "buzzer-1--", to: "battery-1--" }
+      ]
+    },
+    {
+      id: "led-1",
+      type: "led-yellow",
+      name: "Yellow LED",
+      x: 400,
+      y: 350,
+      color: "#FFC107",
+      pins: ["+", "-"],
+      connections: [
+        { from: "led-1--", to: "resistor-1-1" }
+      ]
+    },
+    {
+      id: "resistor-1",
+      type: "resistor-220",
+      name: "220Ω Resistor",
+      x: 550,
+      y: 350,
+      color: "#FF5722",
+      pins: ["1", "2"],
+      connections: [
+        { from: "resistor-1-2", to: "battery-1--" }
+      ]
+    }
+  ];
+}
