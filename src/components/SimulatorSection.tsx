@@ -48,7 +48,7 @@ export const SimulatorSection = () => {
               <Button 
                 size="lg" 
                 variant="secondary" 
-                className="group bg-secondary hover:bg-secondary/90"
+                className="group bg-secondary hover:bg-secondary/90 px-10 py-6 text-base"
                 onClick={() => {
                   navigate("/simulator");
                   setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
