@@ -205,11 +205,14 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
       
       components.forEach((comp) => {
         if (isPropellerComponent(comp.type)) {
+          // Safety check for properties
+          if (!comp.properties.diameter || !comp.properties.thrustCoefficient) return;
+          
           const thrust = calculatePropellerThrust({
             diameter: comp.properties.diameter,
-            pitch: comp.properties.pitch,
+            pitch: comp.properties.pitch || 4.5,
             thrustCoefficient: comp.properties.thrustCoefficient,
-            powerCoefficient: comp.properties.powerCoefficient,
+            powerCoefficient: comp.properties.powerCoefficient || 0.05,
             rpm: 8000 * throttle,
           });
 
@@ -230,7 +233,10 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
         }
 
         if (isMotorComponent(comp.type)) {
-          const current = (comp.properties.voltage / comp.properties.resistance) * Math.abs(effectiveThrottle);
+          // Safety checks
+          const voltage = comp.properties.voltage || 11.1;
+          const resistance = comp.properties.resistance || 0.1;
+          const current = (voltage / resistance) * Math.abs(effectiveThrottle);
           totalCurrent += current;
           
           // For wheeled vehicles, apply forward/backward force

@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import { MechanicalComponent } from './MechanicalComponent';
 import { ComponentModel3D } from './ComponentModel3D';
 import { FPVCamera } from './FPVCamera';
 import { WiringVisualizer } from './WiringVisualizer';
 import { Button } from '@/components/ui/button';
 import { Eye, Zap } from 'lucide-react';
-import * as THREE from 'three';
-import { 
-  DCMotor3D, 
-  BrushlessMotor3D, 
-  Battery3D, 
-  ESC3D, 
-  Wheel3D, 
-  Propeller3D 
-} from './Advanced3DModels';
+import { WebGLContextHandler } from './WebGLContextHandler';
 
 interface MechatronicsCanvas3DProps {
   components: MechanicalComponent[];
@@ -34,21 +26,11 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
 }) => {
   const [fpvEnabled, setFpvEnabled] = useState(false);
   const [wiringEnabled, setWiringEnabled] = useState(false);
-  const [currentFlow, setCurrentFlow] = useState(0);
-  
-  // Animate current flow
-  React.useEffect(() => {
-    if (!wiringEnabled) return;
-    const interval = setInterval(() => {
-      setCurrentFlow((prev) => (prev + 0.05) % 1);
-    }, 50);
-    return () => clearInterval(interval);
-  }, [wiringEnabled]);
-  
+
   return (
-    <div className="w-full h-full bg-background relative">
-      {/* Controls overlay */}
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
+    <div className="relative h-full w-full bg-background rounded-lg overflow-hidden border">
+      {/* Control Buttons */}
+      <div className="absolute top-4 left-4 z-10 flex gap-2">
         <Button
           size="sm"
           variant={fpvEnabled ? "default" : "outline"}
@@ -66,63 +48,41 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           Wiring
         </Button>
       </div>
+      
       <Canvas
         camera={{ position: [5, 5, 5], fov: 50 }}
-        shadows
+        shadows="basic"
+        dpr={[1, 1.5]}
         gl={{ 
-          antialias: true, 
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2,
+          antialias: true,
+          powerPreference: 'high-performance',
+          alpha: false,
+          stencil: false,
+          depth: true,
         }}
       >
-        {/* Enhanced Photorealistic Lighting */}
-        <ambientLight intensity={0.3} color="#f0f8ff" />
+        {/* Simplified Lighting for Performance */}
+        <ambientLight intensity={0.5} />
         
         <directionalLight
-          position={[15, 20, 10]}
-          intensity={1.8}
+          position={[10, 10, 5]}
+          intensity={1}
           castShadow
-          shadow-mapSize-width={4096}
-          shadow-mapSize-height={4096}
-          shadow-camera-left={-20}
-          shadow-camera-right={20}
-          shadow-camera-top={20}
-          shadow-camera-bottom={-20}
-          shadow-bias={-0.0001}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
         />
         
-        <hemisphereLight
-          args={[0x87ceeb, 0x6b5d47, 0.5]}
-        />
+        <hemisphereLight args={['#ffffff', '#444444', 0.4]} />
         
-        <pointLight position={[-8, 8, -8]} intensity={0.6} color="#ffd4a3" />
-        <pointLight position={[8, 6, 8]} intensity={0.4} color="#a3c9ff" />
+        {/* Simple Environment */}
+        <Environment preset="city" background={false} />
         
-        <spotLight
-          position={[0, 15, 0]}
-          angle={0.4}
-          penumbra={1}
-          intensity={0.8}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-        />
-        
-        {/* HDR Environment for realistic reflections */}
-        <Environment
-          preset="city"
-          background={false}
-          blur={0.8}
-        />
-        
-        {/* Contact Shadows for grounded realism */}
-        <ContactShadows
-          position={[0, -0.01, 0]}
-          opacity={0.5}
-          scale={30}
-          blur={2}
-          far={10}
-        />
+        {/* WebGL Context Handler */}
+        <WebGLContextHandler />
         
         {/* Grid */}
         <Grid
@@ -138,7 +98,7 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           followCamera={false}
         />
         
-        {/* Ground plane for additional shadow receiving */}
+        {/* Ground plane */}
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, -0.02, 0]}
@@ -154,7 +114,7 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           />
         </mesh>
         
-        {/* Obstacle for IR sensor detection (only shown if IR sensor present) */}
+        {/* Obstacle for IR sensor detection */}
         {components.some(c => c.type === 'ir_sensor') && (
           <mesh position={[0, 0.3, 3]} castShadow receiveShadow>
             <boxGeometry args={[1.5, 0.6, 0.5]} />
@@ -177,36 +137,18 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
         <WiringVisualizer
           components={components}
           showWiring={wiringEnabled}
-          currentFlow={currentFlow}
+          currentFlow={0}
         />
         
-        {/* Render Components with enhanced 3D models */}
+        {/* Render Components with standard models */}
         {components.map((component) => {
           const isSelected = selectedComponent === component.id;
-          const onClick = () => onSelectComponent(component.id);
-          
-          // Use advanced models for specific component types
-          if (component.type === 'dc_motor_775') {
-            return <DCMotor3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
-          } else if (component.type === 'brushless_motor_2212') {
-            return <BrushlessMotor3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
-          } else if (component.type.startsWith('lipo_')) {
-            return <Battery3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
-          } else if (component.type.startsWith('esc_')) {
-            return <ESC3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
-          } else if (component.type === 'rubber_wheel_100mm' || component.type === 'omni_wheel' || component.type === 'mecanum_wheel') {
-            return <Wheel3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
-          } else if (component.type.startsWith('propeller_')) {
-            return <Propeller3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
-          }
-          
-          // Fall back to standard model for other components
           return (
             <ComponentModel3D
               key={component.id}
               component={component}
               isSelected={isSelected}
-              onClick={onClick}
+              onClick={() => onSelectComponent(component.id)}
             />
           );
         })}
