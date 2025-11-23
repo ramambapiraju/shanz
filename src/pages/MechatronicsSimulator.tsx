@@ -22,6 +22,7 @@ import { getProjectCode } from "@/data/projectCode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransferFunctionDesigner from "@/components/mechatronics/TransferFunctionDesigner";
 import StateSpaceDesigner from "@/components/mechatronics/StateSpaceDesigner";
+import CameraControls, { CameraPreset } from "@/components/mechatronics/CameraControls";
 
 const MechatronicsSimulator = () => {
   const navigate = useNavigate();
@@ -55,6 +56,13 @@ const MechatronicsSimulator = () => {
     }));
   });
   const [simulationSettings, setSimulationSettings] = useState<SimulationSettings>(DEFAULT_SETTINGS);
+  const [cameraPreset, setCameraPreset] = useState<string>('Isometric');
+  
+  const handleCameraPresetChange = (preset: CameraPreset) => {
+    setCameraPreset(preset.name);
+    // Camera changes are handled by OrbitControls in the Canvas
+    toast.success(`Camera switched to ${preset.name} view`);
+  };
   
   useEffect(() => {
     // Show welcome message with instructions
@@ -222,6 +230,10 @@ const MechatronicsSimulator = () => {
 
         {/* Right Panel */}
         <div className="col-span-3 space-y-4 overflow-auto max-h-[calc(100vh-8rem)]">
+          <CameraControls
+            onPresetChange={handleCameraPresetChange}
+            currentPreset={cameraPreset}
+          />
           <PropertyPanel3D
             component={selectedComp}
             onUpdateComponent={handleUpdateComponent}
