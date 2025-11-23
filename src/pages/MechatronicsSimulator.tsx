@@ -20,6 +20,8 @@ import { loadProjectTemplate } from "@/components/mechatronics/ProjectTemplates3
 import { validateProject } from "@/utils/projectValidator";
 import { getProjectCode } from "@/data/projectCode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TransferFunctionDesigner from "@/components/mechatronics/TransferFunctionDesigner";
+import StateSpaceDesigner from "@/components/mechatronics/StateSpaceDesigner";
 
 const MechatronicsSimulator = () => {
   const navigate = useNavigate();
@@ -159,8 +161,9 @@ const MechatronicsSimulator = () => {
                 <TabsTrigger value="validate">Validate</TabsTrigger>
               </TabsList>
               {/* Second row of tabs */}
-              <TabsList className="w-full grid grid-cols-2">
+              <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="connect">Connect</TabsTrigger>
+                <TabsTrigger value="control">Control</TabsTrigger>
                 <TabsTrigger value="code">Code</TabsTrigger>
               </TabsList>
             </div>
@@ -180,6 +183,20 @@ const MechatronicsSimulator = () => {
                 selectedComponent={selectedComponent}
                 onUpdateComponent={handleUpdateComponent}
               />
+            </TabsContent>
+            <TabsContent value="control" className="mt-4 space-y-4">
+              <Tabs defaultValue="transfer" className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="transfer">Transfer Function</TabsTrigger>
+                  <TabsTrigger value="statespace">State-Space</TabsTrigger>
+                </TabsList>
+                <TabsContent value="transfer" className="mt-4">
+                  <TransferFunctionDesigner />
+                </TabsContent>
+                <TabsContent value="statespace" className="mt-4">
+                  <StateSpaceDesigner />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
             <TabsContent value="code" className="mt-4">
               <CodePanel
