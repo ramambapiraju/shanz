@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransferFunctionDesigner from "@/components/mechatronics/TransferFunctionDesigner";
 import StateSpaceDesigner from "@/components/mechatronics/StateSpaceDesigner";
 import CameraControls, { CameraPreset } from "@/components/mechatronics/CameraControls";
+import ErrorBoundary from "@/components/mechatronics/ErrorBoundary";
 
 const MechatronicsSimulator = () => {
   const navigate = useNavigate();
@@ -136,7 +137,8 @@ const MechatronicsSimulator = () => {
   const selectedComp = components.find(c => c.id === selectedComponent) || null;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <ErrorBoundary fallbackMessage="The mechatronics simulator encountered an error. Reloading will reset your session.">
+      <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
@@ -262,7 +264,8 @@ const MechatronicsSimulator = () => {
           />
         </div>
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 };
 
