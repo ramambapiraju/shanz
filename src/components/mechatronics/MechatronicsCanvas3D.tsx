@@ -28,7 +28,7 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
   const [wiringEnabled, setWiringEnabled] = useState(false);
 
   return (
-    <div className="relative h-full w-full bg-background rounded-lg overflow-hidden border">
+    <div className="relative h-full w-full bg-secondary/10 rounded-lg overflow-hidden border">
       {/* Control Buttons */}
       <div className="absolute top-4 left-4 z-10 flex gap-2">
         <Button
@@ -53,6 +53,7 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
         camera={{ position: [5, 5, 5], fov: 50 }}
         shadows="basic"
         dpr={[1, 1.5]}
+        style={{ background: '#f8f9fa' }}
         gl={{ 
           antialias: true,
           powerPreference: 'high-performance',
@@ -62,11 +63,11 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
         }}
       >
         {/* Simplified Lighting for Performance */}
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.8} />
         
         <directionalLight
           position={[10, 10, 5]}
-          intensity={1}
+          intensity={1.2}
           castShadow
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
@@ -76,10 +77,10 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           shadow-camera-bottom={-10}
         />
         
-        <hemisphereLight args={['#ffffff', '#444444', 0.4]} />
+        <hemisphereLight args={['#ffffff', '#8899aa', 0.6]} />
         
         {/* Simple Environment */}
-        <Environment preset="city" background={false} />
+        <Environment preset="sunset" background={false} />
         
         {/* WebGL Context Handler */}
         <WebGLContextHandler />
@@ -89,10 +90,10 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           args={[30, 30]}
           cellSize={1}
           cellThickness={0.6}
-          cellColor="#6b7280"
+          cellColor="#d1d5db"
           sectionSize={5}
           sectionThickness={1.2}
-          sectionColor="#3b82f6"
+          sectionColor="#60a5fa"
           fadeDistance={40}
           fadeStrength={1}
           followCamera={false}
@@ -106,11 +107,11 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
         >
           <planeGeometry args={[100, 100]} />
           <meshStandardMaterial
-            color="#1a1a1a"
-            roughness={0.9}
-            metalness={0.1}
+            color="#e5e7eb"
+            roughness={0.8}
+            metalness={0.05}
             transparent
-            opacity={0.1}
+            opacity={0.5}
           />
         </mesh>
         
@@ -119,9 +120,9 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           <mesh position={[0, 0.3, 3]} castShadow receiveShadow>
             <boxGeometry args={[1.5, 0.6, 0.5]} />
             <meshStandardMaterial 
-              color="#ff4444" 
-              roughness={0.7}
-              metalness={0.2}
+              color="#ef4444" 
+              roughness={0.6}
+              metalness={0.3}
             />
           </mesh>
         )}
