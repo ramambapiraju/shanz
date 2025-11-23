@@ -8,6 +8,14 @@ import { WiringVisualizer } from './WiringVisualizer';
 import { Button } from '@/components/ui/button';
 import { Eye, Zap } from 'lucide-react';
 import * as THREE from 'three';
+import { 
+  DCMotor3D, 
+  BrushlessMotor3D, 
+  Battery3D, 
+  ESC3D, 
+  Wheel3D, 
+  Propeller3D 
+} from './Advanced3DModels';
 
 interface MechatronicsCanvas3DProps {
   components: MechanicalComponent[];
@@ -172,15 +180,33 @@ const MechatronicsCanvas3D: React.FC<MechatronicsCanvas3DProps> = ({
           currentFlow={currentFlow}
         />
         
-        {/* Render Components with realistic models */}
+        {/* Render Components with enhanced 3D models */}
         {components.map((component) => {
           const isSelected = selectedComponent === component.id;
+          const onClick = () => onSelectComponent(component.id);
+          
+          // Use advanced models for specific component types
+          if (component.type === 'dc_motor_775') {
+            return <DCMotor3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
+          } else if (component.type === 'brushless_motor_2212') {
+            return <BrushlessMotor3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
+          } else if (component.type.startsWith('lipo_')) {
+            return <Battery3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
+          } else if (component.type.startsWith('esc_')) {
+            return <ESC3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
+          } else if (component.type === 'rubber_wheel_100mm' || component.type === 'omni_wheel' || component.type === 'mecanum_wheel') {
+            return <Wheel3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
+          } else if (component.type.startsWith('propeller_')) {
+            return <Propeller3D key={component.id} component={component} isSelected={isSelected} onClick={onClick} />;
+          }
+          
+          // Fall back to standard model for other components
           return (
             <ComponentModel3D
               key={component.id}
               component={component}
               isSelected={isSelected}
-              onClick={() => onSelectComponent(component.id)}
+              onClick={onClick}
             />
           );
         })}
