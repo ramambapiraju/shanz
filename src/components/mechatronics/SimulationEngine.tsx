@@ -81,10 +81,18 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
 
   const [battery, setBattery] = useState<Battery>({
     capacity: 2200,
-    voltage: 11.1,
+    nominalVoltage: 3.7,
+    cellCount: 3,
     currentCharge: 2200,
     internalResistance: 0.01,
     dischargeCurrent: 0,
+    cRating: 25,
+    maxVoltage: 12.6,
+    minVoltage: 9.0,
+    currentVoltage: 11.1,
+    stateOfCharge: 1.0,
+    cycleCount: 0,
+    temperature: 25,
   });
 
   // PID Controllers for stability (Phase 3)
@@ -297,7 +305,7 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
 
       // Update metrics (Phase 3)
       setTotalCurrent(totalCurrent);
-      const power = totalCurrent * newBattery.voltage;
+      const power = totalCurrent * newBattery.currentVoltage;
       setPowerConsumption(power);
       const theoreticalPower = totalMass * GRAVITY * Math.abs(rigidBody.velocity.y);
       setEfficiency(theoreticalPower > 0 ? Math.min(100, (theoreticalPower / power) * 100) : 100);
@@ -354,10 +362,18 @@ const SimulationEngine: React.FC<SimulationEngineProps> = ({
     });
     setBattery({
       capacity: 2200,
-      voltage: 11.1,
+      nominalVoltage: 3.7,
+      cellCount: 3,
       currentCharge: 2200,
       internalResistance: 0.01,
       dischargeCurrent: 0,
+      cRating: 25,
+      maxVoltage: 12.6,
+      minVoltage: 9.0,
+      currentVoltage: 11.1,
+      stateOfCharge: 1.0,
+      cycleCount: 0,
+      temperature: 25,
     });
   };
 

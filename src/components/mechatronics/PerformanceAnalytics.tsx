@@ -96,7 +96,15 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
           </div>
           <div className="flex justify-between">
             <span>Voltage:</span>
-            <span>{battery.voltage.toFixed(2)} V</span>
+            <span>{battery.currentVoltage.toFixed(2)} V</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Cell Count:</span>
+            <span>{battery.cellCount}S</span>
+          </div>
+          <div className="flex justify-between">
+            <span>C-Rating:</span>
+            <span>{battery.cRating}C</span>
           </div>
         </div>
       </CardContent>

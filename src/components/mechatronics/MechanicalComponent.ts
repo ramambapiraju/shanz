@@ -59,12 +59,19 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
     scale: { x: 1, y: 1, z: 1 },
     color: "#4A5568",
     properties: {
+      motorType: 'brushed',
       maxRPM: 15000,
       maxTorque: 0.5,
       voltage: 12,
       noLoadCurrent: 0.8,
       stallCurrent: 35,
+      maxCurrent: 35,
+      resistance: 0.034, // Ω (calculated from stall)
+      inductance: 0.00005, // H (typical for brushed motors)
+      backEMFConstant: 0.0008, // V/(rad/s)
+      torqueConstant: 0.014, // N⋅m/A
       efficiency: 0.75,
+      mass: 0.21,
     },
   },
   brushless_motor_2212: {
@@ -73,10 +80,17 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
     scale: { x: 1, y: 1, z: 1 },
     color: "#2D3748",
     properties: {
+      motorType: 'brushless',
       maxRPM: 11100,
-      kv: 920,
+      kv: 920, // RPM/V
+      maxTorque: 0.8,
       voltage: 11.1,
+      noLoadCurrent: 0.5,
       maxCurrent: 18,
+      resistance: 0.12, // Ω
+      inductance: 0.0002, // H (typical for brushless)
+      backEMFConstant: 0.00104, // V/(rad/s) calculated from Kv
+      torqueConstant: 0.00104, // N⋅m/A (equals Ke for SI units)
       efficiency: 0.85,
       mass: 0.052,
     },
@@ -235,6 +249,9 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
       cellCount: "2-3S",
       pwmFrequency: 8000,
       voltage: 11.1,
+      responseTime: 0.05, // 50ms lag
+      efficiency: 0.95,
+      brakingEnabled: true,
     },
   },
   esc_60a: {
@@ -248,6 +265,9 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
       cellCount: "3-6S",
       pwmFrequency: 8000,
       voltage: 14.8,
+      responseTime: 0.04, // 40ms lag (better ESC)
+      efficiency: 0.96,
+      brakingEnabled: true,
     },
   },
   flight_controller: {
@@ -321,7 +341,10 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
     properties: {
       capacity: 2200,
       cellCount: 2,
+      nominalVoltage: 3.7,
       voltage: 7.4,
+      maxVoltage: 8.4,
+      minVoltage: 6.0,
       cRating: 30,
       maxDischarge: 66,
       internalResistance: 0.005,
@@ -336,7 +359,10 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
     properties: {
       capacity: 5000,
       cellCount: 3,
+      nominalVoltage: 3.7,
       voltage: 11.1,
+      maxVoltage: 12.6,
+      minVoltage: 9.0,
       cRating: 50,
       maxDischarge: 250,
       internalResistance: 0.003,
@@ -351,7 +377,10 @@ export const MECHANICAL_COMPONENTS: Record<ComponentType, Omit<MechanicalCompone
     properties: {
       capacity: 3300,
       cellCount: 4,
+      nominalVoltage: 3.7,
       voltage: 14.8,
+      maxVoltage: 16.8,
+      minVoltage: 12.0,
       cRating: 45,
       maxDischarge: 148.5,
       internalResistance: 0.004,
